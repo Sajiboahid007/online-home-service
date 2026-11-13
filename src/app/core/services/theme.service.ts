@@ -1,4 +1,5 @@
 import { Injectable, signal, effect } from '@angular/core';
+import { EN_DICTIONARY } from '../i18n';
 
 export type Language = 'bn' | 'en';
 
@@ -38,8 +39,12 @@ export class ThemeService {
       document.body.classList.add('dark-mode');
     }
 
-    const savedLang = (localStorage.getItem('kajkhoj_lang') as Language) || 'bn';
-    this.currentLang.set(savedLang);
+    const savedLang = localStorage.getItem('kajkhoj_lang');
+    this.currentLang.set(savedLang === 'en' ? 'en' : 'bn');
+
+    effect(() => {
+      document.documentElement.lang = this.currentLang();
+    });
 
     effect(() => {
       const dark = this.isDarkMode();
@@ -62,9 +67,19 @@ export class ThemeService {
     localStorage.setItem('kajkhoj_lang', lang);
   }
 
+  public toggleLanguage(): void {
+    this.setLanguage(this.currentLang() === 'bn' ? 'en' : 'bn');
+  }
+
+  /**
+   * Translate a named key (e.g. 'home') or a Bangla source string.
+   * Bangla source strings are looked up in EN_DICTIONARY; anything missing stays in Bangla.
+   */
   public t(key: string): string {
+    const lang = this.currentLang();
     const item = this.translations[key];
-    if (!item) return key;
-    return item[this.currentLang()] || item.bn;
+    if (item) return item[lang] || item.bn;
+    if (lang === 'en') return EN_DICTIONARY[key] ?? key;
+    return key;
   }
 }

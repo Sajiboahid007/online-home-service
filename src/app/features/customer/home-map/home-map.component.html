@@ -8,7 +8,7 @@
           type="text" 
           [ngModel]="searchQuery()" 
           (ngModelChange)="onSearchInput($event)" 
-          placeholder="সাভার, ঢাকা বা যেকোনো ঠিকানা খুঁজুন..." 
+          [placeholder]="'সাভার, ঢাকা বা যেকোনো ঠিকানা খুঁজুন...' | t" 
           style="border: none; outline: none; background: transparent; width: 100%; font-family: inherit; font-size: 13.5px;" 
         />
         @if (searchQuery()) {
@@ -40,7 +40,7 @@
         (click)="selectCategory('all')"
       >
         <span class="cat-chip-icon">✨</span>
-        <span class="cat-chip-text">সব কাজ</span>
+        <span class="cat-chip-text">{{ 'সব কাজ' | t }}</span>
       </button>
 
       <!-- Safety filter for female/trusted workers (Item 24) -->
@@ -49,10 +49,10 @@
         class="cat-chip safety-chip" 
         [class.active]="onlyTrustedOrFemale()"
         (click)="toggleTrustedFilter()"
-        title="শুধুমাত্র বিশ্বস্ত ও ভেরিফাইড কারিগর ফিল্টার"
+        [title]="'শুধুমাত্র বিশ্বস্ত ও ভেরিফাইড কারিগর ফিল্টার' | t"
       >
         <span class="cat-chip-icon">🛡️</span>
-        <span class="cat-chip-text">বিশ্বস্ত কারিগর</span>
+        <span class="cat-chip-text">{{ 'বিশ্বস্ত কারিগর' | t }}</span>
       </button>
 
       @for (cat of categories(); track cat.id) {
@@ -63,7 +63,7 @@
           (click)="selectCategory(cat.id)"
         >
           <span class="cat-chip-icon">{{ cat.icon }}</span>
-          <span class="cat-chip-text">{{ cat.nameBn }}</span>
+          <span class="cat-chip-text">{{ isEn() ? cat.nameEn : cat.nameBn }}</span>
         </button>
       }
     </div>
@@ -75,16 +75,16 @@
   <!-- Map Floating Controls & Legend (Properly positioned below category bar without overlap) -->
   <div class="map-floating-overlay">
     <div class="map-legend">
-      <span class="legend-item"><span class="dot online"></span> প্রস্তুত ({{ onlineWorkersCount() | bnNumber }})</span>
-      <span class="legend-item"><span class="dot busy"></span> ব্যস্ত</span>
-      <span class="legend-item"><span class="dot offline"></span> অফলাইন</span>
+      <span class="legend-item"><span class="dot online"></span> {{ 'প্রস্তুত' | t }} ({{ onlineWorkersCount() | bnNumber }})</span>
+      <span class="legend-item"><span class="dot busy"></span> {{ 'ব্যস্ত' | t }}</span>
+      <span class="legend-item"><span class="dot offline"></span> {{ 'অফলাইন' | t }}</span>
     </div>
   </div>
 
   <!-- Floating My Location Button -->
-  <button type="button" class="btn-floating-recenter" (click)="recenterToUser()" title="আমার অবস্থানে ফিরে যান">
+  <button type="button" class="btn-floating-recenter" (click)="recenterToUser()" [title]="'আমার অবস্থানে ফিরে যান' | t">
     <span class="pi pi-compass"></span>
-    <span class="recenter-text">আমার লোকেশন</span>
+    <span class="recenter-text">{{ 'আমার লোকেশন' | t }}</span>
   </button>
 
   <!-- Advanced Slide-up Bottom Sheet: Nearby Workers & Unified Actions -->
@@ -95,14 +95,14 @@
 
       <!-- Quick Action Row Embedded into Sheet -->
       <div class="sheet-actions-row" (click)="$event.stopPropagation()">
-        <a routerLink="/customer/create-request" class="action-card request-card" title="কাজের চাহিদা পোস্ট করুন">
+        <a routerLink="/customer/create-request" class="action-card request-card" [title]="'কাজের চাহিদা পোস্ট করুন' | t">
           <div class="ac-icon-badge">📢</div>
           <div class="ac-body">
             <div class="ac-title-line">
-              <span class="ac-title">কাজের রিকোয়েস্ট পোস্ট</span>
+              <span class="ac-title">{{ 'কাজের রিকোয়েস্ট পোস্ট' | t }}</span>
               <span class="badge-grab">⚡ First Grab</span>
             </div>
-            <span class="ac-sub">যে প্লাম্বার আগে গ্রহণ করবেন তিনিই পাবেন</span>
+            <span class="ac-sub">{{ 'যে প্লাম্বার আগে গ্রহণ করবেন তিনিই পাবেন' | t }}</span>
           </div>
           <span class="ac-arrow">➔</span>
         </a>
@@ -111,10 +111,10 @@
           <div class="ac-icon-badge orange">⚡</div>
           <div class="ac-body">
             <div class="ac-title-line">
-              <span class="ac-title">তাৎক্ষণিক বুকিং</span>
-              <span class="badge-fast">৩ মিনিটে</span>
+              <span class="ac-title">{{ 'তাৎক্ষণিক বুকিং' | t }}</span>
+              <span class="badge-fast">{{ '৩ মিনিটে' | t }}</span>
             </div>
-            <span class="ac-sub">নিকটস্থ সেরা টেকনিশিয়ান কল</span>
+            <span class="ac-sub">{{ 'নিকটস্থ সেরা টেকনিশিয়ান কল' | t }}</span>
           </div>
           <span class="ac-arrow">➔</span>
         </button>
@@ -125,8 +125,8 @@
         <div class="summary-meta">
           <div class="live-pulse-dot"></div>
           <div class="summary-texts">
-            <h3 class="summary-heading">নিকটবর্তী দক্ষ কারিগর তালিকা</h3>
-            <p class="summary-info">সাভার এলাকায় <strong>{{ nearbyWorkers().length | bnNumber }} জন</strong> উপলব্ধ • গড় আগমন ১০-১৫ মিনিট</p>
+            <h3 class="summary-heading">{{ 'নিকটবর্তী দক্ষ কারিগর তালিকা' | t }}</h3>
+            <p class="summary-info">{{ 'সাভার এলাকায়' | t }} <strong>{{ nearbyWorkers().length | bnNumber }} {{ 'জন' | t }}</strong> {{ 'উপলব্ধ • গড় আগমন ১০-১৫ মিনিট' | t }}</p>
           </div>
         </div>
 
@@ -142,7 +142,7 @@
           </div>
 
           <button type="button" class="btn-toggle-expand" [attr.aria-expanded]="isSheetExpanded()">
-            <span class="toggle-label">{{ isSheetExpanded() ? 'সংক্ষিপ্ত করুন' : 'বিস্তারিত দেখুন' }}</span>
+            <span class="toggle-label">{{ (isSheetExpanded() ? 'সংক্ষিপ্ত করুন' : 'বিস্তারিত দেখুন') | t }}</span>
             <span class="pi" [class.pi-chevron-up]="!isSheetExpanded()" [class.pi-chevron-down]="isSheetExpanded()"></span>
           </button>
         </div>
@@ -155,8 +155,8 @@
         @if (sortedWorkers().length === 0) {
           <div class="peek-empty-state">
             <span class="empty-emoji">🔍</span>
-            <span class="empty-msg">এই ফিল্টারে কাছাকাছি কোনো কর্মী নেই</span>
-            <button type="button" class="btn-peek-reset" (click)="selectCategory('all')">সব দেখুন</button>
+            <span class="empty-msg">{{ 'এই ফিল্টারে কাছাকাছি কোনো কর্মী নেই' | t }}</span>
+            <button type="button" class="btn-peek-reset" (click)="selectCategory('all')">{{ 'সব দেখুন' | t }}</button>
           </div>
         } @else {
           <div class="peek-carousel-scroll">
@@ -172,9 +172,9 @@
                     <div class="pwc-meta-line">
                       <span class="pwc-rating">⭐ {{ worker.rating | bnNumber }}</span>
                       <span>•</span>
-                      <span class="pwc-dist">📍 {{ worker.distanceKm | bnNumber }} কিমি</span>
+                      <span class="pwc-dist">📍 {{ worker.distanceKm | bnNumber }} {{ 'কিমি' | t }}</span>
                       <span>•</span>
-                      <span class="pwc-eta">⏱️ {{ getEtaMinutes(worker) | bnNumber }} মি</span>
+                      <span class="pwc-eta">⏱️ {{ getEtaMinutes(worker) | bnNumber }} {{ 'মি' | t }}</span>
                     </div>
                   </div>
                 </div>
@@ -182,7 +182,7 @@
                 <div class="pwc-footer">
                   <div class="pwc-price">
                     <strong>{{ worker.rate | taka }}</strong>
-                    <small>/ {{ worker.rateUnit === 'job' ? 'কাজ' : 'ঘণ্টা' }}</small>
+                    <small>/ {{ (worker.rateUnit === 'job' ? 'কাজ' : 'ঘণ্টা') | t }}</small>
                   </div>
                   <button 
                     type="button" 
@@ -190,7 +190,7 @@
                     [disabled]="worker.isBusy || !worker.isOnline"
                     (click)="$event.stopPropagation(); startDirectBooking(worker)"
                   >
-                    {{ worker.isBusy ? 'ব্যস্ত' : 'বুক করুন' }}
+                    {{ (worker.isBusy ? 'ব্যস্ত' : 'বুক করুন') | t }}
                   </button>
                 </div>
               </div>
@@ -212,7 +212,7 @@
               [class.active]="sortBy() === 'distance'" 
               (click)="setSort('distance')">
               <span class="pi pi-compass"></span>
-              <span>নিকটবর্তী</span>
+              <span>{{ 'নিকটবর্তী' | t }}</span>
             </button>
             <button 
               type="button" 
@@ -220,7 +220,7 @@
               [class.active]="sortBy() === 'rating'" 
               (click)="setSort('rating')">
               <span class="pi pi-star"></span>
-              <span>সেরা রেটিং</span>
+              <span>{{ 'সেরা রেটিং' | t }}</span>
             </button>
             <button 
               type="button" 
@@ -228,12 +228,12 @@
               [class.active]="sortBy() === 'rate'" 
               (click)="setSort('rate')">
               <span class="pi pi-tag"></span>
-              <span>সাশ্রয়ী মূল্য</span>
+              <span>{{ 'সাশ্রয়ী মূল্য' | t }}</span>
             </button>
           </div>
 
           <div class="sheet-stats-chip">
-            <span>{{ sortedWorkers().length | bnNumber }} জন কারিগর ফিল্টার্ড</span>
+            <span>{{ sortedWorkers().length | bnNumber }} {{ 'জন কারিগর ফিল্টার্ড' | t }}</span>
           </div>
         </div>
 
@@ -242,9 +242,9 @@
           @if (sortedWorkers().length === 0) {
             <div class="empty-workers-state">
               <span class="empty-icon">🔍</span>
-              <p class="empty-title">এই ক্যাটাগরিতে কোনো কর্মী পাওয়া যায়নি</p>
-              <p class="empty-sub">অন্য ক্যাটাগরি বেছে নিন অথবা একটু পরে আবার চেষ্টা করুন।</p>
-              <button class="btn-outline btn-sm" (click)="selectCategory('all')">সব ক্যাটাগরি দেখুন</button>
+              <p class="empty-title">{{ 'এই ক্যাটাগরিতে কোনো কর্মী পাওয়া যায়নি' | t }}</p>
+              <p class="empty-sub">{{ 'অন্য ক্যাটাগরি বেছে নিন অথবা একটু পরে আবার চেষ্টা করুন।' | t }}</p>
+              <button class="btn-outline btn-sm" (click)="selectCategory('all')">{{ 'সব ক্যাটাগরি দেখুন' | t }}</button>
             </div>
           } @else {
             @for (worker of sortedWorkers(); track worker.uid) {
@@ -256,7 +256,7 @@
                     <span class="status-indicator" [class.online]="worker.isOnline && !worker.isBusy" [class.busy]="worker.isBusy" [class.offline]="!worker.isOnline"></span>
                   </div>
                   <span class="status-text-pill" [class.online]="worker.isOnline && !worker.isBusy">
-                    {{ worker.isOnline ? (worker.isBusy ? 'ব্যস্ত' : 'অনলাইন') : 'অফলাইন' }}
+                    {{ (worker.isOnline ? (worker.isBusy ? 'ব্যস্ত' : 'অনলাইন') : 'অফলাইন') | t }}
                   </span>
                 </div>
 
@@ -265,10 +265,10 @@
                   <div class="worker-name-line">
                     <h4 class="worker-name">{{ worker.name }}</h4>
                     @if (worker.verified) {
-                      <span class="verified-pill" title="এনআইডি ও ব্যাকগ্রাউন্ড ভেরিফায়েড">✓ ভেরিফায়েড</span>
+                      <span class="verified-pill" [title]="'এনআইডি ও ব্যাকগ্রাউন্ড ভেরিফায়েড' | t">{{ '✓ ভেরিফায়েড' | t }}</span>
                     }
                     @if (worker.trustedBadge) {
-                      <span class="trusted-pill" title="বিশেষভাবে বিশ্বস্ত কারিগর">⭐ ট্রাস্টেড</span>
+                      <span class="trusted-pill" [title]="'বিশেষভাবে বিশ্বস্ত কারিগর' | t">{{ '⭐ ট্রাস্টেড' | t }}</span>
                     }
                   </div>
 
@@ -277,13 +277,13 @@
                       ⭐ {{ worker.rating | bnNumber }} <small>({{ worker.ratingCount | bnNumber }})</small>
                     </span>
                     <span class="divider-dot">•</span>
-                    <span class="experience-text">{{ worker.experienceYears | bnNumber }} বছর অভিজ্ঞতা</span>
+                    <span class="experience-text">{{ worker.experienceYears | bnNumber }} {{ 'বছর অভিজ্ঞতা' | t }}</span>
                     @if (worker.distanceKm !== undefined) {
                       <span class="divider-dot">•</span>
-                      <span class="distance-text">📍 {{ worker.distanceKm | bnNumber }} কিমি</span>
+                      <span class="distance-text">📍 {{ worker.distanceKm | bnNumber }} {{ 'কিমি' | t }}</span>
                     }
                     <span class="divider-dot">•</span>
-                    <span class="eta-text">⏱️ প্রায় {{ getEtaMinutes(worker) | bnNumber }} মিনিট</span>
+                    <span class="eta-text">⏱️ {{ 'প্রায়' | t }} {{ getEtaMinutes(worker) | bnNumber }} {{ 'মিনিট' | t }}</span>
                   </div>
 
                   <div class="worker-skills-tags">
@@ -297,12 +297,12 @@
                 <div class="wc-right" (click)="$event.stopPropagation()">
                   <div class="price-rate">
                     <span class="rate-amount">{{ worker.rate | taka }}</span>
-                    <span class="rate-unit">/ {{ worker.rateUnit === 'job' ? 'কাজ' : worker.rateUnit === 'hour' ? 'ঘণ্টা' : 'দিন' }}</span>
+                    <span class="rate-unit">/ {{ (worker.rateUnit === 'job' ? 'কাজ' : worker.rateUnit === 'hour' ? 'ঘণ্টা' : 'দিন') | t }}</span>
                   </div>
 
                   <div class="card-buttons">
                     <button type="button" class="btn-card-profile" (click)="openWorkerProfile(worker)">
-                      প্রোফাইল
+                      {{ 'প্রোফাইল' | t }}
                     </button>
                     <button 
                       type="button" 
@@ -310,7 +310,7 @@
                       [disabled]="worker.isBusy || !worker.isOnline"
                       (click)="startDirectBooking(worker)"
                     >
-                      {{ worker.isBusy ? 'ব্যস্ত' : 'বুক করুন' }}
+                      {{ (worker.isBusy ? 'ব্যস্ত' : 'বুক করুন') | t }}
                     </button>
                   </div>
                 </div>
@@ -332,7 +332,7 @@
           <div class="profile-avatar-large">
             <img [src]="w.photoURL" [alt]="w.name" />
             <span class="status-badge" [class.online]="w.isOnline && !w.isBusy" [class.busy]="w.isBusy" [class.offline]="!w.isOnline">
-              {{ w.isOnline ? (w.isBusy ? 'ব্যস্ত' : 'অনলাইন') : 'অফলাইন' }}
+              {{ (w.isOnline ? (w.isBusy ? 'ব্যস্ত' : 'অনলাইন') : 'অফলাইন') | t }}
             </span>
           </div>
         </div>
@@ -342,13 +342,13 @@
             <h3 class="profile-name">{{ w.name }}</h3>
             <div class="badge-row">
               @if (w.verified) {
-                <span class="badge badge-success">✓ জাতীয় পরিচয়পত্র ভেরিফায়েড</span>
+                <span class="badge badge-success">{{ '✓ জাতীয় পরিচয়পত্র ভেরিফায়েড' | t }}</span>
               }
               @if (w.trustedBadge) {
-                <span class="badge badge-info">⭐ ৫ স্টার প্ল্যাটফর্ম স্পেশালিস্ট</span>
+                <span class="badge badge-info">{{ '⭐ ৫ স্টার প্ল্যাটফর্ম স্পেশালিস্ট' | t }}</span>
               }
               @if (w.isPremium) {
-                <span class="badge badge-warning">👑 প্রিমিয়াম প্রো</span>
+                <span class="badge badge-warning">{{ '👑 প্রিমিয়াম প্রো' | t }}</span>
               }
             </div>
           </div>
@@ -357,33 +357,33 @@
           <div class="profile-stats-grid">
             <div class="stat-box">
               <span class="stat-num">⭐ {{ w.rating | bnNumber }}</span>
-              <span class="stat-lbl">{{ w.ratingCount | bnNumber }} টি রিভিউ</span>
+              <span class="stat-lbl">{{ w.ratingCount | bnNumber }} {{ 'টি রিভিউ' | t }}</span>
             </div>
             <div class="stat-box">
               <span class="stat-num">{{ w.totalJobs | bnNumber }}+</span>
-              <span class="stat-lbl">কাজ সম্পন্ন</span>
+              <span class="stat-lbl">{{ 'কাজ সম্পন্ন' | t }}</span>
             </div>
             <div class="stat-box">
               <span class="stat-num">{{ w.completionRate | bnNumber }}%</span>
-              <span class="stat-lbl">সফলতার হার</span>
+              <span class="stat-lbl">{{ 'সফলতার হার' | t }}</span>
             </div>
             <div class="stat-box">
-              <span class="stat-num">{{ w.experienceYears | bnNumber }} বছর</span>
-              <span class="stat-lbl">বাস্তব অভিজ্ঞতা</span>
+              <span class="stat-num">{{ w.experienceYears | bnNumber }} {{ 'বছর' | t }}</span>
+              <span class="stat-lbl">{{ 'বাস্তব অভিজ্ঞতা' | t }}</span>
             </div>
           </div>
 
           <!-- Bio -->
           @if (w.bio) {
             <div class="profile-bio-box">
-              <h4>অভিজ্ঞতার বিবরণ</h4>
+              <h4>{{ 'অভিজ্ঞতার বিবরণ' | t }}</h4>
               <p>{{ w.bio }}</p>
             </div>
           }
 
           <!-- Skills -->
           <div class="profile-skills-box">
-            <h4>বিশেষ পারদর্শিতা</h4>
+            <h4>{{ 'বিশেষ পারদর্শিতা' | t }}</h4>
             <div class="skills-wrap">
               @for (skill of w.skills; track skill) {
                 <span class="skill-pill">{{ skill }}</span>
@@ -394,15 +394,15 @@
           <!-- Pricing & Distance -->
           <div class="profile-price-banner">
             <div>
-              <span class="pb-label">প্রস্তাবিত পারিশ্রমিক</span>
+              <span class="pb-label">{{ 'প্রস্তাবিত পারিশ্রমিক' | t }}</span>
               <div class="pb-price">
                 <strong>{{ w.rate | taka }}</strong>
-                <span>/ {{ w.rateUnit === 'job' ? 'ফিক্সড রেট কাজ' : w.rateUnit === 'hour' ? 'প্রতি ঘণ্টা' : 'প্রতি দিন' }}</span>
+                <span>/ {{ (w.rateUnit === 'job' ? 'ফিক্সড রেট কাজ' : w.rateUnit === 'hour' ? 'প্রতি ঘণ্টা' : 'প্রতি দিন') | t }}</span>
               </div>
             </div>
             @if (w.distanceKm !== undefined) {
               <div class="pb-dist">
-                <span>📍 প্রায় {{ w.distanceKm | bnNumber }} কিমি দূরে</span>
+                <span>📍 {{ 'প্রায়' | t }} {{ w.distanceKm | bnNumber }} {{ 'কিমি দূরে' | t }}</span>
               </div>
             }
           </div>
@@ -414,18 +414,18 @@
             class="btn-fav-toggle" 
             [class.active]="isFavorite(w.uid)"
             (click)="toggleFavorite(w)"
-            title="প্রিয় কারিগর হিসেবে সংরক্ষণ করুন"
+            [title]="'প্রিয় কারিগর হিসেবে সংরক্ষণ করুন' | t"
           >
-            <span>{{ isFavorite(w.uid) ? '❤️ প্রিয় কারিগর' : '🤍 প্রিয়তে রাখুন' }}</span>
+            <span>{{ (isFavorite(w.uid) ? '❤️ প্রিয় কারিগর' : '🤍 প্রিয়তে রাখুন') | t }}</span>
           </button>
-          <button type="button" class="btn-outline" (click)="closeWorkerProfile()">ফিরে যান</button>
+          <button type="button" class="btn-outline" (click)="closeWorkerProfile()">{{ 'ফিরে যান' | t }}</button>
           <button 
             type="button" 
             class="btn-primary" 
             [disabled]="w.isBusy || !w.isOnline"
             (click)="startDirectBooking(w)"
           >
-            {{ w.isBusy ? 'কর্মী বর্তমানে অন্য কাজে ব্যস্ত' : 'সরাসরি বুকিং নিশ্চিত করুন' }}
+            {{ (w.isBusy ? 'কর্মী বর্তমানে অন্য কাজে ব্যস্ত' : 'সরাসরি বুকিং নিশ্চিত করুন') | t }}
           </button>
         </div>
       </div>
@@ -440,7 +440,7 @@
           <div class="modal-title-wrap">
             <span class="modal-icon">{{ bookingMode() === 'scheduled' ? '📅' : bookingMode() === 'bulk_labor' ? '👥' : '⚡' }}</span>
             <h3 class="modal-title">
-              {{ bookingMode() === 'scheduled' ? 'ভবিষ্যতের জন্য কাজ শিডিউল করুন' : bookingMode() === 'bulk_labor' ? 'দিনমজুর বাল্ক বুকিং (গ্রুপ সার্ভিস)' : 'তাৎক্ষণিক কর্মী ডাকুন (Instant Request)' }}
+              {{ (bookingMode() === 'scheduled' ? 'ভবিষ্যতের জন্য কাজ শিডিউল করুন' : bookingMode() === 'bulk_labor' ? 'দিনমজুর বাল্ক বুকিং (গ্রুপ সার্ভিস)' : 'তাৎক্ষণিক কর্মী ডাকুন (Instant Request)') | t }}
             </h3>
           </div>
           <button class="close-btn" (click)="closeInstantBooking()">✕</button>
@@ -456,7 +456,7 @@
               (click)="setBookingMode('instant')"
             >
               <span class="tab-icon">⚡</span>
-              <span class="tab-name">তাৎক্ষণিক কর্মী</span>
+              <span class="tab-name">{{ 'তাৎক্ষণিক কর্মী' | t }}</span>
             </button>
 
             <button 
@@ -466,7 +466,7 @@
               (click)="setBookingMode('scheduled')"
             >
               <span class="tab-icon">📅</span>
-              <span class="tab-name">শিডিউল বুকিং</span>
+              <span class="tab-name">{{ 'শিডিউল বুকিং' | t }}</span>
             </button>
 
             <button 
@@ -476,7 +476,7 @@
               (click)="setBookingMode('bulk_labor')"
             >
               <span class="tab-icon">👥</span>
-              <span class="tab-name">দিনমজুর বাল্ক</span>
+              <span class="tab-name">{{ 'দিনমজুর বাল্ক' | t }}</span>
             </button>
           </div>
 
@@ -484,12 +484,12 @@
           @if (bookingMode() === 'bulk_labor') {
             <div class="bulk-counter-card">
               <div class="bcc-info">
-                <span class="bcc-title">শ্রমিক সংখ্যা নির্বাচন করুন</span>
-                <span class="bcc-sub">বাসা বদল, মাল ওঠানামা বা মাটির কাজের জন্য</span>
+                <span class="bcc-title">{{ 'শ্রমিক সংখ্যা নির্বাচন করুন' | t }}</span>
+                <span class="bcc-sub">{{ 'বাসা বদল, মাল ওঠানামা বা মাটির কাজের জন্য' | t }}</span>
               </div>
               <div class="bcc-stepper">
                 <button type="button" class="btn-step" (click)="changeLaborCount(-1)" [disabled]="bulkLaborCount() <= 2">−</button>
-                <span class="count-val">{{ bulkLaborCount() | bnNumber }} জন</span>
+                <span class="count-val">{{ bulkLaborCount() | bnNumber }} {{ 'জন' | t }}</span>
                 <button type="button" class="btn-step" (click)="changeLaborCount(1)" [disabled]="bulkLaborCount() >= 10">+</button>
               </div>
             </div>
@@ -499,7 +499,7 @@
           @if (bookingMode() === 'scheduled') {
             <div class="scheduled-selectors-card">
               <div class="form-group mb-2">
-                <label class="form-label">কাজের তারিখ</label>
+                <label class="form-label">{{ 'কাজের তারিখ' | t }}</label>
                 <div class="schedule-chips">
                   @for (d of ['আজ বিকেলে', 'আগামীকাল', 'পরশু দিন', 'শুক্রবার']; track d) {
                     <button 
@@ -508,14 +508,14 @@
                       [class.active]="scheduledDate() === d"
                       (click)="scheduledDate.set(d)"
                     >
-                      {{ d }}
+                      {{ d | t }}
                     </button>
                   }
                 </div>
               </div>
 
               <div class="form-group">
-                <label class="form-label">সময় স্লট</label>
+                <label class="form-label">{{ 'সময় স্লট' | t }}</label>
                 <div class="schedule-chips">
                   @for (slot of ['সকাল ৯:০০ - ১২:০০', 'দুপুর ১২:০০ - ৩:০০', 'বিকাল ৩:০০ - ৬:০০', 'সন্ধ্যা ৬:০০ - রাত ৯:০০']; track slot) {
                     <button 
@@ -524,7 +524,7 @@
                       [class.active]="scheduledTimeSlot() === slot"
                       (click)="scheduledTimeSlot.set(slot)"
                     >
-                      {{ slot }}
+                      {{ slot | t }}
                     </button>
                   }
                 </div>
@@ -535,7 +535,7 @@
           <!-- Category selection (for instant and scheduled) -->
           @if (bookingMode() !== 'bulk_labor') {
             <div class="form-group">
-              <label class="form-label">সেবার ধরন নির্বাচন করুন</label>
+              <label class="form-label">{{ 'সেবার ধরন নির্বাচন করুন' | t }}</label>
               <div class="category-select-grid">
                 @for (cat of categories(); track cat.id) {
                   <button 
@@ -545,7 +545,7 @@
                     (click)="bookingCategory.set(cat.id)"
                   >
                     <span class="co-icon">{{ cat.icon }}</span>
-                    <span class="co-name">{{ cat.nameBn }}</span>
+                    <span class="co-name">{{ isEn() ? cat.nameEn : cat.nameBn }}</span>
                   </button>
                 }
               </div>
@@ -554,11 +554,11 @@
 
           <!-- Description -->
           <div class="form-group">
-            <label class="form-label">কাজের বিবরণ বা সমস্যা সংক্ষেপে লিখুন</label>
+            <label class="form-label">{{ 'কাজের বিবরণ বা সমস্যা সংক্ষেপে লিখুন' | t }}</label>
             <textarea 
               class="form-textarea" 
               rows="3" 
-              placeholder="যেমন: বাথরুমের পানির কল নষ্ট বা লাইন লিক করছে..." 
+              [placeholder]="'যেমন: বাথরুমের পানির কল নষ্ট বা লাইন লিক করছে...' | t" 
               [ngModel]="bookingDescription()"
               (ngModelChange)="bookingDescription.set($event)"
             ></textarea>
@@ -566,7 +566,7 @@
 
           <!-- Address -->
           <div class="form-group">
-            <label class="form-label">সার্ভিস লোকেশন</label>
+            <label class="form-label">{{ 'সার্ভিস লোকেশন' | t }}</label>
             <div class="location-preview-box">
               <span class="lpb-icon">📍</span>
               <span class="lpb-address">{{ userLocation().address || 'সাভার বাজার রোড, সাভার, ঢাকা' }}</span>
@@ -575,21 +575,21 @@
 
           <!-- Payment method -->
           <div class="form-group">
-            <label class="form-label">পরিশোধের মাধ্যম</label>
+            <label class="form-label">{{ 'পরিশোধের মাধ্যম' | t }}</label>
             <div class="payment-methods-grid">
               <label class="payment-choice" [class.selected]="bookingPaymentMethod() === 'cash'">
                 <input type="radio" name="paymethod" value="cash" [checked]="bookingPaymentMethod() === 'cash'" (change)="bookingPaymentMethod.set('cash')" />
-                <span class="pay-name">💵 কাজ শেষে ক্যাশ</span>
+                <span class="pay-name">{{ '💵 কাজ শেষে ক্যাশ' | t }}</span>
               </label>
 
               <label class="payment-choice" [class.selected]="bookingPaymentMethod() === 'bkash'">
                 <input type="radio" name="paymethod" value="bkash" [checked]="bookingPaymentMethod() === 'bkash'" (change)="bookingPaymentMethod.set('bkash')" />
-                <span class="pay-name">📱 বিকাশ (bKash)</span>
+                <span class="pay-name">{{ '📱 বিকাশ (bKash)' | t }}</span>
               </label>
 
               <label class="payment-choice" [class.selected]="bookingPaymentMethod() === 'nagad'">
                 <input type="radio" name="paymethod" value="nagad" [checked]="bookingPaymentMethod() === 'nagad'" (change)="bookingPaymentMethod.set('nagad')" />
-                <span class="pay-name">🟧 নগদ (Nagad)</span>
+                <span class="pay-name">{{ '🟧 নগদ (Nagad)' | t }}</span>
               </label>
             </div>
           </div>
@@ -597,15 +597,15 @@
           <!-- Estimated pricing notice -->
           <div class="pricing-summary-card">
             <div class="ps-row">
-              <span>প্রাথমিক ভিজিট ও পরীক্ষণ ফি:</span>
+              <span>{{ 'প্রাথমিক ভিজিট ও পরীক্ষণ ফি:' | t }}</span>
               <strong class="ps-val">{{ 350 | taka }}</strong>
             </div>
-            <p class="ps-note">* কোনো যন্ত্রাংশ বা বাড়তি কাজের প্রয়োজন হলে ওয়ার্কার কাজ শুরুর আগেই কাস্টমারকে মূল্য জানাবেন।</p>
+            <p class="ps-note">{{ '* কোনো যন্ত্রাংশ বা বাড়তি কাজের প্রয়োজন হলে ওয়ার্কার কাজ শুরুর আগেই কাস্টমারকে মূল্য জানাবেন।' | t }}</p>
           </div>
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn-cancel" (click)="closeInstantBooking()">বাতিল</button>
+          <button type="button" class="btn-cancel" (click)="closeInstantBooking()">{{ 'বাতিল' | t }}</button>
           <button 
             type="button" 
             class="btn-primary" 
@@ -613,9 +613,9 @@
             (click)="submitInstantBooking()"
           >
             @if (isSubmittingJob()) {
-              <span>অনুসন্ধান চলছে...</span>
+              <span>{{ 'অনুসন্ধান চলছে...' | t }}</span>
             } @else {
-              <span>🚀 এখনই অর্ডার নিশ্চিত করুন</span>
+              <span>{{ '🚀 এখনই অর্ডার নিশ্চিত করুন' | t }}</span>
             }
           </button>
         </div>

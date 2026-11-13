@@ -12,13 +12,15 @@ import { NotificationCenterComponent } from '../../shared/components/notificatio
 import { BnNumberPipe } from '../../shared/pipes/bn-number.pipe';
 import { MaskPhonePipe } from '../../shared/pipes/mask-phone.pipe';
 import { TakaPipe } from '../../shared/pipes/taka.pipe';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { LangToggleComponent } from '../../shared/components/lang-toggle/lang-toggle.component';
 import { UserRole } from '../../core/models/user.model';
 import { WorkerProfile } from '../../core/models/worker.model';
 
 @Component({
   selector: 'app-customer-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, NotificationCenterComponent, BnNumberPipe, MaskPhonePipe, TakaPipe],
+  imports: [CommonModule, RouterModule, NotificationCenterComponent, BnNumberPipe, MaskPhonePipe, TakaPipe, TranslatePipe, LangToggleComponent],
   templateUrl: './customer-layout.component.html',
   styleUrl: './customer-layout.component.scss'
 })

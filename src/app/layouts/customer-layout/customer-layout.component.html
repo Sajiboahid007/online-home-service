@@ -3,21 +3,21 @@
   <header class="customer-header">
     <div class="header-left">
       <a routerLink="/customer/home" class="brand-link">
-        <div class="brand-badge">ক</div>
+        <div class="brand-badge">{{ 'ক' | t }}</div>
         <div class="brand-text">
-          <span class="brand-name">কাজখোঁজ</span>
-          <span class="brand-sub">হোম সার্ভিস</span>
+          <span class="brand-name">{{ 'কাজখোঁজ' | t }}</span>
+          <span class="brand-sub">{{ 'হোম সার্ভিস' | t }}</span>
         </div>
       </a>
 
       <!-- Location Badge -->
-      <div class="location-chip" (click)="refreshLocation()" title="লোকেশন রিফ্রেশ করতে চাপুন">
+      <div class="location-chip" (click)="refreshLocation()" [title]="'লোকেশন রিফ্রেশ করতে চাপুন' | t">
         <span class="loc-icon" [class.spinning]="isRefreshingLocation()">📍</span>
         <div class="loc-info">
-          <span class="loc-label">আপনার অবস্থান</span>
-          <span class="loc-val">{{ userLocation().address || 'সাভার বাজার, সাভার, ঢাকা' }}</span>
+          <span class="loc-label">{{ 'আপনার অবস্থান' | t }}</span>
+          <span class="loc-val">{{ userLocation().address || ('সাভার বাজার, সাভার, ঢাকা' | t) }}</span>
         </div>
-        <button class="loc-refresh-btn" type="button" aria-label="Refresh Location">
+        <button class="loc-refresh-btn" type="button" [attr.aria-label]="'লোকেশন রিফ্রেশ করতে চাপুন' | t">
           <span class="pi pi-refresh" [class.pi-spin]="isRefreshingLocation()"></span>
         </button>
       </div>
@@ -25,43 +25,45 @@
 
     <div class="header-right">
       <!-- Post Work Request Button -->
-      <a routerLink="/customer/create-request" class="create-req-header-btn" title="কাজের চাহিদা পোস্ট করুন">
+      <a routerLink="/customer/create-request" class="create-req-header-btn" [title]="'কাজের চাহিদা পোস্ট করুন' | t">
         <span class="cr-icon">📝</span>
-        <span class="cr-text">কাজের রিকোয়েস্ট</span>
+        <span class="cr-text">{{ 'কাজের রিকোয়েস্ট' | t }}</span>
       </a>
 
       <!-- Favorites Trigger Button -->
-      <button class="fav-header-btn" type="button" (click)="openFavorites()" title="প্রিয় কারিগর তালিকা">
+      <button class="fav-header-btn" type="button" (click)="openFavorites()" [title]="'প্রিয় কারিগর তালিকা' | t">
         <span class="fav-icon">❤️</span>
-        <span class="fav-text">প্রিয় কারিগর</span>
+        <span class="fav-text">{{ 'প্রিয় কারিগর' | t }}</span>
         @if (favoriteWorkers().length > 0) {
           <span class="fav-counter">{{ favoriteWorkers().length | bnNumber }}</span>
         }
       </button>
 
-      <!-- Notification Center & Dark Mode -->
+      <!-- Notification Center, Language & Dark Mode -->
       <app-notification-center></app-notification-center>
 
-      <button type="button" class="icon-toggle-btn" (click)="themeService.toggleDarkMode()" [title]="themeService.isDarkMode() ? 'লাইট মোড' : 'ডার্ক মোড'" style="background:none; border:none; cursor:pointer; font-size:16px; padding:6px; color:inherit;">
+      <app-lang-toggle></app-lang-toggle>
+
+      <button type="button" class="icon-toggle-btn" (click)="themeService.toggleDarkMode()" [title]="(themeService.isDarkMode() ? 'লাইট মোড' : 'ডার্ক মোড') | t" style="background:none; border:none; cursor:pointer; font-size:16px; padding:6px; color:inherit;">
         <i class="pi" [ngClass]="themeService.isDarkMode() ? 'pi-sun' : 'pi-moon'"></i>
       </button>
 
       <!-- SOS Button -->
-      <button class="sos-btn" type="button" (click)="openSOS()" title="জরুরি পরিস্থিতিতে অবিলম্বে সহায়তা পান">
+      <button class="sos-btn" type="button" (click)="openSOS()" [title]="'জরুরি পরিস্থিতিতে অবিলম্বে সহায়তা পান' | t">
         <span class="sos-pulse"></span>
         <span class="sos-icon">🚨</span>
-        <span class="sos-text">SOS জরুরি</span>
+        <span class="sos-text">{{ 'SOS জরুরি' | t }}</span>
       </button>
 
       <!-- Role Switcher Trigger -->
-      <div class="role-badge-btn" (click)="toggleRoleSwitcher()" title="ভূমিকা পরিবর্তন করুন">
+      <div class="role-badge-btn" (click)="toggleRoleSwitcher()" [title]="'ভূমিকা পরিবর্তন করুন' | t">
         <span class="role-icon">🔄</span>
-        <span class="role-name">কাস্টমার</span>
+        <span class="role-name">{{ 'কাস্টমার' | t }}</span>
       </div>
 
       <!-- User Avatar / Profile -->
-      <div class="user-profile-trigger" (click)="toggleProfileModal()" title="প্রোফাইল দেখুন">
-        <img [src]="currentUser()?.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'" [alt]="currentUser()?.name || 'কাস্টমার'" class="avatar-img" />
+      <div class="user-profile-trigger" (click)="toggleProfileModal()" [title]="'প্রোফাইল দেখুন' | t">
+        <img [src]="currentUser()?.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'" [alt]="currentUser()?.name || ('কাস্টমার' | t)" class="avatar-img" />
         <span class="online-dot"></span>
       </div>
     </div>
@@ -76,22 +78,22 @@
   <nav class="customer-bottom-nav">
     <a routerLink="/customer/home" routerLinkActive="active" class="nav-item">
       <span class="nav-icon">🗺️</span>
-      <span class="nav-text">ম্যাপ</span>
+      <span class="nav-text">{{ 'ম্যাপ' | t }}</span>
     </a>
 
     <a routerLink="/customer/create-request" routerLinkActive="active" class="nav-item special-req-nav">
       <span class="nav-icon">➕</span>
-      <span class="nav-text">রিকোয়েস্ট</span>
+      <span class="nav-text">{{ 'রিকোয়েস্ট' | t }}</span>
     </a>
 
     <a routerLink="/customer/bookings" routerLinkActive="active" class="nav-item">
       <span class="nav-icon">📋</span>
-      <span class="nav-text">বুকিং</span>
+      <span class="nav-text">{{ 'বুকিং' | t }}</span>
     </a>
 
     <button type="button" class="nav-item tracking-nav" (click)="navigateToTracking()">
       <span class="nav-icon">🛰️</span>
-      <span class="nav-text">ট্র্যাকিং</span>
+      <span class="nav-text">{{ 'ট্র্যাকিং' | t }}</span>
       @if (activeJobsCount() > 0) {
         <span class="active-badge">{{ activeJobsCount() | bnNumber }}</span>
       }
@@ -99,12 +101,12 @@
 
     <button type="button" class="nav-item" (click)="toggleProfileModal()">
       <span class="nav-icon">👤</span>
-      <span class="nav-text">প্রোফাইল</span>
+      <span class="nav-text">{{ 'প্রোফাইল' | t }}</span>
     </button>
 
     <button type="button" class="nav-item" (click)="toggleRoleSwitcher()">
       <span class="nav-icon">🔄</span>
-      <span class="nav-text">ভূমিকা</span>
+      <span class="nav-text">{{ 'ভূমিকা' | t }}</span>
     </button>
   </nav>
 
@@ -115,8 +117,8 @@
         <div class="sos-modal-header">
           <div class="sos-siren-box">🚨</div>
           <div class="sos-title-wrap">
-            <h3 class="sos-title">জরুরি SOS সহায়তা</h3>
-            <p class="sos-subtitle">আপনার বর্তমান অবস্থান ও জরুরি সতর্কতা অবিলম্বে পাঠানো হবে</p>
+            <h3 class="sos-title">{{ 'জরুরি SOS সহায়তা' | t }}</h3>
+            <p class="sos-subtitle">{{ 'আপনার বর্তমান অবস্থান ও জরুরি সতর্কতা অবিলম্বে পাঠানো হবে' | t }}</p>
           </div>
           <button class="close-btn" (click)="closeSOS()">✕</button>
         </div>
@@ -125,23 +127,23 @@
           <div class="sos-modal-body">
             <div class="sos-alert-box">
               <p class="alert-desc">
-                আপনি যদি কোনো অনিরাপদ বা বিপজ্জনক পরিস্থিতিতে পড়েন, তাৎক্ষণিক সতর্কতা পাঠান। আমাদের জরুরি হেল্পডেস্ক টিম ও সাভার এলাকার প্রশাসনিক দল তৎক্ষণাৎ পদক্ষেপ গ্রহণ করবে।
+                {{ 'আপনি যদি কোনো অনিরাপদ বা বিপজ্জনক পরিস্থিতিতে পড়েন, তাৎক্ষণিক সতর্কতা পাঠান। আমাদের জরুরি হেল্পডেস্ক টিম ও সাভার এলাকার প্রশাসনিক দল তৎক্ষণাৎ পদক্ষেপ গ্রহণ করবে।' | t }}
               </p>
               <div class="sos-meta-grid">
                 <div class="meta-row">
-                  <span class="meta-lbl">আপনার নাম:</span>
+                  <span class="meta-lbl">{{ 'আপনার নাম:' | t }}</span>
                   <span class="meta-val">{{ currentUser()?.name || 'তানভীর আহমেদ' }}</span>
                 </div>
                 <div class="meta-row">
-                  <span class="meta-lbl">মোবাইল:</span>
+                  <span class="meta-lbl">{{ 'মোবাইল:' | t }}</span>
                   <span class="meta-val">{{ (currentUser()?.phone || '01712345678') | maskPhone }}</span>
                 </div>
                 <div class="meta-row">
-                  <span class="meta-lbl">বর্তমান অবস্থান:</span>
-                  <span class="meta-val">{{ userLocation().address || 'সাভার বাজার, ঢাকা' }}</span>
+                  <span class="meta-lbl">{{ 'বর্তমান অবস্থান:' | t }}</span>
+                  <span class="meta-val">{{ userLocation().address || ('সাভার বাজার, ঢাকা' | t) }}</span>
                 </div>
                 <div class="meta-row">
-                  <span class="meta-lbl">জিপিএস কোঅর্ডিনেট:</span>
+                  <span class="meta-lbl">{{ 'জিপিএস কোঅর্ডিনেট:' | t }}</span>
                   <span class="meta-val">{{ userLocation().lat.toFixed(4) }}, {{ userLocation().lng.toFixed(4) }}</span>
                 </div>
               </div>
@@ -150,29 +152,29 @@
             <div class="emergency-quick-actions">
               <a href="tel:999" class="quick-call-btn">
                 <span class="qc-icon">📞</span>
-                <span class="qc-text">জাতীয় জরুরি সেবা (৯৯৯) এ সরাসরি কল করুন</span>
+                <span class="qc-text">{{ 'জাতীয় জরুরি সেবা (৯৯৯) এ সরাসরি কল করুন' | t }}</span>
               </a>
             </div>
           </div>
 
           <div class="sos-modal-footer">
-            <button class="btn-cancel" (click)="closeSOS()">বাতিল করুন</button>
+            <button class="btn-cancel" (click)="closeSOS()">{{ 'বাতিল করুন' | t }}</button>
             <button class="btn-confirm-sos" (click)="triggerSOS()">
-              <span>🚨 কাজখোঁজ সেন্টারে SOS অ্যালার্ট পাঠান</span>
+              <span>{{ '🚨 কাজখোঁজ সেন্টারে SOS অ্যালার্ট পাঠান' | t }}</span>
             </button>
           </div>
         } @else {
           <div class="sos-success-body">
             <div class="success-icon-wrap">✅</div>
-            <h4 class="success-title">SOS এলার্ট সফলভাবে পাঠানো হয়েছে!</h4>
+            <h4 class="success-title">{{ 'SOS এলার্ট সফলভাবে পাঠানো হয়েছে!' | t }}</h4>
             <p class="success-desc">
-              আপনার সাভার এলাকার কন্ট্রোল রুম ও প্রশাসনিক কর্মকর্তাদের নিকট জরুরি সিগন্যাল পাঠানো হয়েছে। অতি দ্রুত সাপোর্ট টিম আপনার সাথে ফোনে যোগাযোগ করবে।
+              {{ 'আপনার সাভার এলাকার কন্ট্রোল রুম ও প্রশাসনিক কর্মকর্তাদের নিকট জরুরি সিগন্যাল পাঠানো হয়েছে। অতি দ্রুত সাপোর্ট টিম আপনার সাথে ফোনে যোগাযোগ করবে।' | t }}
             </p>
             <div class="sos-help-box">
-              <span>প্রয়োজনে সরাসরি আমাদের সার্বক্ষণিক হটলাইনে যোগাযোগ করুন:</span>
-              <a href="tel:01700000000" class="hotline-link">📞 ০১৭০০-০০০০০০</a>
+              <span>{{ 'প্রয়োজনে সরাসরি আমাদের সার্বক্ষণিক হটলাইনে যোগাযোগ করুন:' | t }}</span>
+              <a href="tel:01700000000" class="hotline-link">📞 {{ '০১৭০০-০০০০০০' | bnNumber }}</a>
             </div>
-            <button class="btn-primary w-full" (click)="closeSOS()">বুঝেছি, বন্ধ করুন</button>
+            <button class="btn-primary w-full" (click)="closeSOS()">{{ 'বুঝেছি, বন্ধ করুন' | t }}</button>
           </div>
         }
       </div>
@@ -186,67 +188,67 @@
         <div class="modal-header">
           <div class="modal-title-wrap">
             <span class="modal-icon">🔄</span>
-            <h3 class="modal-title">ভূমিকা পরিবর্তন করুন (Role Switcher)</h3>
+            <h3 class="modal-title">{{ 'ভূমিকা পরিবর্তন করুন (Role Switcher)' | t }}</h3>
           </div>
           <button class="close-btn" (click)="closeRoleSwitcher()">✕</button>
         </div>
 
-        <p class="role-desc">প্ল্যাটফর্মের ভিন্ন ভিন্ন রোল ও ইন্টারফেস টেস্ট করতে নিচের যেকোনো প্রোফাইল বেছে নিন:</p>
+        <p class="role-desc">{{ 'প্ল্যাটফর্মের ভিন্ন ভিন্ন রোল ও ইন্টারফেস টেস্ট করতে নিচের যেকোনো প্রোফাইল বেছে নিন:' | t }}</p>
 
         <div class="role-cards-grid">
           <div class="role-card active-role" (click)="switchRole('customer')">
-            <div class="rc-badge active">বর্তমান</div>
+            <div class="rc-badge active">{{ 'বর্তমান' | t }}</div>
             <div class="rc-avatar">👤</div>
             <div class="rc-info">
-              <h4>কাস্টমার ডেমো</h4>
-              <p>তানভীর আহমেদ (সাভার বাজার)</p>
-              <span class="rc-hint">সার্ভিস বুকিং ও লাইভ ম্যাপ ট্র্যাকিং</span>
+              <h4>{{ 'কাস্টমার ডেমো' | t }}</h4>
+              <p>{{ 'তানভীর আহমেদ (সাভার বাজার)' | t }}</p>
+              <span class="rc-hint">{{ 'সার্ভিস বুকিং ও লাইভ ম্যাপ ট্র্যাকিং' | t }}</span>
             </div>
           </div>
 
           <div class="role-card" (click)="switchRole('worker')">
-            <div class="rc-badge worker">প্লাম্বার ১</div>
+            <div class="rc-badge worker">{{ 'প্লাম্বার ১' | t }}</div>
             <div class="rc-avatar">🔧</div>
             <div class="rc-info">
-              <h4>রহিম প্লাম্বার (ভেরিফায়েড)</h4>
-              <p>সাভার বাসস্ট্যান্ড (অনলাইন 🟢)</p>
-              <span class="rc-hint">ওয়ার্কার ড্যাশবোর্ড, রিকোয়েস্ট ও ওয়ালেট</span>
+              <h4>{{ 'রহিম প্লাম্বার (ভেরিফায়েড)' | t }}</h4>
+              <p>{{ 'সাভার বাসস্ট্যান্ড (অনলাইন 🟢)' | t }}</p>
+              <span class="rc-hint">{{ 'ওয়ার্কার ড্যাশবোর্ড, রিকোয়েস্ট ও ওয়ালেট' | t }}</span>
             </div>
           </div>
 
           <div class="role-card" (click)="switchRole('worker_kalam')">
-            <div class="rc-badge worker">প্লাম্বার ২</div>
+            <div class="rc-badge worker">{{ 'প্লাম্বার ২' | t }}</div>
             <div class="rc-avatar">🚰</div>
             <div class="rc-info">
-              <h4>কালাম হোসেন (প্লাম্বার)</h4>
-              <p>ব্যাংক টাউন (অনলাইন 🟢)</p>
-              <span class="rc-hint">দ্বিতীয় প্লাম্বার — ফার্স্ট গ্র্যাব যাচাই করুন</span>
+              <h4>{{ 'কালাম হোসেন (প্লাম্বার)' | t }}</h4>
+              <p>{{ 'ব্যাংক টাউন (অনলাইন 🟢)' | t }}</p>
+              <span class="rc-hint">{{ 'দ্বিতীয় প্লাম্বার — ফার্স্ট গ্র্যাব যাচাই করুন' | t }}</span>
             </div>
           </div>
 
           <div class="role-card" (click)="switchRole('worker_korim')">
-            <div class="rc-badge worker">ওয়ার্কার</div>
+            <div class="rc-badge worker">{{ 'ওয়ার্কার' | t }}</div>
             <div class="rc-avatar">⚡</div>
             <div class="rc-info">
-              <h4>করিম মিয়া (ইলেকট্রিশিয়ান)</h4>
-              <p>রেডিও কলোনি (অনলাইন 🟢)</p>
-              <span class="rc-hint">জব বোর্ড ও কাজের আবেদন</span>
+              <h4>{{ 'করিম মিয়া (ইলেকট্রিশিয়ান)' | t }}</h4>
+              <p>{{ 'রেডিও কলোনি (অনলাইন 🟢)' | t }}</p>
+              <span class="rc-hint">{{ 'জব বোর্ড ও কাজের আবেদন' | t }}</span>
             </div>
           </div>
 
           <div class="role-card" (click)="switchRole('admin')">
-            <div class="rc-badge admin">অ্যাডমিন</div>
+            <div class="rc-badge admin">{{ 'অ্যাডমিন' | t }}</div>
             <div class="rc-avatar">🛡️</div>
             <div class="rc-info">
-              <h4>সাভার এরিয়া অ্যাডমিন</h4>
-              <p>সাভার উপজেলা কন্ট্রোল রুম</p>
-              <span class="rc-hint">ভেরিফিকেশন, এরিয়া নিয়ন্ত্রণ ও লাইভ মনিটর</span>
+              <h4>{{ 'সাভার এরিয়া অ্যাডমিন' | t }}</h4>
+              <p>{{ 'সাভার উপজেলা কন্ট্রোল রুম' | t }}</p>
+              <span class="rc-hint">{{ 'ভেরিফিকেশন, এরিয়া নিয়ন্ত্রণ ও লাইভ মনিটর' | t }}</span>
             </div>
           </div>
         </div>
 
         <div class="modal-footer">
-          <button class="btn-cancel" (click)="closeRoleSwitcher()">বন্ধ করুন</button>
+          <button class="btn-cancel" (click)="closeRoleSwitcher()">{{ 'বন্ধ করুন' | t }}</button>
         </div>
       </div>
     </div>
@@ -259,7 +261,7 @@
         <div class="modal-header">
           <div class="modal-title-wrap">
             <span class="modal-icon">👤</span>
-            <h3 class="modal-title">কাস্টমার প্রোফাইল</h3>
+            <h3 class="modal-title">{{ 'কাস্টমার প্রোফাইল' | t }}</h3>
           </div>
           <button class="close-btn" (click)="closeProfileModal()">✕</button>
         </div>
@@ -268,8 +270,8 @@
           <img [src]="currentUser()?.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80'" class="profile-big-avatar" alt="Avatar" />
           <div class="hero-details">
             <h3 class="user-fullname">{{ currentUser()?.name || 'তানভীর আহমেদ' }}</h3>
-            <span class="phone-tag">{{ currentUser()?.phone || '০১৭১২-৩৪৫৬৭৮' }}</span>
-            <span class="badge badge-success">সক্রিয় কাস্টমার অ্যাকাউন্ট</span>
+            <span class="phone-tag">{{ (currentUser()?.phone || '০১৭১২-৩৪৫৬৭৮') | bnNumber }}</span>
+            <span class="badge badge-success">{{ 'সক্রিয় কাস্টমার অ্যাকাউন্ট' | t }}</span>
           </div>
         </div>
 
@@ -277,34 +279,34 @@
           <div class="info-tile">
             <span class="it-icon">📍</span>
             <div class="it-content">
-              <label>বর্তমান ঠিকানা / এলাকা</label>
-              <strong>সাভার বাজার রোড, সাভার, ঢাকা</strong>
+              <label>{{ 'বর্তমান ঠিকানা / এলাকা' | t }}</label>
+              <strong>{{ 'সাভার বাজার রোড, সাভার, ঢাকা' | t }}</strong>
             </div>
           </div>
 
           <div class="info-tile">
             <span class="it-icon">🚨</span>
             <div class="it-content">
-              <label>জরুরি যোগাযোগ (Emergency Contact)</label>
-              <strong>রফিক আহমেদ (পিতা) — ০১৭১১-৯৮৭৬৫৪</strong>
+              <label>{{ 'জরুরি যোগাযোগ (Emergency Contact)' | t }}</label>
+              <strong>{{ 'রফিক আহমেদ (পিতা) — ০১৭১১-৯৮৭৬৫৪' | t }}</strong>
             </div>
           </div>
 
           <div class="info-tile">
             <span class="it-icon">⭐</span>
             <div class="it-content">
-              <label>কাস্টমার রেটিং</label>
-              <strong>৫.০ / ৫.০ (৩টি সফল কাজ সম্পন্ন)</strong>
+              <label>{{ 'কাস্টমার রেটিং' | t }}</label>
+              <strong>{{ '৫.০ / ৫.০ (৩টি সফল কাজ সম্পন্ন)' | t }}</strong>
             </div>
           </div>
         </div>
 
         <div class="profile-modal-actions">
           <a routerLink="/customer/profile" class="btn-primary" (click)="closeProfileModal()" style="text-decoration: none; text-align: center; display: block; padding: 10px;">
-            <i class="pi pi-user-edit"></i> প্রোফাইল ও ঠিকানা সম্পাদনা
+            <i class="pi pi-user-edit"></i> {{ 'প্রোফাইল ও ঠিকানা সম্পাদনা' | t }}
           </a>
           <button class="btn-outline" (click)="closeProfileModal(); toggleRoleSwitcher()">
-            <span>ভূমিকা পরিবর্তন করুন</span>
+            <span>{{ 'ভূমিকা পরিবর্তন করুন' | t }}</span>
           </button>
         </div>
       </div>
@@ -318,18 +320,18 @@
         <div class="modal-header">
           <div class="modal-title-wrap">
             <span class="modal-icon">❤️</span>
-            <h3 class="modal-title">প্রিয় কারিগর তালিকা (Favorite Workers)</h3>
+            <h3 class="modal-title">{{ 'প্রিয় কারিগর তালিকা (Favorite Workers)' | t }}</h3>
           </div>
           <button class="close-btn" (click)="closeFavorites()">✕</button>
         </div>
 
-        <p class="fav-desc">আপনার পূর্বে সংরক্ষিত বিশ্বস্ত কারিগরদের তালিকা। যে কাউকে ১-ক্লিকে আবার ডাকতে পারেন:</p>
+        <p class="fav-desc">{{ 'আপনার পূর্বে সংরক্ষিত বিশ্বস্ত কারিগরদের তালিকা। যে কাউকে ১-ক্লিকে আবার ডাকতে পারেন:' | t }}</p>
 
         @if (favoriteWorkers().length === 0) {
           <div class="empty-favs">
             <span class="ef-icon">🤍</span>
-            <h4>কোনো প্রিয় কারিগর সংরক্ষিত নেই</h4>
-            <p>ম্যাপে যেকোনো ওয়ার্কারের প্রোফাইলে গিয়ে "প্রিয়তে রাখুন" বাটনে ক্লিক করে যোগ করুন।</p>
+            <h4>{{ 'কোনো প্রিয় কারিগর সংরক্ষিত নেই' | t }}</h4>
+            <p>{{ 'ম্যাপে যেকোনো ওয়ার্কারের প্রোফাইলে গিয়ে "প্রিয়তে রাখুন" বাটনে ক্লিক করে যোগ করুন।' | t }}</p>
           </div>
         } @else {
           <div class="fav-workers-list">
@@ -344,24 +346,24 @@
                   <div class="fwi-name-row">
                     <h4 class="fwi-name">{{ w.name }}</h4>
                     @if (w.verified) {
-                      <span class="badge badge-success">✓ ভেরিফায়েড</span>
+                      <span class="badge badge-success">{{ '✓ ভেরিফায়েড' | t }}</span>
                     }
                   </div>
                   <div class="fwi-metrics">
-                    <span>⭐ {{ w.rating | bnNumber }} ({{ w.totalJobs | bnNumber }} কাজ)</span>
+                    <span>⭐ {{ w.rating | bnNumber }} ({{ w.totalJobs | bnNumber }} {{ 'কাজ' | t }})</span>
                     <span class="dot">•</span>
-                    <span class="rate">{{ w.rate | taka }} / {{ w.rateUnit === 'job' ? 'কাজ' : w.rateUnit === 'hour' ? 'ঘণ্টা' : 'দিন' }}</span>
+                    <span class="rate">{{ w.rate | taka }} / {{ (w.rateUnit === 'job' ? 'কাজ' : w.rateUnit === 'hour' ? 'ঘণ্টা' : 'দিন') | t }}</span>
                   </div>
                   <span class="fwi-status-tag" [class.online]="w.isOnline && !w.isBusy" [class.busy]="w.isBusy" [class.offline]="!w.isOnline">
-                    {{ w.isOnline ? (w.isBusy ? '🟠 কাজে ব্যস্ত' : '🟢 অনলাইন ও প্রস্তুত') : '⚪ অফলাইন' }}
+                    {{ (w.isOnline ? (w.isBusy ? '🟠 কাজে ব্যস্ত' : '🟢 অনলাইন ও প্রস্তুত') : '⚪ অফলাইন') | t }}
                   </span>
                 </div>
 
                 <div class="fwi-actions">
                   <button type="button" class="btn-book-fav" [disabled]="!w.isOnline || w.isBusy" (click)="bookFavoriteWorker(w)">
-                    {{ w.isBusy ? 'ব্যস্ত' : 'আবার ডাকুন' }}
+                    {{ (w.isBusy ? 'ব্যস্ত' : 'আবার ডাকুন') | t }}
                   </button>
-                  <button type="button" class="btn-remove-fav" (click)="removeFavorite(w.uid)" title="প্রিয় তালিকা থেকে সরান">
+                  <button type="button" class="btn-remove-fav" (click)="removeFavorite(w.uid)" [title]="'প্রিয় তালিকা থেকে সরান' | t">
                     🗑️
                   </button>
                 </div>
@@ -371,7 +373,7 @@
         }
 
         <div class="modal-footer">
-          <button class="btn-cancel" (click)="closeFavorites()">বন্ধ করুন</button>
+          <button class="btn-cancel" (click)="closeFavorites()">{{ 'বন্ধ করুন' | t }}</button>
         </div>
       </div>
     </div>

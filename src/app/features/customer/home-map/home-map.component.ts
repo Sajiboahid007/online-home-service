@@ -13,12 +13,14 @@ import { Category } from '../../../core/models/category.model';
 import { Job, PaymentMethod } from '../../../core/models/job.model';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { ThemeService } from '../../../core/services/theme.service';
 import { Map as MapLibreMap, Marker } from 'maplibre-gl';
 
 @Component({
   selector: 'app-home-map',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, BnNumberPipe, TakaPipe],
+  imports: [CommonModule, FormsModule, RouterModule, BnNumberPipe, TakaPipe, TranslatePipe],
   templateUrl: './home-map.component.html',
   styleUrl: './home-map.component.scss'
 })
@@ -32,6 +34,10 @@ export class HomeMapComponent implements AfterViewInit, OnDestroy {
   private jobService = inject(JobService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private themeService = inject(ThemeService);
+
+  // True when the UI language is English (used to show category nameEn)
+  public isEn = computed(() => this.themeService.currentLang() === 'en');
 
   // Signals
   public categories = this.categoryService.categories;

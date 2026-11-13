@@ -7,11 +7,13 @@ import { ReportService } from '../../core/services/report.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { NotificationCenterComponent } from '../../shared/components/notification-center/notification-center.component';
 import { BnNumberPipe } from '../../shared/pipes/bn-number.pipe';
+import { LangToggleComponent } from '../../shared/components/lang-toggle/lang-toggle.component';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, NotificationCenterComponent, BnNumberPipe],
+  imports: [CommonModule, RouterModule, NotificationCenterComponent, BnNumberPipe, LangToggleComponent, TranslatePipe],
   templateUrl: './admin-layout.component.html',
   styleUrl: './admin-layout.component.scss'
 })

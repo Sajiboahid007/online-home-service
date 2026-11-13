@@ -9,11 +9,13 @@ import { WorkerProfile } from '../../core/models/worker.model';
 import { NotificationCenterComponent } from '../../shared/components/notification-center/notification-center.component';
 import { BnNumberPipe } from '../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../shared/pipes/taka.pipe';
+import { LangToggleComponent } from '../../shared/components/lang-toggle/lang-toggle.component';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-worker-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, NotificationCenterComponent, BnNumberPipe, TakaPipe],
+  imports: [CommonModule, RouterModule, NotificationCenterComponent, BnNumberPipe, TakaPipe, LangToggleComponent, TranslatePipe],
   templateUrl: './worker-layout.component.html',
   styleUrl: './worker-layout.component.scss'
 })

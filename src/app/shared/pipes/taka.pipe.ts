@@ -1,17 +1,18 @@
-import { Pipe, PipeTransform } from '@angular/core';
-import { BnNumberPipe } from './bn-number.pipe';
+import { Pipe, PipeTransform, inject } from '@angular/core';
+import { ThemeService } from '../../core/services/theme.service';
+import { localizeDigits } from './bn-number.pipe';
 
 @Pipe({
   name: 'taka',
-  standalone: true
+  standalone: true,
+  pure: false
 })
 export class TakaPipe implements PipeTransform {
-  private bnNumber = new BnNumberPipe();
+  private themeService = inject(ThemeService);
 
   transform(value: number | string | null | undefined): string {
-    if (value === null || value === undefined) return '৳০';
-    const num = Number(value) || 0;
+    const num = Number(value ?? 0) || 0;
     const formatted = num.toLocaleString('en-US');
-    return `৳${this.bnNumber.transform(formatted)}`;
+    return `৳${localizeDigits(formatted, this.themeService.currentLang())}`;
   }
 }
