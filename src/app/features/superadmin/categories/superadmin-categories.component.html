@@ -1,0 +1,93 @@
+<div class="sa-categories-page">
+  <div class="page-header">
+    <div>
+      <h2>সার্ভিস ক্যাটাগরি ব্যবস্থাপনা (Categories CRUD)</h2>
+      <p class="subtitle">আইকন, বাংলা ও ইংরেজি নাম, সক্রিয়/নিষ্ক্রিয় এবং ডিসপ্লে অর্ডার নির্ধারণ</p>
+    </div>
+    <button class="btn-primary" (click)="showCreateModal.set(true)">
+      <i class="pi pi-plus"></i> নতুন ক্যাটাগরি তৈরি
+    </button>
+  </div>
+
+  <div class="card table-card">
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>আইকন</th>
+            <th>বাংলা নাম</th>
+            <th>ইংরেজি নাম</th>
+            <th>প্রাইসিং ধরন</th>
+            <th>অর্ডার</th>
+            <th>স্ট্যাটাস</th>
+            <th>অ্যাকশন</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cat of categories(); track cat.id) {
+            <tr>
+              <td><span class="cat-icon-lg">{{ cat.icon }}</span></td>
+              <td><strong>{{ cat.nameBn }}</strong></td>
+              <td>{{ cat.nameEn }}</td>
+              <td><span class="badge badge-info">{{ cat.pricingType }}</span></td>
+              <td>{{ cat.order }}</td>
+              <td>
+                <button class="status-btn" [class.active]="cat.isActive" (click)="toggleActive(cat)">
+                  {{ cat.isActive ? 'সক্রিয়' : 'নিষ্ক্রিয়' }}
+                </button>
+              </td>
+              <td>
+                <button class="btn-sm btn-outline text-danger" (click)="deleteCat(cat.id)">
+                  মুছুন
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Create Modal -->
+  @if (showCreateModal()) {
+    <div class="modal-backdrop" (click)="showCreateModal.set(false)">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <h3>নতুন সেবা ক্যাটাগরি তৈরি করুন</h3>
+
+        <div class="form-group my-2">
+          <label>আইকন (ইমোজি)</label>
+          <input type="text" [(ngModel)]="newIcon" class="input-field" placeholder="উদাঃ 🔨" />
+        </div>
+
+        <div class="form-group my-2">
+          <label>বাংলা নাম</label>
+          <input type="text" [(ngModel)]="newNameBn" class="input-field" placeholder="উদাঃ কাঠমিস্ত্রি (কার্পেন্টার)" />
+        </div>
+
+        <div class="form-group my-2">
+          <label>ইংরেজি নাম</label>
+          <input type="text" [(ngModel)]="newNameEn" class="input-field" placeholder="Carpenter" />
+        </div>
+
+        <div class="form-group my-2">
+          <label>প্রাইসিং ধরন</label>
+          <select [(ngModel)]="newPricingType" class="input-field">
+            <option value="job">প্রতি কাজ (Per Job)</option>
+            <option value="hour">প্রতি ঘণ্টা (Hourly)</option>
+            <option value="day">প্রতি দিন (Daily)</option>
+          </select>
+        </div>
+
+        <div class="form-group my-2">
+          <label>ডিসপ্লে ক্রম (Order)</label>
+          <input type="number" [(ngModel)]="newOrder" class="input-field" min="1" />
+        </div>
+
+        <div class="modal-actions mt-3">
+          <button class="btn-outline" (click)="showCreateModal.set(false)">বাতিল</button>
+          <button class="btn-primary" (click)="createCategory()">সংরক্ষণ করুন</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

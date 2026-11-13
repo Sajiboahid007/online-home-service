@@ -1,0 +1,118 @@
+<div class="customer-profile-page">
+  <div class="profile-header">
+    <h2>আমার প্রোফাইল ও নিরাপত্তা সেটিংস</h2>
+    <p class="subtitle">আপনার ব্যক্তিগত তথ্য, জরুরি যোগাযোগ ও সংরক্ষিত ঠিকানা পরিচালনা করুন</p>
+  </div>
+
+  <div class="profile-grid">
+    <!-- Basic Info Form -->
+    <div class="card info-card">
+      <h3>মৌলিক তথ্য</h3>
+
+      <div class="avatar-edit">
+        <img [src]="photoURL() || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'" alt="Profile Photo" />
+        <div class="upload-btn-wrap">
+          <app-image-uploader label="ছবি পরিবর্তন করুন" (imageSelected)="photoURL.set($event)"></app-image-uploader>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>আপনার পূর্ণ নাম</label>
+        <input type="text" [(ngModel)]="name" class="input-field" placeholder="নাম লিখুন" />
+      </div>
+
+      <div class="form-group">
+        <label>মোবাইল নম্বর</label>
+        <input type="text" [(ngModel)]="phone" class="input-field" placeholder="মোবাইল নম্বর লিখুন" />
+      </div>
+
+      <div class="form-group">
+        <label>ইমেইল (ঐচ্ছিক)</label>
+        <input type="email" [(ngModel)]="email" class="input-field" placeholder="ইমেইল অ্যাড্রেস লিখুন" />
+      </div>
+    </div>
+
+    <!-- Emergency Contact Settings -->
+    <div class="card emergency-card">
+      <div class="section-title">
+        <i class="pi pi-shield text-danger"></i>
+        <div>
+          <h3>জরুরি যোগাযোগ (SOS Contact)</h3>
+          <p class="sub">জরুরি SOS বাটনে চাপ দিলে এই নম্বরে স্বয়ংক্রিয়ভাবে আপনার লোকেশন পাঠানো হবে</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>যোগাযোগের ব্যক্তির নাম</label>
+        <input type="text" [(ngModel)]="emergencyName" class="input-field" placeholder="উদাঃ নাসরিন আক্তার" />
+      </div>
+
+      <div class="form-group">
+        <label>জরুরি মোবাইল নম্বর</label>
+        <input type="text" [(ngModel)]="emergencyPhone" class="input-field" placeholder="০১৭XXXXXXXX" />
+      </div>
+
+      <div class="form-group">
+        <label>সম্পর্ক</label>
+        <select [(ngModel)]="emergencyRelation" class="input-field">
+          <option value="স্ত্রী / স্বামী">স্ত্রী / স্বামী</option>
+          <option value="পিতা / মাতা">পিতা / মাতা</option>
+          <option value="ভাই / বোন">ভাই / বোন</option>
+          <option value="সন্তান">সন্তান</option>
+          <option value="বন্ধু / অন্যান্য">বন্ধু / অন্যান্য</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Saved Addresses -->
+    <div class="card addresses-card full-width">
+      <div class="section-title-between">
+        <div>
+          <h3>সংরক্ষিত ঠিকানা সমূহ (Saved Addresses)</h3>
+          <p class="sub">হোম, অফিস বা পছন্দের ঠিকানা দ্রুত বুকিংয়ের জন্য সেভ করে রাখুন</p>
+        </div>
+        <button type="button" class="btn-outline-sm" (click)="showAddAddress.set(true)">
+          <i class="pi pi-plus"></i> নতুন ঠিকানা যোগ করুন
+        </button>
+      </div>
+
+      <div class="addresses-list">
+        @for (addr of savedAddresses(); track addr.id) {
+          <div class="address-item">
+            <div class="addr-icon">
+              <i class="pi" [ngClass]="addr.label === 'বাসা' ? 'pi-home' : addr.label === 'অফিস' ? 'pi-building' : 'pi-map-marker'"></i>
+            </div>
+            <div class="addr-details">
+              <strong>{{ addr.label }}</strong>
+              <p>{{ addr.address }}</p>
+            </div>
+            <button class="delete-btn" (click)="deleteAddress(addr.id)" title="মুছুন">
+              <i class="pi pi-trash"></i>
+            </button>
+          </div>
+        }
+      </div>
+
+      @if (showAddAddress()) {
+        <div class="add-address-form">
+          <h4>নতুন ঠিকানা সংরক্ষণ</h4>
+          <div class="form-row">
+            <input type="text" [(ngModel)]="newAddressLabel" class="input-field" placeholder="লেবেল (উদাঃ বাসা, দোকান, অফিস)" />
+            <input type="text" [(ngModel)]="newAddressText" class="input-field" placeholder="পূর্ণ ঠিকানা লিখুন" />
+            <button class="btn-primary" (click)="addAddress()">সংরক্ষণ করুন</button>
+            <button class="btn-cancel" (click)="showAddAddress.set(false)">বাতিল</button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="save-bar">
+    @if (successMessage()) {
+      <span class="success-alert"><i class="pi pi-check"></i> {{ successMessage() }}</span>
+    }
+    <button class="btn-primary px-5 py-3" (click)="saveProfile()">
+      <i class="pi pi-save"></i> পরিবর্তনসমূহ সংরক্ষণ করুন
+    </button>
+  </div>
+</div>

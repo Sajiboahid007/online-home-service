@@ -1,0 +1,19 @@
+{
+  "name": "কাজখোঁজ (KajKhoj) - অন-ডিমান্ড হোম সার্ভিস",
+  "short_name": "কাজখোঁজ",
+  "description": "বাংলাদেশের সেরা অন-ডিমান্ড হোম সার্ভিস প্ল্যাটফর্ম — প্লাম্বার, ইলেকট্রিশিয়ান, এসি টেকনিশিয়ান ও রাজমিস্ত্রি",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f766e",
+  "theme_color": "#0f766e",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["utilities", "business", "lifestyle"],
+  "lang": "bn-BD"
+}

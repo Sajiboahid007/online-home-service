@@ -1,0 +1,12 @@
+<div class="empty-state-card card">
+  <div class="icon-circle">
+    <i [class]="'pi ' + icon"></i>
+  </div>
+  <h3>{{ title }}</h3>
+  <p>{{ description }}</p>
+  @if (actionLabel) {
+    <button (click)="actionClick.emit()" class="btn-primary">
+      {{ actionLabel }}
+    </button>
+  }
+</div>

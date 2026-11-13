@@ -1,0 +1,69 @@
+<div class="worker-premium-page">
+  <div class="hero-banner">
+    <div class="pro-badge-circle">
+      <i class="pi pi-star-fill"></i>
+    </div>
+    <h2>কাজখোঁজ প্রো (Pro) মেম্বারশিপ</h2>
+    <p class="tagline">আপনার আয় বাড়ান, পান অগ্রাধিকার এবং বিশেষ প্ল্যাটফর্ম সুবিধা</p>
+  </div>
+
+  @if (isCurrentPremium()) {
+    <div class="card active-pro-card">
+      <div class="pro-status">
+        <i class="pi pi-check-circle text-success"></i>
+        <div>
+          <h3>আপনি একজন প্রিমিয়াম প্রো সদস্য!</h3>
+          <p>মেয়াদ শেষ হবে: <strong>{{ worker()?.premiumUntil || '2026-12-31' | date:'mediumDate' }}</strong></p>
+        </div>
+      </div>
+      <button class="btn-primary" (click)="renewSubscription()">১ মাসের জন্য রিনিউ করুন (৳২৯৯)</button>
+    </div>
+  }
+
+  <div class="benefits-grid">
+    <div class="card benefit-card">
+      <div class="b-icon gold"><i class="pi pi-percentage"></i></div>
+      <h4>১০% হ্রাসকৃত কমিশন</h4>
+      <p>সাধারণ কারিগররা ১৫% কমিশন দেন, কিন্তু প্রো সদস্যরা পাবেন হ্রাসকৃত মাত্র ১০% কমিশন। প্রতি কাজে বেশি লাভ!</p>
+    </div>
+
+    <div class="card benefit-card">
+      <div class="b-icon blue"><i class="pi pi-arrow-up-right"></i></div>
+      <h4>অনুসন্ধানে সবার উপরে স্থান</h4>
+      <p>গ্রাহক যখন ম্যাপ বা ক্যাটাগরিতে খুঁজবেন, তখন আপনার প্রোফাইল সবার শীর্ষে সোনালী ব্যাজ সহ প্রদর্শিত হবে।</p>
+    </div>
+
+    <div class="card benefit-card">
+      <div class="b-icon green"><i class="pi pi-bolt"></i></div>
+      <h4>তাৎক্ষণিক অফার অগ্রাধিকার</h4>
+      <p>নতুন কোনো ইনস্ট্যান্ট জব পোস্ট হলে সাধারণের আগে প্রথম ৫ সেকেন্ডে আপনার কাছে নোটিফিকেশন আসবে।</p>
+    </div>
+
+    <div class="card benefit-card">
+      <div class="b-icon purple"><i class="pi pi-shield"></i></div>
+      <h4>গোল্ডেন ভেরিফাইড প্রো ব্যাজ</h4>
+      <p>প্রোফাইলে বিশেষ সোনালী ব্যাজ যা গ্রাহকদের আস্থা ৩ গুণ বাড়িয়ে তোলে এবং বেশি কাজ পেতে সাহায্য করে।</p>
+    </div>
+  </div>
+
+  @if (!isCurrentPremium()) {
+    <div class="card pricing-cta-card">
+      <div class="plan-price">
+        <span class="currency">৳</span>
+        <span class="amt">২৯৯</span>
+        <span class="period">/ প্রতি মাস</span>
+      </div>
+      <p class="terms">যেকোনো সময় বাতিলযোগ্য • bKash বা Nagad-এ সহজে পরিশোধ</p>
+
+      @if (subscribeSuccess()) {
+        <div class="p-2 mb-2 text-success font-bold">
+          <i class="pi pi-check"></i> {{ subscribeSuccess() }}
+        </div>
+      }
+
+      <button type="button" class="btn-primary btn-lg" (click)="subscribe()">
+        <i class="pi pi-star-fill"></i> এখনই প্রো সদস্য হন (৳২৯৯)
+      </button>
+    </div>
+  }
+</div>

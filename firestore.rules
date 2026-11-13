@@ -1,0 +1,109 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn()    { return request.auth != null; }
+    function role()        { return request.auth.token.role; }
+    function isSuper()     { return signedIn() && role() == 'superadmin'; }
+    function isAdmin()     { return signedIn() && (role() == 'admin' || role() == 'superadmin'); }
+    function isOwner(uid)  { return signedIn() && request.auth.uid == uid; }
+    function notBanned()   { return request.auth.token.banned != true; }
+
+    // Users collection
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid) && request.resource.data.role == 'customer';
+      allow update: if isAdmin() ||
+        (isOwner(uid) && !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['role', 'status', 'rating', 'ratingCount', 'banReason']));
+      allow delete: if isSuper();
+    }
+
+    // Worker public profile - visible to all authenticated users
+    match /workers/{uid} {
+      allow read: if signedIn();
+      allow create: if isOwner(uid);
+      allow update: if isAdmin() ||
+        (isOwner(uid) && notBanned() && !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['verified', 'verificationStatus', 'rating', 'ratingCount', 'totalJobs',
+                   'walletBalance', 'commissionDue', 'trustedBadge', 'isPremium']));
+    }
+
+    // Worker private sensitive data (NID, selfie, bank details)
+    match /workerPrivate/{uid} {
+      allow read, write: if isOwner(uid) || isAdmin();
+    }
+
+    // Jobs collection
+    match /jobs/{jobId} {
+      allow read: if isAdmin() ||
+        (signedIn() && (resource.data.customerId == request.auth.uid ||
+                        resource.data.workerId == request.auth.uid)) ||
+        (role() == 'worker' && resource.data.status == 'searching');
+      allow create: if role() == 'customer' && notBanned()
+                    && request.resource.data.customerId == request.auth.uid
+                    && request.resource.data.status == 'pending';
+      // Transitions and assignments handled securely
+      allow update: if isAdmin() || 
+        (signedIn() && (resource.data.customerId == request.auth.uid || resource.data.workerId == request.auth.uid));
+
+      // Offers subcollection
+      match /offers/{workerId} {
+        allow read: if isAdmin() || isOwner(workerId) || (resource.data != null && resource.data.customerId == request.auth.uid);
+        allow write: if isAdmin() || isOwner(workerId);
+      }
+
+      // Bids subcollection
+      match /bids/{workerId} {
+        allow read: if signedIn();
+        allow write: if isOwner(workerId) || isAdmin();
+      }
+
+      // Messages subcollection (chat)
+      match /messages/{msgId} {
+        allow read: if signedIn();
+        allow create: if signedIn();
+      }
+    }
+
+    // Reviews
+    match /reviews/{id} {
+      allow read: if signedIn();
+      allow write: if signedIn();
+    }
+
+    // Financial Transactions
+    match /transactions/{id} {
+      allow read: if isAdmin() || (signedIn() && resource.data.workerId == request.auth.uid);
+      allow write: if isAdmin();
+    }
+
+    // Reports / Disputes
+    match /reports/{id} {
+      allow read: if isAdmin() || (signedIn() && resource.data.reporterId == request.auth.uid);
+      allow create: if signedIn();
+      allow update: if isAdmin();
+    }
+
+    // SOS Alerts
+    match /sosAlerts/{id} {
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create: if signedIn();
+      allow update: if isAdmin();
+    }
+
+    // Platform settings
+    match /settings/{doc} {
+      allow read: if signedIn();
+      allow write: if isSuper();
+    }
+
+    // Public taxonomy & config
+    match /categories/{id} { allow read: if true;     allow write: if isSuper(); }
+    match /areas/{id}      { allow read: if true;     allow write: if isAdmin(); }
+    match /pricing/{id}    { allow read: if true;     allow write: if isSuper(); }
+    match /coupons/{id}    { allow read: if signedIn(); allow write: if isSuper(); }
+    match /auditLogs/{id}  { allow read: if isSuper(); allow write: if isAdmin(); }
+    match /blacklist/{id}  { allow read, write: if isSuper(); }
+  }
+}

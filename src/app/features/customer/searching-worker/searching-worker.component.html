@@ -1,0 +1,55 @@
+<div class="searching-container">
+  <div class="radar-box">
+    <div class="ripple ripple-1"></div>
+    <div class="ripple ripple-2"></div>
+    <div class="ripple ripple-3"></div>
+    <div class="center-icon">
+      <i class="pi pi-search"></i>
+    </div>
+  </div>
+
+  <div class="status-card">
+    <h2>কারিগর খোঁজা হচ্ছে...</h2>
+    <p class="radius-text">
+      <i class="pi pi-compass text-teal"></i> বর্তমান খোঁজার ব্যাসার্ধ: <strong>{{ currentRadius() | bnNumber }} কিমি</strong>
+    </p>
+
+    <div class="timer-box">
+      <span class="timer-label">বাকি সময়</span>
+      <span class="timer-seconds">{{ countdown() | bnNumber }} সেকেন্ড</span>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="progressPct()"></div>
+    </div>
+
+    @if (nearbyCandidateCount() > 0) {
+      <div class="candidate-badge">
+        <i class="pi pi-users"></i> আপনার এলাকায় {{ nearbyCandidateCount() | bnNumber }} জন উপযুক্ত কারিগরকে প্রস্তাব পাঠানো হয়েছে
+      </div>
+    }
+
+    <!-- Fallback when timeout approaches or reached -->
+    @if (countdown() <= 5 || isTimedOut()) {
+      <div class="fallback-panel">
+        <div class="fallback-header">
+          <i class="pi pi-info-circle text-orange"></i>
+          <h4>তাৎক্ষণিক কোনো কারিগর সাড়া দিচ্ছেন না?</h4>
+        </div>
+        <p>আপনি কাজটি জব বোর্ডে পোস্ট করে রাখতে পারেন অথবা নির্দিষ্ট সময়ে শিডিউল করতে পারেন।</p>
+
+        <div class="fallback-btns">
+          <button type="button" class="btn-accent" (click)="postToJobBoard()">
+            <i class="pi pi-th-large"></i> জব বোর্ডে পোস্ট করুন
+          </button>
+          <button type="button" class="btn-outline" (click)="scheduleInstead()">
+            <i class="pi pi-calendar"></i> শিডিউল করুন
+          </button>
+          <button type="button" class="btn-cancel" (click)="cancelSearch()">
+            বাতিল করুন
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

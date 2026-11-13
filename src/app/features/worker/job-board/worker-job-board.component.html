@@ -1,0 +1,245 @@
+<div class="job-board-container">
+  <!-- Page Header -->
+  <header class="board-header">
+    <div class="header-left">
+      <h1 class="page-title">খোলা কাজের বোর্ড (Job Board)</h1>
+      <p class="page-sub">
+        আপনার ক্যাটাগরির ({{ currentWorker()?.skills?.[0] || 'প্লাম্বার' }}) উন্মুক্ত কাজগুলো দূরত্ব অনুযায়ী সাজানো হয়েছে। পছন্দের কাজটি বেছে নিয়ে এখনই কাজ শুরু করুন।
+      </p>
+    </div>
+
+    <div class="header-right">
+      <button type="button" class="btn-seed-job" (click)="seedDemoJob()" title="নতুন টেস্ট জব তৈরি করুন">
+        <i class="pi pi-plus-circle"></i>
+        <span>নতুন টেস্ট জব যোগ করুন</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Filter, Search & Sorting Controls -->
+  <section class="board-controls-card">
+    <div class="controls-top-row">
+      <!-- Filter Chips -->
+      <div class="filter-chips">
+        <button 
+          type="button" 
+          class="chip-btn" 
+          [class.active]="filterType() === 'all'"
+          (click)="filterType.set('all')">
+          সব কাজ
+        </button>
+        <button 
+          type="button" 
+          class="chip-btn" 
+          [class.active]="filterType() === 'board_fixed'"
+          (click)="filterType.set('board_fixed')">
+          ফিক্সড রেট কাজ
+        </button>
+        <button 
+          type="button" 
+          class="chip-btn" 
+          [class.active]="filterType() === 'board_bid'"
+          (click)="filterType.set('board_bid')">
+          বিডিং কাজ
+        </button>
+        <button 
+          type="button" 
+          class="chip-btn" 
+          [class.active]="filterType() === 'instant'"
+          (click)="filterType.set('instant')">
+          ইনস্ট্যান্ট কল
+        </button>
+      </div>
+
+      <!-- Sort Selection -->
+      <div class="sort-wrapper">
+        <label for="sortBySelect" class="sort-label">সাজান:</label>
+        <select id="sortBySelect" class="sort-select" [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)">
+          <option value="distance">সবচেয়ে কাছে (দূরত্ব)</option>
+          <option value="price">সর্বোচ্চ বাজেট</option>
+          <option value="newest">সর্বশেষ পোস্ট করা</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Search Input -->
+    <div class="search-bar-wrap">
+      <i class="pi pi-search search-icon"></i>
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="কাজের বিবরণ বা এলাকা দিয়ে খুঁজুন (যেমন: সাভার বাজার, সিঙ্ক পাইপ)..." 
+        [ngModel]="searchQuery()" 
+        (ngModelChange)="searchQuery.set($event)" />
+      @if (searchQuery()) {
+        <button type="button" class="clear-search-btn" (click)="searchQuery.set('')">
+          <i class="pi pi-times"></i>
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Available Jobs Cards List -->
+  @if (availableJobs().length > 0) {
+    <div class="jobs-grid">
+      @for (job of availableJobs(); track job.id) {
+        <div class="card job-card">
+          <!-- Card Top Meta -->
+          <div class="job-card-header">
+            <div class="badges-row">
+              <span class="category-badge">
+                <i class="pi pi-wrench"></i> {{ job.categoryName }}
+              </span>
+              <span class="job-type-pill" [class.bid-pill]="job.type === 'board_bid'">
+                @switch (job.type) {
+                  @case ('board_fixed') { ফিক্সড রেট }
+                  @case ('board_bid') { বিডিং জব }
+                  @case ('instant') { জরুরি কল }
+                  @default { উন্মুক্ত জব }
+                }
+              </span>
+            </div>
+
+            <div class="distance-chip" title="আপনার লোকেশন থেকে দূরত্ব">
+              <i class="pi pi-compass"></i>
+              <span>{{ job.distanceKm | bnNumber }} কিমি দূরে</span>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <p class="job-desc">
+            "{{ job.description }}"
+          </p>
+
+          <!-- Customer & Address Info -->
+          <div class="job-location-info">
+            <div class="info-line">
+              <i class="pi pi-map-marker icon-red"></i>
+              <span class="location-text">{{ job.location.address }}</span>
+            </div>
+            <div class="info-line">
+              <i class="pi pi-user icon-user"></i>
+              <span class="customer-info">{{ job.customerName }} • ⭐ {{ (job.customerRating || 4.8) | bnNumber }}</span>
+              <span class="time-stamp">{{ job.timeline.createdAt | timeAgo }}</span>
+            </div>
+          </div>
+
+          <!-- Attached Photos Preview (if any) -->
+          @if (job.photos.length > 0) {
+            <div class="card-photos-row">
+              @for (photo of job.photos; track photo) {
+                <img [src]="photo" alt="Job issue" class="photo-thumb" />
+              }
+            </div>
+          }
+
+          <!-- Price & Grab Action Footer -->
+          <div class="job-card-footer">
+            <div class="price-box">
+              <span class="price-label">আনুমানিক মজুরি:</span>
+              <span class="price-value">{{ job.estimatedPrice | taka }}</span>
+            </div>
+
+            <div class="footer-btn-group" style="display: flex; gap: 8px;">
+              <button type="button" class="btn-bid-job" (click)="openBidModal(job)" style="background: none; border: 1.5px solid var(--accent-color); color: var(--accent-color); padding: 8px 12px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px;">
+                <i class="pi pi-pencil"></i> কোটেশন
+              </button>
+              <button type="button" class="btn-grab-job" (click)="promptGrab(job)">
+                <i class="pi pi-bolt"></i>
+                <span>কাজটি নিন (Grab)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <!-- Empty State -->
+    <div class="card empty-board-card">
+      <i class="pi pi-briefcase empty-icon"></i>
+      <h3>এই মুহূর্তে কোনো উন্মুক্ত কাজ নেই</h3>
+      <p>আপনার নির্বাচিত ক্যাটাগরি বা এলাকায় নতুন কোনো কাজ এখনো আসেনি। কাস্টমার নতুন রিকোয়েস্ট পাঠালে তা এখানে স্বয়ংক্রিয়ভাবে ভেসে উঠবে।</p>
+      <div class="empty-actions">
+        <button type="button" class="btn-primary" (click)="seedDemoJob()">
+          <i class="pi pi-plus-circle"></i>
+          <span>একটি ডেমো টেস্ট কাজ যোগ করুন</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- CONFIRM GRAB MODAL DIALOG -->
+  @if (selectedJobForGrab(); as jobToGrab) {
+    <div class="modal-backdrop">
+      <div class="modal-dialog grab-dialog">
+        <div class="modal-header">
+          <h3>কাজটি গ্রহণ নিশ্চিত করুন</h3>
+          <button type="button" class="btn-close" (click)="cancelGrab()">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="grab-job-summary">
+            <h4 class="grab-title">{{ jobToGrab.categoryName }}</h4>
+            <p class="grab-desc">"{{ jobToGrab.description }}"</p>
+            <div class="grab-meta">
+              <span>📍 {{ jobToGrab.location.address }} ({{ jobToGrab.distanceKm | bnNumber }} কিমি দূরে)</span>
+              <span>💰 পারিশ্রমিক: <strong>{{ jobToGrab.estimatedPrice | taka }}</strong></span>
+            </div>
+          </div>
+
+          <p class="grab-notice">
+            কাজটি গ্রহণ করলে এটি আপনার একটিভ জব লিস্টে চলে যাবে এবং আপনি সরাসরি কাস্টমারের ঠিকানায় রওনা হতে পারবেন।
+          </p>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" (click)="cancelGrab()">বাতিল</button>
+          <button type="button" class="btn-primary" (click)="confirmGrab()">
+            <i class="pi pi-check"></i>
+            <span>হ্যাঁ, কাজটি গ্রহণ করুন</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Bidding Modal (Item 33) -->
+  @if (showBidModal() && bidJob()) {
+    <div class="modal-backdrop" (click)="showBidModal.set(false)">
+      <div class="modal-card" (click)="$event.stopPropagation()" style="max-width: 440px;">
+        <div class="modal-header">
+          <h3>কোটেশন ও দরপ্রস্তাব জমা দিন (Submit Bid)</h3>
+          <button type="button" class="btn-close" (click)="showBidModal.set(false)">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+          <p style="margin: 0; font-size: 13.5px; color: var(--text-secondary);">
+            কাজের বিবরণ: <strong>{{ bidJob()!.description }}</strong>
+          </p>
+
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 13px; font-weight: 600;">আপনার প্রস্তাবিত মজুরি (টাকা)</label>
+            <input type="number" [(ngModel)]="bidAmount" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; font-weight: 700; font-family: inherit;" />
+            <span style="font-size: 11.5px; color: var(--text-secondary);">কাস্টমারের প্রাথমিক বাজেট ছিল: ৳{{ bidJob()!.estimatedPrice }}</span>
+          </div>
+
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 13px; font-weight: 600;">নোট / বার্তার বিবরণ</label>
+            <textarea [(ngModel)]="bidMessage" rows="3" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13.5px; font-family: inherit;" placeholder="কখন শুরু করতে পারবেন বা কাজের বিশেষ নোট লিখুন..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" (click)="showBidModal.set(false)">বাতিল</button>
+          <button type="button" class="btn-primary" (click)="submitBid()">
+            <i class="pi pi-send"></i> কোটেশন জমা দিন
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

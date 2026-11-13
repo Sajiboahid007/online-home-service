@@ -1,0 +1,238 @@
+<div class="login-page">
+  <!-- Top Demo Quick-Switch Bar -->
+  <header class="demo-quick-bar">
+    <div class="quick-bar-content">
+      <div class="quick-bar-title">
+        <span class="pulse-dot"></span>
+        <span class="title-text">⚡ ডেমো কুইক-লগইন (১-ক্লিক টেস্টিং):</span>
+      </div>
+      <div class="quick-switch-buttons">
+        @for (account of demoAccounts; track account.id) {
+          <button
+            type="button"
+            class="demo-chip-btn"
+            [class.active]="currentUser()?.uid === account.id || (account.id === 'superadmin' && currentUser()?.role === 'superadmin') || (account.id === 'admin' && currentUser()?.role === 'admin')"
+            (click)="quickLogin(account)"
+            [title]="account.desc"
+          >
+            <span class="chip-icon">{{ account.icon }}</span>
+            <span class="chip-label">{{ account.label }}</span>
+          </button>
+        }
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="login-container">
+    <div class="login-card">
+      <!-- Brand Header -->
+      <div class="brand-section">
+        <div class="logo-badge">
+          <span class="logo-icon">🛠️</span>
+          <span class="logo-spark">✨</span>
+        </div>
+        <h1 class="brand-title">কাজখোঁজ</h1>
+        <p class="brand-subtitle">বিশ্বস্ত হোম সার্ভিস প্ল্যাটফর্ম • সাভার ও ঢাকা</p>
+      </div>
+
+      <!-- Current Logged In Notification if any -->
+      @if (currentUser()) {
+        <div class="active-session-banner">
+          <div class="session-info">
+            <span class="avatar-ring">👤</span>
+            <div>
+              <p class="logged-text">বর্তমান সেশন: <strong>{{ currentUser()?.name }}</strong></p>
+              <span class="role-pill">{{ currentUser()?.role === 'superadmin' ? 'সুপার অ্যাডমিন' : currentUser()?.role === 'admin' ? 'সাভার অ্যাডমিন' : currentUser()?.role === 'worker' ? 'ওয়ার্কার' : 'কাস্টমার' }}</span>
+            </div>
+          </div>
+          <div class="session-actions">
+            @if (currentUser()?.role === 'superadmin' || currentUser()?.role === 'admin') {
+              <a routerLink="/admin" class="btn-go-dash">অ্যাডমিন প্যানেল ➔</a>
+            } @else if (currentUser()?.role === 'worker') {
+              <a routerLink="/worker" class="btn-go-dash">ওয়ার্কার ড্যাশবোর্ড ➔</a>
+            } @else {
+              <a routerLink="/customer" class="btn-go-dash">কাস্টমার পোর্টাল ➔</a>
+            }
+            <button type="button" class="btn-logout-link" (click)="authService.logout()">লগআউট</button>
+          </div>
+        </div>
+      }
+
+      <!-- Alert Messages -->
+      @if (errorMessage()) {
+        <div class="alert-box alert-error">
+          <span class="alert-icon">⚠️</span>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      @if (successMessage()) {
+        <div class="alert-box alert-success">
+          <span class="alert-icon">✓</span>
+          <span>{{ successMessage() }}</span>
+        </div>
+      }
+
+      <!-- STEP 1: Phone Input Screen -->
+      @if (!otpSent()) {
+        <div class="form-wrapper">
+          <h2 class="form-heading">মোবাইল নম্বর দিয়ে প্রবেশ করুন</h2>
+          <p class="form-subtext">আপনার ফোন নম্বরে একটি ৬-সংখ্যার ওটিপি কোড পাঠানো হবে।</p>
+
+          <form (ngSubmit)="sendOtp()" class="auth-form">
+            <div class="form-group">
+              <label for="phone-input" class="form-label">মোবাইল নম্বর</label>
+              <div class="phone-input-group">
+                <span class="country-prefix">
+                  <span class="bd-flag">🇧🇩</span> +৮৮০
+                </span>
+                <input
+                  id="phone-input"
+                  type="tel"
+                  class="form-control phone-control"
+                  placeholder="01XXXXXXXXX"
+                  [(ngModel)]="phone"
+                  name="phone"
+                  maxlength="11"
+                  autocomplete="tel"
+                  [disabled]="isLoading()"
+                  required
+                />
+              </div>
+              <span class="field-hint">উদাহরণ: ০১৭১২৩৪৫৬৭৮</span>
+            </div>
+
+            <button type="submit" class="btn-primary-action" [disabled]="isLoading()">
+              @if (isLoading()) {
+                <span class="spinner"></span>
+                <span>ওটিপি পাঠানো হচ্ছে...</span>
+              } @else {
+                <span>ওটিপি কোড পাঠান</span>
+                <span class="btn-arrow">➔</span>
+              }
+            </button>
+          </form>
+        </div>
+      }
+
+      <!-- STEP 2: OTP Verification Screen -->
+      @if (otpSent()) {
+        <div class="form-wrapper otp-wrapper">
+          <div class="otp-header">
+            <h2 class="form-heading">ওটিপি যাচাই করুন</h2>
+            <p class="form-subtext">
+              <strong>+৮৮০ {{ phone() }}</strong> নম্বরে প্রেরিত কোডটি লিখুন।
+            </p>
+            <button type="button" class="btn-change-phone" (click)="changePhone()">
+              ✏️ নম্বর পরিবর্তন করুন
+            </button>
+          </div>
+
+          <!-- Simulation Quick Auto-Fill Helper -->
+          <div class="simulation-banner">
+            <div class="sim-content">
+              <span class="sim-icon">💡</span>
+              <div class="sim-text">
+                <strong>টেস্ট ওটিপি কোড:</strong> ১২৩৪৫৬ (যেকোনো ৬ ডিজিট প্রযোজ্য)
+              </div>
+            </div>
+            <button type="button" class="btn-autofill" (click)="autoFillOtp()">
+              ⚡ অটো-ফিল ওটিপি
+            </button>
+          </div>
+
+          <form (ngSubmit)="verifyOtp()" class="auth-form">
+            <div class="form-group">
+              <label class="form-label">৬-ডিজিটের কোড লিখুন</label>
+              <div class="otp-inputs-grid" (paste)="onOtpPaste($event)">
+                @for (d of otpDigits(); track $index) {
+                  <input
+                    [id]="'otp-box-' + $index"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="1"
+                    class="otp-digit-box"
+                    [value]="d"
+                    (input)="onOtpInput($event, $index)"
+                    (keydown)="onOtpKeyDown($event, $index)"
+                    [disabled]="isLoading()"
+                  />
+                }
+              </div>
+            </div>
+
+            <!-- Resend Timer -->
+            <div class="resend-row">
+              @if (countdown() > 0) {
+                <span class="countdown-text">
+                  পুনরায় কোড পাঠানোর সময় বাকি: <strong>{{ countdown() | bnNumber }}</strong> সেকেন্ড
+                </span>
+              } @else {
+                <button type="button" class="btn-resend" (click)="resendOtp()" [disabled]="isLoading()">
+                  🔄 কোড পুনরায় পাঠান
+                </button>
+              }
+            </div>
+
+            <button type="submit" class="btn-primary-action" [disabled]="isLoading() || otpString().length < 6">
+              @if (isLoading()) {
+                <span class="spinner"></span>
+                <span>যাচাই করা হচ্ছে...</span>
+              } @else {
+                <span>যাচাই করুন ও প্রবেশ করুন</span>
+                <span class="btn-arrow">✓</span>
+              }
+            </button>
+          </form>
+        </div>
+      }
+
+      <!-- Divider -->
+      <div class="or-divider">
+        <span class="divider-line"></span>
+        <span class="divider-text">নতুন অ্যাকাউন্ট খুলুন</span>
+        <span class="divider-line"></span>
+      </div>
+
+      <!-- Registration Options Cards -->
+      <div class="registration-cards-grid">
+        <a routerLink="/register-customer" class="reg-card customer-card">
+          <div class="reg-icon-box">🏠</div>
+          <div class="reg-card-content">
+            <h3 class="reg-card-title">কাস্টমার রেজিস্ট্রেশন</h3>
+            <p class="reg-card-desc">বাসাবাড়ির কাজের জন্য বিশ্বস্ত কারিগর বুকিং করুন</p>
+          </div>
+          <span class="card-chevron">›</span>
+        </a>
+
+        <a routerLink="/register-worker" class="reg-card worker-card">
+          <div class="reg-icon-box worker-icon-box">🔧</div>
+          <div class="reg-card-content">
+            <h3 class="reg-card-title">ওয়ার্কার হিসেবে যুক্ত হন</h3>
+            <p class="reg-card-desc">কাজের স্বাধীনতা, সম্মানজনক আয় ও লাইভ জব রিকোয়েস্ট</p>
+          </div>
+          <span class="card-chevron">›</span>
+        </a>
+      </div>
+
+      <!-- Trust Badges Footer -->
+      <div class="trust-footer">
+        <div class="trust-item">
+          <span class="trust-icon">🛡️</span>
+          <span>NID ভেরিফাইড কারিগর</span>
+        </div>
+        <div class="trust-dot">•</div>
+        <div class="trust-item">
+          <span class="trust-icon">📍</span>
+          <span>লাইভ ট্র্যাকিং</span>
+        </div>
+        <div class="trust-dot">•</div>
+        <div class="trust-item">
+          <span class="trust-icon">⚡</span>
+          <span>জরুরি সার্ভিস</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

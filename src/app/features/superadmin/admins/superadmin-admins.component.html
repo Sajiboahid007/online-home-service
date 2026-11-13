@@ -1,0 +1,99 @@
+<div class="sa-admins-page">
+  <div class="page-header">
+    <div>
+      <h2>এডমিন ও জোন ম্যানেজার ব্যবস্থাপনা</h2>
+      <p class="subtitle">নতুন আঞ্চলিক প্রশাসক তৈরি, জোন এসাইন এবং নিয়ন্ত্রণ</p>
+    </div>
+    <button class="btn-primary" (click)="showCreateModal.set(true)">
+      <i class="pi pi-plus"></i> নতুন এডমিন তৈরি করুন
+    </button>
+  </div>
+
+  <div class="card table-card">
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>এডমিন নাম</th>
+            <th>মোবাইল ও ইমেইল</th>
+            <th>অ্যাসাইনকৃত জোন</th>
+            <th>স্ট্যাটাস</th>
+            <th>তৈরির তারিখ</th>
+            <th>অ্যাকশন</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (admin of admins(); track admin.uid) {
+            <tr>
+              <td>
+                <div class="admin-profile-row">
+                  <img [src]="admin.photoURL" alt="Admin" class="avatar" />
+                  <strong>{{ admin.name }}</strong>
+                </div>
+              </td>
+              <td>
+                <div class="contact-info">
+                  <span>{{ admin.phone }}</span>
+                  <small>{{ admin.email }}</small>
+                </div>
+              </td>
+              <td><span class="badge badge-info">{{ admin.areaId || 'সাভার বাজার জোন' }}</span></td>
+              <td>
+                <span class="badge" [ngClass]="admin.status === 'active' ? 'badge-success' : 'badge-danger'">
+                  {{ admin.status === 'active' ? 'সক্রিয়' : 'নিষ্ক্রিয়' }}
+                </span>
+              </td>
+              <td>{{ admin.createdAt | date:'mediumDate' }}</td>
+              <td>
+                <div class="action-btn-group">
+                  <button class="btn-sm" [ngClass]="admin.status === 'active' ? 'btn-danger' : 'btn-primary'" (click)="toggleAdminStatus(admin)">
+                    {{ admin.status === 'active' ? 'নিষ্ক্রিয় করুন' : 'সক্রিয় করুন' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Create Admin Modal -->
+  @if (showCreateModal()) {
+    <div class="modal-backdrop" (click)="showCreateModal.set(false)">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <h3>নতুন আঞ্চলিক এডমিন অ্যাকাউন্ট তৈরি</h3>
+
+        <div class="form-group my-2">
+          <label>এডমিনের নাম</label>
+          <input type="text" [(ngModel)]="newName" class="input-field" placeholder="উদাঃ শফিকুল ইসলাম" />
+        </div>
+
+        <div class="form-group my-2">
+          <label>মোবাইল নম্বর</label>
+          <input type="text" [(ngModel)]="newPhone" class="input-field" placeholder="০১৭১১XXXXXX" />
+        </div>
+
+        <div class="form-group my-2">
+          <label>ইমেইল অ্যাড্রেস</label>
+          <input type="email" [(ngModel)]="newEmail" class="input-field" placeholder="admin.savar@kajkhoj.com" />
+        </div>
+
+        <div class="form-group my-2">
+          <label>অপারেশনাল জোন নির্বাচন</label>
+          <select [(ngModel)]="newAreaId" class="input-field">
+            <option value="savar_bazar">সাভার বাজার ও বাসস্ট্যান্ড</option>
+            <option value="ashulia_epz">আশুলিয়া ও ডিইপিজেড</option>
+            <option value="hemayetpur">হেমায়েতপুর</option>
+            <option value="dhaka_mirpur">মিরপুর ঢাকা</option>
+          </select>
+        </div>
+
+        <div class="modal-actions mt-3">
+          <button class="btn-outline" (click)="showCreateModal.set(false)">বাতিল</button>
+          <button class="btn-primary" (click)="createAdmin()">তৈরি করুন</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,101 @@
+<div class="users-page">
+  <div class="page-header">
+    <div>
+      <h2>ইউজার ও ওয়ার্কার নিয়ন্ত্রণ তালিকা</h2>
+      <p>গ্রাহক ও কর্মীদের রেটিং, স্ট্যাটাস পর্যবেক্ষণ এবং ব্যাজ/মওকুফ/ব্যান ব্যবস্থা</p>
+    </div>
+    <button class="btn-outline-sm" (click)="exportCsv()">
+      <i class="pi pi-download"></i> CSV ডাউনলোড
+    </button>
+  </div>
+
+  <!-- Workers List Section -->
+  <div class="card section-box">
+    <h3>👷 নিবন্ধিত ওয়ার্কারবৃন্দ (সাভার জোন)</h3>
+    <div class="table-container">
+      <table class="kajkhoj-table">
+        <thead>
+          <tr>
+            <th>ওয়ার্কার</th>
+            <th>ক্যাটাগরি</th>
+            <th>রেটিং ও কাজ</th>
+            <th>ব্যাজসমূহ</th>
+            <th>কমিশন বকেয়া</th>
+            <th>স্ট্যাটাস</th>
+            <th>পদক্ষেপ</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (worker of workers(); track worker.uid) {
+            <tr>
+              <td>
+                <div class="worker-col">
+                  <img [src]="worker.photoURL" [alt]="worker.name" class="avatar" />
+                  <div>
+                    <strong>{{ worker.name }}</strong>
+                    <small>{{ worker.phone }}</small>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="cat-pill">{{ worker.categoryIds.join(', ') }}</span>
+              </td>
+              <td>
+                <div class="rate-col">
+                  <span>⭐ {{ worker.rating.toFixed(1) | bnNumber }} ({{ worker.totalJobs | bnNumber }} কাজ)</span>
+                  <small>সম্পন্নতা: {{ (worker.completionRate * 100).toFixed(0) | bnNumber }}%</small>
+                </div>
+              </td>
+              <td>
+                <div class="badge-toggles-row" style="display: flex; gap: 4px; flex-wrap: wrap;">
+                  <button type="button" class="btn-xs-badge" [class.active]="worker.verified" (click)="toggleBadge(worker, 'verified')" title="ভেরিফাইড টগল">
+                    <i class="pi pi-check-circle"></i>
+                  </button>
+                  <button type="button" class="btn-xs-badge" [class.active]="worker.trustedBadge" (click)="toggleBadge(worker, 'trustedBadge')" title="বিশ্বস্ত টগল">
+                    <i class="pi pi-shield"></i>
+                  </button>
+                  <button type="button" class="btn-xs-badge" [class.active]="worker.isPremium" (click)="toggleBadge(worker, 'isPremium')" title="প্রো টগল">
+                    <i class="pi pi-star-fill"></i>
+                  </button>
+                </div>
+              </td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <strong [class.text-danger]="worker.commissionDue >= 500">
+                    {{ worker.commissionDue | taka }}
+                  </strong>
+                  @if (worker.commissionDue > 0) {
+                    <button type="button" class="btn-xs-waive" (click)="waiveDue(worker)" title="কমিশন মওকুফ করুন" style="background: none; border: 1px solid var(--border-color); border-radius: 4px; font-size: 10px; padding: 2px 5px; cursor: pointer;">
+                      মওকুফ
+                    </button>
+                  }
+                </div>
+                @if (worker.commissionDue >= 500) {
+                  <span class="badge badge-danger">সীমা অতিক্রান্ত</span>
+                }
+              </td>
+              <td>
+                <span class="badge"
+                  [class.badge-success]="worker.verified && worker.verificationStatus === 'approved'"
+                  [class.badge-warning]="worker.verificationStatus === 'pending'"
+                  [class.badge-danger]="worker.verificationStatus === 'rejected'">
+                  {{ worker.verified ? 'অনুমোদিত' : worker.verificationStatus === 'pending' ? 'পেন্ডিং' : 'বাতিল' }}
+                </span>
+              </td>
+              <td>
+                <div class="actions">
+                  <button (click)="warnWorker(worker)" class="btn-action warn" title="সতর্কবার্তা পাঠান">
+                    <i class="pi pi-exclamation-circle"></i>
+                  </button>
+                  <button (click)="banWorker(worker)" class="btn-action ban" title="সাসপেন্ড / ব্যান করুন">
+                    <i class="pi pi-ban"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

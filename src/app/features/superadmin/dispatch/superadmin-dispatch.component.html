@@ -1,0 +1,135 @@
+<div class="sa-dispatch-page">
+  <div class="page-header">
+    <div>
+      <h2>কমিশন ও অটোমেটেড ডিসপ্যাচ সেটিংস (Dispatch & Commission)</h2>
+      <p class="subtitle">প্ল্যাটফর্ম কমিশন রেট, ডিউ লিমিট এবং এলগরিদম ডিসপ্যাচ প্যারামিটার কনফিগার করুন</p>
+    </div>
+    <button class="btn-primary" (click)="saveSettings()">
+      <i class="pi pi-check"></i> সেটিংস সংরক্ষণ করুন
+    </button>
+  </div>
+
+  <div class="grid-layout">
+    <!-- Commission & Wallet Due Limit Card -->
+    <div class="card">
+      <div class="card-header">
+        <i class="pi pi-wallet card-icon"></i>
+        <h3>প্ল্যাটফর্ম কমিশন ও ডিউ সীমা</h3>
+      </div>
+      <div class="card-body">
+        <div class="form-group mb-3">
+          <label>ডিফল্ট প্ল্যাটফর্ম কমিশন (%)</label>
+          <div class="input-unit-wrap">
+            <input type="number" [(ngModel)]="commissionPercent" class="input-field" min="0" max="100" step="1" />
+            <span class="unit-tag">%</span>
+          </div>
+          <small class="hint">প্রতিটি সফল সম্পন্ন কাজের বিল থেকে এই কমিশন নির্ধারিত হয় (ডিফল্ট ১৫%)।</small>
+        </div>
+
+        <div class="form-group mb-3">
+          <label>কর্মী ডিউ লিমিট (বকেয়া সীমা ৳)</label>
+          <div class="input-unit-wrap">
+            <input type="number" [(ngModel)]="dueLimit" class="input-field" min="100" step="50" />
+            <span class="unit-tag">৳</span>
+          </div>
+          <small class="hint">বকেয়া কমিশন এই সীমার বেশি হলে কর্মী নতুন কাজ গ্রহণ করতে পারবেন না (ডিফল্ট ৫০০ টাকা)।</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dispatch Radii and Timeout Card -->
+    <div class="card">
+      <div class="card-header">
+        <i class="pi pi-compass card-icon"></i>
+        <h3>ডিসপ্যাচ রেডিয়াস ও অফার টাইমার</h3>
+      </div>
+      <div class="card-body">
+        <div class="form-row mb-3">
+          <div class="form-group col">
+            <label>প্রাথমিক ব্যাসার্ধ (Initial Radius)</label>
+            <div class="input-unit-wrap">
+              <input type="number" [(ngModel)]="initialRadius" class="input-field" min="1" max="20" />
+              <span class="unit-tag">কিমি</span>
+            </div>
+            <small class="hint">প্রথম রাউন্ডের অনুসন্ধান পরিধি (ডিফল্ট ৩ কিমি)।</small>
+          </div>
+
+          <div class="form-group col">
+            <label>সর্বোচ্চ ব্যাসার্ধ (Max Radius)</label>
+            <div class="input-unit-wrap">
+              <input type="number" [(ngModel)]="maxRadius" class="input-field" min="1" max="50" />
+              <span class="unit-tag">কিমি</span>
+            </div>
+            <small class="hint">পরবর্তী রাউন্ডে প্রসারিত সর্বোচ্চ সীমা (ডিফল্ট ১০ কিমি)।</small>
+          </div>
+        </div>
+
+        <div class="form-row mb-3">
+          <div class="form-group col">
+            <label>অফার সময়সীমা (Timeout)</label>
+            <div class="input-unit-wrap">
+              <input type="number" [(ngModel)]="offerTimeoutSec" class="input-field" min="10" max="120" />
+              <span class="unit-tag">সেকেন্ড</span>
+            </div>
+            <small class="hint">কর্মী কাজ গ্রহণের জন্য কাউন্টডাউন সময় (ডিফল্ট ৩০ সেকেন্ড)।</small>
+          </div>
+
+          <div class="form-group col">
+            <label>ব্যাচ সাইজ (Workers per Batch)</label>
+            <div class="input-unit-wrap">
+              <input type="number" [(ngModel)]="batchSize" class="input-field" min="1" max="10" />
+              <span class="unit-tag">জন</span>
+            </div>
+            <small class="hint">একত্রে শীর্ষ কতজন কর্মীকে অফার পাঠানো হবে (ডিফল্ট ৩-৫ জন)।</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dispatch Scoring Weights -->
+    <div class="card full-width">
+      <div class="card-header">
+        <i class="pi pi-sliders-v card-icon"></i>
+        <h3>ডিসপ্যাচ স্কোরিং অ্যালগরিদম ওয়েট (Dispatch Scoring Weights)</h3>
+        <span class="badge" [class.badge-success]="totalWeight === 1" [class.badge-danger]="totalWeight !== 1">
+          মোট অনুপাত: {{ totalWeight.toFixed(2) }} (লক্ষ্য: 1.00)
+        </span>
+      </div>
+      <div class="card-body">
+        <p class="description">শীর্ষ কর্মীদের নির্বাচন করতে কাজখোঁজ স্কোরিং সূত্র: Distance×w₁ + Rating×w₂ + AcceptRate×w₃ + IdleTime×w₄ + PremiumBonus×w₅</p>
+
+        <div class="weights-grid">
+          <div class="weight-item">
+            <label>দূরত্ব ওয়েট (Distance Weight)</label>
+            <input type="number" [(ngModel)]="weightDistance" class="input-field" step="0.05" min="0" max="1" />
+            <span class="weight-bar" [style.width.%]="weightDistance * 100"></span>
+          </div>
+
+          <div class="weight-item">
+            <label>রেটিং ওয়েট (Rating Weight)</label>
+            <input type="number" [(ngModel)]="weightRating" class="input-field" step="0.05" min="0" max="1" />
+            <span class="weight-bar" [style.width.%]="weightRating * 100"></span>
+          </div>
+
+          <div class="weight-item">
+            <label>গ্রহণযোগ্যতার হার (Accept Rate)</label>
+            <input type="number" [(ngModel)]="weightAcceptRate" class="input-field" step="0.05" min="0" max="1" />
+            <span class="weight-bar" [style.width.%]="weightAcceptRate * 100"></span>
+          </div>
+
+          <div class="weight-item">
+            <label>অলস সময় (Idle Time Weight)</label>
+            <input type="number" [(ngModel)]="weightIdleTime" class="input-field" step="0.05" min="0" max="1" />
+            <span class="weight-bar" [style.width.%]="weightIdleTime * 100"></span>
+          </div>
+
+          <div class="weight-item">
+            <label>প্রিমিয়াম বোনাস (Premium Bonus)</label>
+            <input type="number" [(ngModel)]="weightPremiumBonus" class="input-field" step="0.05" min="0" max="1" />
+            <span class="weight-bar" [style.width.%]="weightPremiumBonus * 100"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

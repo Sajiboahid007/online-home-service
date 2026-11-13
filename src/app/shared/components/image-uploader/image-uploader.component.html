@@ -1,0 +1,24 @@
+<div class="uploader-container">
+  @if (previewUrl()) {
+    <div class="preview-box">
+      <img [src]="previewUrl()" alt="Uploaded preview" />
+      <button type="button" class="remove-btn" (click)="clearImage()" title="ছবি মুছুন">
+        <i class="pi pi-trash"></i>
+      </button>
+    </div>
+  } @else {
+    <div class="dropzone" (click)="fileInput.click()" [class.dragging]="isDragging()" (dragover)="onDragOver($event)" (dragleave)="isDragging.set(false)" (drop)="onDrop($event)">
+      <i class="pi pi-camera upload-icon"></i>
+      <span class="upload-label">{{ label }}</span>
+      <span class="upload-hint">সর্বোচ্চ ৫ মেগাবাইট (JPG, PNG, WebP)</span>
+      <input #fileInput type="file" [accept]="acceptedTypes" (change)="onFileSelected($event)" style="display: none" />
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="error-msg">
+      <i class="pi pi-exclamation-circle"></i>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+</div>

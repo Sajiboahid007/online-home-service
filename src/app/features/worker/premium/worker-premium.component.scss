@@ -1,0 +1,144 @@
+.worker-premium-page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 30px 16px 80px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  text-align: center;
+
+  .hero-banner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+
+    .pro-badge-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .tagline {
+      margin: 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+  }
+
+  .active-pro-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 2px solid #22c55e;
+    background: #f0fdf4;
+    padding: 20px;
+    text-align: left;
+
+    .pro-status {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+
+      i { font-size: 32px; }
+
+      h3 {
+        margin: 0;
+        font-size: 16px;
+        color: #15803d;
+      }
+      p {
+        margin: 2px 0 0 0;
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
+    }
+  }
+
+  .benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    text-align: left;
+
+    .benefit-card {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 20px;
+
+      .b-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        margin-bottom: 4px;
+
+        &.gold { background: #fef3c7; color: #d97706; }
+        &.blue { background: #e0f2fe; color: #0284c7; }
+        &.green { background: #dcfce7; color: #15803d; }
+        &.purple { background: #f3e8ff; color: #7e22ce; }
+      }
+
+      h4 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      p {
+        margin: 0;
+        font-size: 12.5px;
+        color: var(--text-secondary);
+        line-height: 1.5;
+      }
+    }
+  }
+
+  .pricing-cta-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 30px;
+    border: 2px solid var(--accent-color);
+    background: #fffaf5;
+
+    .plan-price {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+
+      .currency { font-size: 24px; font-weight: 700; color: var(--accent-color); }
+      .amt { font-size: 40px; font-weight: 900; color: var(--accent-color); }
+      .period { font-size: 14px; color: var(--text-secondary); }
+    }
+
+    .terms {
+      margin: 0;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+    }
+
+    .btn-lg {
+      padding: 14px 28px;
+      font-size: 15px;
+    }
+  }
+}

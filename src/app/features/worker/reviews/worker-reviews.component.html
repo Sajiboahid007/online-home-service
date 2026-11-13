@@ -1,0 +1,99 @@
+<div class="worker-reviews-page">
+  <div class="page-header">
+    <div>
+      <h2>গ্রাহক রিভিউ ও মূল্যায়ন (Worker Reviews)</h2>
+      <p class="subtitle">গ্রাহকদের দেওয়া মতামত এবং গ্রাহককে রেটিং প্রদান করুন</p>
+    </div>
+    <div class="overall-score">
+      <span class="score-stars">⭐ {{ worker()?.rating?.toFixed(1) || '৪.৮' }}</span>
+      <span class="score-count">({{ worker()?.ratingCount || 38 | bnNumber }} রিভিউ)</span>
+    </div>
+  </div>
+
+  <div class="reviews-tabs">
+    <button class="tab-btn" [class.active]="activeTab() === 'received'" (click)="activeTab.set('received')">প্রাপ্ত রিভিউসমূহ</button>
+    <button class="tab-btn" [class.active]="activeTab() === 'rate_customer'" (click)="activeTab.set('rate_customer')">গ্রাহককে রেটিং দিন (Two-Way)</button>
+  </div>
+
+  @if (activeTab() === 'received') {
+    <div class="reviews-list">
+      @if (receivedReviews().length === 0) {
+        <div class="card p-5 text-center text-secondary">
+          <i class="pi pi-star" style="font-size: 2rem; opacity: 0.5;"></i>
+          <p class="mt-2">এখনও কোনো রিভিউ যুক্ত হয়নি।</p>
+        </div>
+      } @else {
+        @for (rev of receivedReviews(); track rev.id) {
+          <div class="card review-card">
+            <div class="review-top">
+              <div class="reviewer-meta">
+                <h4>{{ rev.fromName }}</h4>
+                <span class="rev-date">{{ rev.createdAt | timeAgo }}</span>
+              </div>
+              <app-rating-stars [rating]="rev.stars"></app-rating-stars>
+            </div>
+
+            <p class="comment-text">{{ rev.comment }}</p>
+
+            @if (rev.tags && rev.tags.length > 0) {
+              <div class="tags-wrap">
+                @for (t of rev.tags; track t) {
+                  <span class="tag-pill">{{ t }}</span>
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  } @else {
+    <!-- Two-Way Customer Rating Section -->
+    <div class="card rate-customer-card">
+      <h3>গ্রাহককে মূল্যায়ন করুন</h3>
+      <p class="text-secondary" style="font-size: 13px;">সম্পন্নকৃত কাজের গ্রাহকদের মূল্যায়ন করে প্ল্যাটফর্মকে সুরক্ষিত রাখুন।</p>
+
+      <div class="form-group mb-3">
+        <label>কাজের অর্ডার নির্বাচন করুন</label>
+        <select [(ngModel)]="selectedCustomerJobId" class="input-field">
+          <option value="job_demo_101">#job_demo_101 — তানভীর আহমেদ (সিঙ্ক পাইপ মেরামত)</option>
+          <option value="job_demo_102">#job_demo_102 — সাব্বির হোসেন (বাথরুম ফ্ল্যাশ মেরামত)</option>
+        </select>
+      </div>
+
+      <div class="form-group mb-3">
+        <label>গ্রাহকের আচরণ ও পেমেন্ট রেটিং</label>
+        <div class="star-rating-select">
+          @for (s of [1, 2, 3, 4, 5]; track s) {
+            <i class="pi" [ngClass]="s <= customerRating() ? 'pi-star-fill text-warning' : 'pi-star'" (click)="customerRating.set(s)"></i>
+          }
+        </div>
+      </div>
+
+      <div class="form-group mb-3">
+        <label>মন্তব্য ও ফিডব্যাক</label>
+        <textarea [(ngModel)]="customerReviewComment" class="input-field" rows="3" placeholder="গ্রাহকের ব্যবহার ও পেমেন্ট কেমন ছিল লিখুন..."></textarea>
+      </div>
+
+      <div class="form-group mb-3">
+        <label>ট্যাগসমূহ নির্বাচন করুন</label>
+        <div class="tag-selector">
+          @for (tag of presetCustomerTags; track tag) {
+            <button type="button" class="tag-toggle" [class.selected]="selectedCustomerTags().includes(tag)" (click)="toggleCustomerTag(tag)">
+              + {{ tag }}
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (reviewSuccessMsg()) {
+        <div class="p-2 mb-2 text-success font-bold">
+          <i class="pi pi-check"></i> {{ reviewSuccessMsg() }}
+        </div>
+      }
+
+      <button type="button" class="btn-primary" (click)="submitCustomerReview()">
+        রেটিং জমা দিন
+      </button>
+    </div>
+  }
+</div>

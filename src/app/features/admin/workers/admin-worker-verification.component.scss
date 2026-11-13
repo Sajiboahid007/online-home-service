@@ -1,0 +1,195 @@
+.verification-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+  }
+}
+
+.empty-card {
+  text-align: center;
+  padding: 60px 20px;
+
+  .check-icon {
+    font-size: 48px;
+    color: #10b981;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-secondary);
+  }
+}
+
+.verification-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 20px;
+
+  .worker-kyc-card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .kyc-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+
+      .avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+
+        h3 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 600;
+        }
+
+        span {
+          font-size: 12px;
+          color: var(--text-secondary);
+        }
+      }
+    }
+
+    .kyc-details {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      .detail-group {
+        label {
+          font-size: 12px;
+          color: var(--text-secondary);
+          font-weight: 600;
+          display: block;
+          margin-bottom: 4px;
+        }
+
+        p {
+          margin: 0;
+          font-size: 13px;
+        }
+
+        .rate-text {
+          font-weight: 700;
+          color: var(--accent-color);
+        }
+
+        .skills-chips {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+
+          .skill-tag {
+            background-color: #f1f5f9;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+          }
+        }
+      }
+
+      .documents-preview {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 6px;
+
+        .doc-box {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+
+          .doc-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+          }
+
+          .doc-img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+          }
+        }
+      }
+    }
+
+    .kyc-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 8px;
+
+      button {
+        padding: 10px;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.2s;
+      }
+
+      .btn-approve {
+        background-color: #16a34a;
+        color: #ffffff;
+        border: none;
+
+        &:hover {
+          background-color: #15803d;
+        }
+      }
+
+      .btn-reject {
+        background-color: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+
+        &:hover {
+          background-color: #fee2e2;
+        }
+      }
+    }
+  }
+}

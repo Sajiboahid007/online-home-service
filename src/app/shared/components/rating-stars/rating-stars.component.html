@@ -1,0 +1,11 @@
+<div class="rating-stars-wrapper">
+  @for (star of stars; track $index) {
+    <i class="pi pi-star-fill star-icon" [class.active]="star <= rating" [class.half]="isHalf(star)"></i>
+  }
+  @if (showValue) {
+    <span class="rating-number">{{ rating.toFixed(1) | bnNumber }}</span>
+  }
+  @if (count !== undefined) {
+    <span class="rating-count">({{ count | bnNumber }})</span>
+  }
+</div>

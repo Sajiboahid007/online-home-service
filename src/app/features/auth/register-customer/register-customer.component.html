@@ -1,0 +1,218 @@
+<div class="register-page">
+  <main class="register-container">
+    <div class="register-card">
+      <!-- Card Header -->
+      <div class="card-header">
+        <a routerLink="/login" class="back-link">
+          <span class="back-arrow">←</span>
+          <span>লগইনে ফিরে যান</span>
+        </a>
+        <div class="header-content">
+          <div class="brand-badge">🏠</div>
+          <h1 class="page-title">কাস্টমার রেজিস্ট্রেশন</h1>
+          <p class="page-subtitle">দ্রুত ও সহজে বাসাবাড়ির বিশ্বস্ত সেবা গ্রহণ করুন</p>
+        </div>
+
+        <!-- 1-Click Demo Fill -->
+        <button type="button" class="btn-demo-fill" (click)="fillDemoData()">
+          ⚡ ডেমো তথ্য পূরণ করুন
+        </button>
+      </div>
+
+      <!-- Alerts -->
+      @if (errorMessage()) {
+        <div class="alert-box alert-error">
+          <span class="alert-icon">⚠️</span>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      @if (successMessage()) {
+        <div class="alert-box alert-success">
+          <span class="alert-icon">✓</span>
+          <span>{{ successMessage() }}</span>
+        </div>
+      }
+
+      <!-- Form -->
+      <form (ngSubmit)="register()" class="registration-form">
+        <!-- Personal Info Section -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <span class="section-icon">👤</span>
+            <span>ব্যক্তিগত তথ্য</span>
+          </h3>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="cust-name" class="form-label">আপনার পূর্ণ নাম <span class="required">*</span></label>
+              <input
+                id="cust-name"
+                type="text"
+                class="form-control"
+                placeholder="যেমন: হাসান মাহমুদ"
+                [(ngModel)]="name"
+                name="name"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="cust-phone" class="form-label">মোবাইল নম্বর <span class="required">*</span></label>
+              <div class="phone-input-wrapper">
+                <span class="prefix">+৮৮০</span>
+                <input
+                  id="cust-phone"
+                  type="tel"
+                  class="form-control phone-field"
+                  placeholder="01XXXXXXXXX"
+                  [(ngModel)]="phone"
+                  name="phone"
+                  maxlength="11"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="cust-email" class="form-label">ইমেইল ঠিকানা <span class="optional">(ঐচ্ছিক)</span></label>
+              <input
+                id="cust-email"
+                type="email"
+                class="form-control"
+                placeholder="যেমন: name@example.com"
+                [(ngModel)]="email"
+                name="email"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Address Section -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <span class="section-icon">📍</span>
+            <span>ঠিকানা ও অবস্থান</span>
+          </h3>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="cust-area" class="form-label">সার্ভিস জোন / এলাকা <span class="required">*</span></label>
+              <select id="cust-area" class="form-control" [(ngModel)]="areaId" name="areaId">
+                @for (area of areas(); track area.id) {
+                  <option [value]="area.id">{{ area.zoneName }} ({{ area.upazila }})</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="cust-address" class="form-label">বাসার সম্পূর্ণ ঠিকানা <span class="required">*</span></label>
+              <textarea
+                id="cust-address"
+                rows="2"
+                class="form-control textarea-control"
+                placeholder="বাড়ি নং, রোড নং, ফ্ল্যাট/বিল্ডিং নাম ও পরিচিত ল্যান্ডমার্ক"
+                [(ngModel)]="address"
+                name="address"
+                required
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Emergency Contact Section (SOS & Safety) -->
+        <div class="form-section emergency-section">
+          <div class="section-header-row">
+            <h3 class="section-title">
+              <span class="section-icon">🚨</span>
+              <span>জরুরি কন্টাক্ট নম্বর ও সম্পর্ক</span>
+            </h3>
+            <span class="badge-safety">সুরক্ষা ফিচার</span>
+          </div>
+          <p class="section-desc">
+            জরুরি কোনো মুহূর্তে বা নিরাপত্তার প্রয়োজনে কাজখোঁজ সাপোর্ট টিম এই নম্বরে যোগাযোগ করতে পারবে।
+          </p>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="em-name" class="form-label">জরুরি ব্যক্তির নাম <span class="required">*</span></label>
+              <input
+                id="em-name"
+                type="text"
+                class="form-control"
+                placeholder="যেমন: নাসরিন সুলতানা"
+                [(ngModel)]="emergencyName"
+                name="emergencyName"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="em-relation" class="form-label">আপনার সাথে সম্পর্ক <span class="required">*</span></label>
+              <select id="em-relation" class="form-control" [(ngModel)]="emergencyRelation" name="emergencyRelation">
+                @for (rel of relationOptions; track rel) {
+                  <option [value]="rel">{{ rel }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="em-phone" class="form-label">জরুরি ব্যক্তির মোবাইল নম্বর <span class="required">*</span></label>
+              <div class="phone-input-wrapper">
+                <span class="prefix">+৮৮০</span>
+                <input
+                  id="em-phone"
+                  type="tel"
+                  class="form-control phone-field"
+                  placeholder="01XXXXXXXXX"
+                  [(ngModel)]="emergencyPhone"
+                  name="emergencyPhone"
+                  maxlength="11"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Terms and Conditions Checkbox -->
+        <div class="terms-group">
+          <label class="terms-label">
+            <input
+              type="checkbox"
+              class="terms-checkbox"
+              [(ngModel)]="agreeTerms"
+              name="agreeTerms"
+            />
+            <span class="terms-text">
+              আমি কাজখোঁজ এর <strong>ব্যবহারের শর্তাবলী</strong> এবং <strong>গোপনীয়তা নীতি</strong> পড়েছি ও মেনে নিচ্ছি।
+            </span>
+          </label>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn-submit" [disabled]="isLoading()">
+          @if (isLoading()) {
+            <span class="spinner"></span>
+            <span>অ্যাকাউন্ট তৈরি হচ্ছে...</span>
+          } @else {
+            <span>নিবন্ধন সম্পন্ন করুন</span>
+            <span class="btn-arrow">➔</span>
+          }
+        </button>
+      </form>
+
+      <!-- Bottom Links -->
+      <div class="card-footer-links">
+        <p class="login-prompt">
+          ইতিমধ্যে একটি অ্যাকাউন্ট আছে?
+          <a routerLink="/login" class="link-bold">লগইন করুন</a>
+        </p>
+        <p class="worker-prompt">
+          আপনি কি একজন টেকনিশিয়ান?
+          <a routerLink="/register-worker" class="link-worker">ওয়ার্কার হিসেবে যুক্ত হন</a>
+        </p>
+      </div>
+    </div>
+  </main>
+</div>

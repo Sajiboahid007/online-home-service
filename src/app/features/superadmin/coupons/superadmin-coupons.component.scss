@@ -1,0 +1,187 @@
+.sa-coupons-page {
+  padding: 1.5rem;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+
+  h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem;
+    color: var(--text-color, #1e293b);
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+    color: var(--text-secondary, #64748b);
+    margin: 0;
+  }
+}
+
+.card {
+  background: var(--surface-card, #ffffff);
+  border-radius: 12px;
+  border: 1px solid var(--surface-border, #e2e8f0);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+
+  th {
+    padding: 0.9rem 1.25rem;
+    background: var(--surface-50, #f8fafc);
+    color: var(--text-secondary, #64748b);
+    font-weight: 600;
+    border-bottom: 1px solid var(--surface-border, #e2e8f0);
+  }
+
+  td {
+    padding: 0.9rem 1.25rem;
+    border-bottom: 1px solid var(--surface-border, #e2e8f0);
+    color: var(--text-color, #334155);
+    vertical-align: middle;
+  }
+}
+
+.coupon-code-badge {
+  display: inline-block;
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-family: monospace;
+  font-size: 0.95rem;
+  border: 1px dashed #93c5fd;
+}
+
+.type-tag {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #64748b);
+  margin-top: 0.2rem;
+}
+
+.usage-count {
+  font-weight: 600;
+  color: var(--text-color, #1e293b);
+}
+
+.status-btn {
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &.active {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #059669;
+  }
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-outline {
+  padding: 0.65rem 1.25rem;
+  background: transparent;
+  border: 1px solid var(--surface-border, #cbd5e1);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+
+  &.btn-outline {
+    background: transparent;
+    border: 1px solid var(--surface-border, #cbd5e1);
+  }
+
+  &.text-danger {
+    color: #dc2626;
+    &:hover { background: #fef2f2; }
+  }
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  background: var(--surface-card, #ffffff);
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 520px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  .col { flex: 1; }
+}
+
+.form-group {
+  label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: var(--text-color, #334155);
+  }
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--surface-border, #cbd5e1);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: var(--surface-ground, #ffffff);
+  color: var(--text-color, #1e293b);
+}

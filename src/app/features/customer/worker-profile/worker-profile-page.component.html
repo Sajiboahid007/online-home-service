@@ -1,0 +1,157 @@
+<div class="worker-profile-page" *ngIf="worker(); else loading">
+  <div class="top-nav">
+    <button class="back-btn" (click)="goBack()">
+      <i class="pi pi-arrow-left"></i> ফিরে যান
+    </button>
+    <div class="actions">
+      <button class="fav-btn" (click)="toggleFavorite()" [class.active]="isFav()">
+        <i class="pi" [ngClass]="isFav() ? 'pi-heart-fill' : 'pi-heart'"></i>
+        {{ isFav() ? 'প্রিয় তালিকাভুক্ত' : 'প্রিয়তে রাখুন' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="hero-card">
+    <div class="avatar-section">
+      <img [src]="worker()!.photoURL" [alt]="worker()!.name" class="profile-img" />
+      <span class="status-indicator" [class.online]="worker()!.isOnline" [class.busy]="worker()!.isBusy"></span>
+    </div>
+
+    <div class="details-section">
+      <div class="name-badge-row">
+        <h2>{{ worker()!.name }}</h2>
+        @if (worker()!.verified) {
+          <span class="badge badge-success"><i class="pi pi-check-circle"></i> ভেরিফাইড</span>
+        }
+        @if (worker()!.trustedBadge) {
+          <span class="badge badge-info"><i class="pi pi-shield"></i> বিশ্বস্ত কারিগর</span>
+        }
+        @if (worker()!.isPremium) {
+          <span class="badge badge-warning"><i class="pi pi-star-fill"></i> প্রো সদস্য</span>
+        }
+      </div>
+
+      <p class="phone-display">
+        <i class="pi pi-phone"></i>
+        <span>{{ worker()!.phoneMasked }}</span>
+      </p>
+
+      <div class="kpi-row">
+        <div class="kpi-item">
+          <app-rating-stars [rating]="worker()!.rating" [count]="worker()!.ratingCount"></app-rating-stars>
+        </div>
+        <div class="kpi-sep">•</div>
+        <div class="kpi-item">
+          <strong>{{ worker()!.totalJobs | bnNumber }}</strong> কাজ সম্পন্ন
+        </div>
+        <div class="kpi-sep">•</div>
+        <div class="kpi-item">
+          <strong>{{ ((worker()!.completionRate || 1) * 100).toFixed(0) | bnNumber }}%</strong> সফলতা হার
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <!-- Left Column: Bio, Skills, Work Area -->
+    <div class="main-column">
+      <div class="card bio-card">
+        <h3>অভিজ্ঞতা ও কর্মবিবরণ</h3>
+        <p class="bio-text">{{ worker()!.bio || 'অভিজ্ঞ কারিগর, দীর্ঘদিনের বিশ্বস্ত সেবা প্রদান করে আসছেন।' }}</p>
+
+        <h4 class="mt-3">দক্ষতাসমূহ</h4>
+        <div class="skills-chips">
+          @for (skill of worker()!.skills; track skill) {
+            <span class="skill-chip"><i class="pi pi-check"></i> {{ skill }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="card portfolio-card">
+        <h3>পোর্টফোলিও ও পূর্ববর্তী কাজের ছবি</h3>
+        @if (worker()!.portfolio && worker()!.portfolio.length > 0) {
+          <div class="portfolio-grid">
+            @for (img of worker()!.portfolio; track img) {
+              <div class="portfolio-item">
+                <img [src]="img" alt="Work portfolio" />
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="default-portfolio">
+            <div class="portfolio-item"><img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500" alt="Work 1" /></div>
+            <div class="portfolio-item"><img src="https://images.unsplash.com/photo-1504148455328-c376907d081c?w=500" alt="Work 2" /></div>
+            <div class="portfolio-item"><img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500" alt="Work 3" /></div>
+          </div>
+        }
+      </div>
+
+      <div class="card reviews-card">
+        <h3>গ্রাহক রিভিউ ও মতামত ({{ workerReviews().length | bnNumber }})</h3>
+        @if (workerReviews().length === 0) {
+          <p class="text-secondary">এখনও কোনো রিভিউ যুক্ত হয়নি।</p>
+        } @else {
+          <div class="reviews-list">
+            @for (rev of workerReviews(); track rev.id) {
+              <div class="review-item">
+                <div class="rev-header">
+                  <strong>{{ rev.fromName }}</strong>
+                  <app-rating-stars [rating]="rev.stars"></app-rating-stars>
+                </div>
+                <p class="rev-comment">{{ rev.comment }}</p>
+                @if (rev.tags && rev.tags.length > 0) {
+                  <div class="rev-tags">
+                    @for (t of rev.tags; track t) {
+                      <span class="tag-pill">{{ t }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Right Column: Booking Card & Work Area -->
+    <div class="side-column">
+      <div class="card booking-action-card">
+        <div class="price-header">
+          <span class="price-title">সার্ভিস ফি</span>
+          <div class="price-val">
+            <span class="amount">{{ worker()!.rate | taka }}</span>
+            <span class="unit">/ {{ worker()!.rateUnit === 'hour' ? 'ঘণ্টা' : worker()!.rateUnit === 'day' ? 'দিন' : 'কাজ' }}</span>
+          </div>
+        </div>
+
+        <div class="specs-list">
+          <div class="spec-row">
+            <span><i class="pi pi-compass text-teal"></i> কভারেজ এরিয়া</span>
+            <strong>{{ worker()!.serviceRadiusKm | bnNumber }} কিমি</strong>
+          </div>
+          <div class="spec-row">
+            <span><i class="pi pi-briefcase text-teal"></i> অভিজ্ঞতা</span>
+            <strong>{{ worker()!.experienceYears | bnNumber }} বছর</strong>
+          </div>
+          <div class="spec-row">
+            <span><i class="pi pi-map-marker text-teal"></i> বর্তমান অবস্থান</span>
+            <strong>{{ worker()!.homeLocation.address || 'সাভার বাজার' }}</strong>
+          </div>
+        </div>
+
+        <div class="direct-book-box">
+          <button class="btn-primary w-100 py-3" (click)="openDirectBooking()">
+            <i class="pi pi-bolt"></i> সরাসরি বুক করুন
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="loading-wrap">
+    <app-skeleton-loader height="200px"></app-skeleton-loader>
+    <app-skeleton-loader height="300px"></app-skeleton-loader>
+  </div>
+</ng-template>

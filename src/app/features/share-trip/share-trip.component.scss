@@ -1,0 +1,215 @@
+.share-trip-container {
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--bg-page);
+  display: flex;
+  flex-direction: column;
+
+  .top-brand-bar {
+    padding: 14px 20px;
+    background: var(--bg-surface);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .brand-name {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--primary-color);
+      }
+    }
+
+    .live-pill {
+      background: #fee2e2;
+      color: #b91c1c;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      .pulse-dot {
+        width: 8px;
+        height: 8px;
+        background: #ef4444;
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+      }
+    }
+  }
+
+  .tracking-map-wrap {
+    position: relative;
+    height: 380px;
+    width: 100%;
+
+    .live-map {
+      width: 100%;
+      height: 100%;
+    }
+
+    .floating-eta-card {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-color);
+
+      .eta-left {
+        display: flex;
+        flex-direction: column;
+
+        .eta-label {
+          font-size: 11px;
+          color: var(--text-secondary);
+        }
+
+        .eta-time {
+          font-size: 20px;
+          font-weight: 800;
+          color: var(--primary-color);
+        }
+      }
+    }
+  }
+
+  .trip-details-card {
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-color);
+    flex: 1;
+
+    .worker-profile-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+
+      .avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--primary-color);
+      }
+
+      .worker-meta {
+        flex: 1;
+
+        h3 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 700;
+        }
+
+        .category-text {
+          margin: 2px 0 0 0;
+          font-size: 13px;
+          color: var(--text-secondary);
+        }
+
+        .rating-badge {
+          font-size: 11.5px;
+          color: #d97706;
+          font-weight: 600;
+        }
+      }
+
+      .call-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: #22c55e;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-size: 18px;
+        box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);
+      }
+    }
+
+    .trip-destination {
+      display: flex;
+      gap: 10px;
+      padding: 12px;
+      background: var(--bg-page);
+      border-radius: var(--radius-md);
+
+      i {
+        font-size: 18px;
+        margin-top: 2px;
+      }
+
+      .label {
+        font-size: 11px;
+        color: var(--text-secondary);
+      }
+
+      .address {
+        margin: 2px 0 0 0;
+        font-size: 13px;
+        font-weight: 600;
+      }
+    }
+
+    .emergency-safety-box {
+      display: flex;
+      gap: 12px;
+      padding: 14px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: var(--radius-md);
+
+      .safety-icon {
+        color: #2563eb;
+        font-size: 20px;
+      }
+
+      .safety-content {
+        strong {
+          font-size: 13px;
+          color: #1e40af;
+          display: block;
+        }
+
+        p {
+          margin: 4px 0 0 0;
+          font-size: 12px;
+          color: #3b82f6;
+
+          a {
+            color: #1d4ed8;
+            font-weight: 700;
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.9); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.6; }
+  100% { transform: scale(0.9); opacity: 1; }
+}

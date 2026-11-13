@@ -1,0 +1,254 @@
+<div class="admin-reports-page">
+  <!-- Top Title Header -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">জরুরি SOS ডেস্ক ও কমপ্লেইন ম্যানেজমেন্ট</h2>
+      <p class="page-subtitle">প্ল্যাটফর্ম ব্যবহারকারীদের জরুরি নিরাপত্তা অ্যালার্ট এবং বিরোধ/অভিযোগের সরাসরি পর্যালোচনা ও সমাধান</p>
+    </div>
+
+    @if (activeSOSCount() > 0) {
+      <div class="sos-alarm-pill">
+        <span class="siren-pulse">🚨</span>
+        <span>{{ activeSOSCount() | bnNumber }} টি সক্রিয় জরুরি SOS সতর্কতা</span>
+      </div>
+    }
+  </div>
+
+  <!-- Live SOS Alerts Section -->
+  <section class="sos-section card mb-4">
+    <div class="section-title-row">
+      <div class="st-left">
+        <span class="st-icon">🚨</span>
+        <h3 class="st-title">সক্রিয় জরুরি SOS অ্যালার্ট ফিড</h3>
+      </div>
+      <span class="badge badge-danger">রিয়েল-টাইম রেসপন্স ডেস্ক</span>
+    </div>
+
+    @if (sosAlerts().length === 0) {
+      <div class="empty-sos">
+        <span class="es-icon">🛡️</span>
+        <p>এই মুহূর্তে কোনো জরুরি SOS সংকেত নেই। প্ল্যাটফর্ম নিরাপদ রয়েছে।</p>
+      </div>
+    } @else {
+      <div class="sos-cards-grid">
+        @for (sos of sosAlerts(); track sos.id) {
+          <div class="sos-alert-card" [class.active-alarm]="sos.status === 'active'" [class.resolved-alarm]="sos.status === 'resolved'">
+            <div class="sac-header">
+              <div class="sac-user">
+                <span class="sac-siren">{{ sos.status === 'active' ? '🚨' : '✅' }}</span>
+                <div>
+                  <h4 class="sac-name">{{ sos.userName }}</h4>
+                  <span class="sac-time">{{ sos.createdAt | timeAgo }}</span>
+                </div>
+              </div>
+              <span class="badge" [class.badge-danger]="sos.status === 'active'" [class.badge-success]="sos.status === 'resolved'">
+                {{ sos.status === 'active' ? 'অবিলম্বে পদক্ষেপ নিন' : 'নিষ্পত্তি সম্পন্ন' }}
+              </span>
+            </div>
+
+            <div class="sac-body">
+              <div class="meta-item">
+                <span class="mi-lbl">মোবাইল নম্বর:</span>
+                <a [href]="'tel:' + sos.userPhone" class="phone-link">📞 {{ sos.userPhone }}</a>
+              </div>
+              <div class="meta-item">
+                <span class="mi-lbl">লোকেশন ঠিকানা:</span>
+                <span class="mi-val">📍 {{ sos.location.address }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="mi-lbl">GPS কোঅর্ডিনেট:</span>
+                <span class="mi-val">{{ sos.location.lat.toFixed(4) }}, {{ sos.location.lng.toFixed(4) }}</span>
+              </div>
+
+              @if (sos.resolutionNote) {
+                <div class="resolution-box">
+                  <span class="rb-title">সমাধান রিপোর্ট:</span>
+                  <p class="rb-text">{{ sos.resolutionNote }}</p>
+                </div>
+              }
+            </div>
+
+            <div class="sac-footer">
+              <a [href]="'https://www.google.com/maps?q=' + sos.location.lat + ',' + sos.location.lng" target="_blank" class="btn-map-link">
+                <span>ম্যাপে অবস্থান দেখুন 🗺️</span>
+              </a>
+
+              @if (sos.status === 'active') {
+                <button type="button" class="btn-resolve-sos" (click)="openResolveSOS(sos)">
+                  <span>সমাধান করুন ও বন্ধ করুন</span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- Complaints & Dispute Management Section -->
+  <section class="disputes-section card">
+    <div class="section-title-row">
+      <div class="st-left">
+        <span class="st-icon">⚖️</span>
+        <h3 class="st-title">অভিযোগ ও বিরোধ নিষ্পত্তি (Disputes)</h3>
+      </div>
+
+      <!-- Status Filters -->
+      <div class="filter-tabs">
+        <button type="button" class="ft-btn" [class.active]="activeFilter() === 'all'" (click)="setFilter('all')">
+          সব ({{ reports().length | bnNumber }})
+        </button>
+        <button type="button" class="ft-btn" [class.active]="activeFilter() === 'open'" (click)="setFilter('open')">
+          উন্মুক্ত
+        </button>
+        <button type="button" class="ft-btn" [class.active]="activeFilter() === 'investigating'" (click)="setFilter('investigating')">
+          তদন্তাধীন
+        </button>
+        <button type="button" class="ft-btn" [class.active]="activeFilter() === 'resolved'" (click)="setFilter('resolved')">
+          নিষ্পত্তি
+        </button>
+      </div>
+    </div>
+
+    <!-- Reports Table -->
+    <div class="table-responsive">
+      <table class="reports-table">
+        <thead>
+          <tr>
+            <th>আইডি ও তারিখ</th>
+            <th>অভিযোগকারী</th>
+            <th>অভিযুক্ত কর্মী</th>
+            <th>সমস্যার বিষয়</th>
+            <th>তীব্রতা</th>
+            <th>স্ট্যাটাস</th>
+            <th>কার্যক্রম</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredReports().length === 0) {
+            <tr>
+              <td colspan="7" class="empty-row">এই ফিল্টারে কোনো অভিযোগ পাওয়া যায়নি।</td>
+            </tr>
+          }
+
+          @for (r of filteredReports(); track r.id) {
+            <tr>
+              <td>
+                <span class="rep-id">#{{ r.id }}</span>
+                <span class="rep-date">{{ r.createdAt | timeAgo }}</span>
+              </td>
+              <td>
+                <strong>{{ r.reporterName }}</strong>
+              </td>
+              <td>
+                <span class="against-name">🔧 {{ r.againstName }}</span>
+              </td>
+              <td>
+                <span class="type-pill">{{ getTypeText(r.type) }}</span>
+              </td>
+              <td>
+                <span class="severity-tag" [class]="r.severity">
+                  {{ r.severity === 'high' ? 'জরুরি' : r.severity === 'medium' ? 'মাঝারি' : 'সাধারণ' }}
+                </span>
+              </td>
+              <td>
+                <span class="status-pill" [class]="r.status">
+                  {{ r.status === 'open' ? 'উন্মুক্ত' : r.status === 'investigating' ? 'তদন্তাধীন' : r.status === 'resolved' ? 'নিষ্পত্তি' : 'বাতিল' }}
+                </span>
+              </td>
+              <td>
+                <button type="button" class="btn-review-report" (click)="openReportDetails(r)">
+                  পর্যালোচনা
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SOS Resolution Modal -->
+  @if (selectedSOS(); as s) {
+    <div class="modal-backdrop" (click)="closeSOSModal()">
+      <div class="modal-card admin-action-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">🚨 SOS অ্যালার্ট সমাধান</h3>
+          <button class="close-btn" (click)="closeSOSModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <p><strong>কলার:</strong> {{ s.userName }} ({{ s.userPhone }})</p>
+          <p><strong>লোকেশন:</strong> {{ s.location.address }}</p>
+
+          <div class="form-group mt-3">
+            <label class="form-label">গৃহীত পদক্ষেপ বা সমাধান নোট:</label>
+            <textarea class="form-textarea" rows="3" [(ngModel)]="sosNote"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" (click)="closeSOSModal()">বাতিল</button>
+          <button type="button" class="btn-success" (click)="confirmResolveSOS()">নিষ্পত্তি সম্পন্ন চিহ্নিত করুন</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Report Details & Action Modal -->
+  @if (selectedReport(); as r) {
+    <div class="modal-backdrop" (click)="closeReportDetails()">
+      <div class="modal-card report-details-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-icon">⚖️</span>
+            <h3 class="modal-title">অভিযোগ পর্যালোচনা — #{{ r.id }}</h3>
+          </div>
+          <button class="close-btn" (click)="closeReportDetails()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="dispute-info-grid">
+            <div class="dig-item">
+              <label>অভিযোগকারী কাস্টমার:</label>
+              <strong>{{ r.reporterName }}</strong>
+            </div>
+            <div class="dig-item">
+              <label>অভিযুক্ত সার্ভিস কর্মী:</label>
+              <strong>{{ r.againstName }}</strong>
+            </div>
+            <div class="dig-item">
+              <label>অভিযোগের ধরন:</label>
+              <span>{{ getTypeText(r.type) }}</span>
+            </div>
+            <div class="dig-item">
+              <label>বর্তমান অবস্থা:</label>
+              <span class="status-pill" [class]="r.status">{{ r.status }}</span>
+            </div>
+          </div>
+
+          <div class="desc-box mt-3">
+            <label>অভিযোগের বিস্তারিত বিবরণ:</label>
+            <p>"{{ r.description }}"</p>
+          </div>
+
+          <div class="form-group mt-3">
+            <label class="form-label">অ্যাডমিন সমাধান ও নির্দেশনামূলক মন্তব্য:</label>
+            <textarea 
+              class="form-textarea" 
+              rows="3" 
+              placeholder="তদন্তের ফলাফল, সতর্কবার্তা বা রিফান্ডের সিদ্ধান্ত লিখুন..."
+              [(ngModel)]="resolutionText"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" (click)="closeReportDetails()">বন্ধ করুন</button>
+          <button type="button" class="btn-investigate" (click)="updateStatus('investigating')">তদন্তাধীন রাখুন</button>
+          <button type="button" class="btn-resolve" (click)="updateStatus('resolved')">নিষ্পত্তি নিশ্চিত করুন</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

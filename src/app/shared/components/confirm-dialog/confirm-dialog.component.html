@@ -1,0 +1,22 @@
+@if (visible()) {
+  <div class="confirm-backdrop" (click)="onCancel()"></div>
+  <div class="confirm-modal">
+    <div class="modal-header">
+      <div class="icon-circle" [ngClass]="type">
+        @if (type === 'danger') {
+          <i class="pi pi-exclamation-triangle"></i>
+        } @else {
+          <i class="pi pi-question-circle"></i>
+        }
+      </div>
+      <h3>{{ title }}</h3>
+    </div>
+    <div class="modal-body">
+      <p>{{ message }}</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-cancel" (click)="onCancel()">{{ cancelText }}</button>
+      <button type="button" [class]="'btn-confirm ' + type" (click)="onConfirm()">{{ confirmText }}</button>
+    </div>
+  </div>
+}

@@ -1,0 +1,45 @@
+<div class="pricing-page">
+  <div class="page-header">
+    <div>
+      <h2>প্রাইসিং ও কমিশন ম্যাট্রিক্স (এরিয়া × ক্যাটাগরি)</h2>
+      <p>প্ল্যাটফর্ম কমিশন হার, ভিজিট চার্জ এবং সর্বনিম্ন/সর্বোচ্চ দাম নির্ধারণ</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-container">
+      <table class="kajkhoj-table">
+        <thead>
+          <tr>
+            <th>অঞ্চল</th>
+            <th>ক্যাটাগরি</th>
+            <th>বেস প্রাইস</th>
+            <th>দাম সীমা (সর্বনিম্ন - সর্বোচ্চ)</th>
+            <th>ভিজিট চার্জ</th>
+            <th>প্ল্যাটফর্ম কমিশন</th>
+            <th>পদক্ষেপ</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (price of pricingList(); track price.id) {
+            <tr>
+              <td><strong>সাভার বাজার জোন</strong></td>
+              <td><span class="cat-pill">{{ price.categoryId }}</span></td>
+              <td><strong>{{ price.basePrice | taka }}</strong></td>
+              <td>{{ price.minPrice | taka }} - {{ price.maxPrice | taka }}</td>
+              <td>{{ price.visitCharge | taka }}</td>
+              <td>
+                <span class="badge badge-warning">{{ (price.commissionRate * 100).toFixed(0) }}% কমিশন</span>
+              </td>
+              <td>
+                <button (click)="editPricing(price)" class="btn-outline btn-sm">
+                  <i class="pi pi-pencil"></i> এডিট
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,421 @@
+<div class="dashboard-container">
+  <!-- Header with Greeting & Simulation Trigger -->
+  <header class="dashboard-header">
+    <div class="header-left">
+      <h1 class="welcome-title">
+        স্বাগতম, {{ currentWorker()?.name }}! 👋
+      </h1>
+      <p class="welcome-sub">
+        {{ currentWorker()?.skills?.[0] || 'প্লাম্বার ও ফিটিং টেকনিশিয়ান' }} • সাভার জোন
+      </p>
+    </div>
+
+    <div class="header-right">
+      <button 
+        type="button" 
+        class="btn-demo-trigger" 
+        (click)="simulateIncomingOffer()"
+        title="নতুন কাজের কল পরীক্ষা করুন">
+        <i class="pi pi-bell"></i>
+        <span>টেস্ট জব রিকোয়েস্ট কল</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Commission Warning Alert if Near or Exceeded ৳500 limit -->
+  @if ((currentWorker()?.commissionDue || 0) >= 400) {
+    <div class="commission-alert-banner" [class.alert-critical]="(currentWorker()?.commissionDue || 0) >= 500">
+      <div class="alert-icon">
+        <i class="pi pi-exclamation-triangle"></i>
+      </div>
+      <div class="alert-content">
+        <strong>বকেয়া কমিশনের সতর্কতা!</strong>
+        <p>
+          আপনার বর্তমান বকেয়া কমিশন <strong>{{ (currentWorker()?.commissionDue || 0) | taka }}</strong>।
+          @if ((currentWorker()?.commissionDue || 0) >= 500) {
+            সর্বোচ্চ সীমা (৳৫০০) অতিক্রম করায় নতুন কাজ পাওয়া সাময়িকভাবে বন্ধ আছে। অবিলম্বে বকেয়া পরিশোধ করুন।
+          } @else {
+            সীমা ৳৫০০ পৌঁছালে নতুন কাজ পাওয়া বন্ধ হবে। অনুগ্রহ করে বিকাশ বা নগদ দিয়ে পরিশোধ করুন।
+          }
+        </p>
+      </div>
+      <a routerLink="/worker/wallet" class="btn-alert-pay">বকেয়া পরিশোধ করুন</a>
+    </div>
+  }
+
+  <!-- Online / Offline Hero Control Card -->
+  <section class="online-status-card" [class.is-online]="currentWorker()?.isOnline">
+    <div class="status-card-inner">
+      <div class="status-info">
+        <div class="status-indicator-badge">
+          <span class="status-dot"></span>
+          <span class="status-text">
+            {{ currentWorker()?.isOnline ? 'আপনি বর্তমানে অনলাইন আছেন' : 'আপনি অফলাইনে আছেন' }}
+          </span>
+        </div>
+        <h2 class="status-headline">
+          @if (currentWorker()?.isOnline) {
+            নতুন কাজের কল পেতে প্রস্তুত 🟢
+          } @else {
+            বিশ্রাম নিচ্ছেন — কাজের নোটিফিকেশন বন্ধ ⚪
+          }
+        </h2>
+        <p class="status-description">
+          @if (currentWorker()?.isOnline) {
+            আপনার এলাকার কাস্টমাররা সার্ভিস রিকোয়েস্ট পাঠালে ৩০ সেকেন্ডের মধ্যে আপনার ফোনে অ্যালার্ট আসবে।
+          } @else {
+            কাজ শুরু করতে বা কাস্টমারদের ম্যাপে দৃশ্যমান হতে অনলাইন বাটনটি অন করুন।
+          }
+        </p>
+      </div>
+
+      <div class="status-action">
+        <button 
+          type="button" 
+          class="btn-toggle-main" 
+          (click)="toggleOnline()"
+          [class.btn-go-offline]="currentWorker()?.isOnline"
+          [class.btn-go-online]="!currentWorker()?.isOnline">
+          <i class="pi" [class.pi-power-off]="!currentWorker()?.isOnline" [class.pi-check]="currentWorker()?.isOnline"></i>
+          <span>{{ currentWorker()?.isOnline ? 'অফলাইনে যান' : 'এখনই অনলাইন হন' }}</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Active Job In-Progress Banner (If active job exists) -->
+  @if (activeJob(); as job) {
+    <section class="active-job-banner">
+      <div class="banner-badge">
+        <span class="pulse-dot"></span>
+        <span>চলমান কাজ</span>
+      </div>
+      <div class="banner-body">
+        <div class="job-quick-info">
+          <h3 class="job-category">{{ job.categoryName }}</h3>
+          <p class="job-address">
+            <i class="pi pi-map-marker"></i> {{ job.location.address }}
+          </p>
+          <div class="job-meta-row">
+            <span class="customer-tag">👤 কাস্টমার: {{ job.customerName }}</span>
+            <span class="status-pill">
+              @switch (job.status) {
+                @case ('accepted') { রওনা দেওয়ার অপেক্ষায় }
+                @case ('on_the_way') { কাস্টমারের ঠিকানায় রওনা দিয়েছেন }
+                @case ('arrived') { কাস্টমারের ঠিকানায় পৌঁছেছেন }
+                @case ('in_progress') { কাজ চলমান রয়েছে }
+                @default { একটিভ }
+              }
+            </span>
+          </div>
+        </div>
+        <div class="banner-cta">
+          <a [routerLink]="['/worker/active', job.id]" class="btn-resume-job">
+            <span>কাজের ধাপে যান</span>
+            <i class="pi pi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Live Open Work Requests (First-Come, First-Served Grab) -->
+  @if (openWorkRequests().length > 0) {
+    <section class="open-requests-section">
+      <div class="open-requests-header">
+        <div class="orh-title-wrap">
+          <span class="lightning-badge">⚡</span>
+          <div>
+            <h2 class="section-title">উন্মুক্ত কাজের রিকোয়েস্ট ({{ openWorkRequests().length | bnNumber }}টি নতুন চাহিদা)</h2>
+            <p class="section-sub">যে প্লাম্বার প্রথমে 'কাজটি নিন' চাপবেন, তিনিই সরাসরি কাজ পাবেন (First Grab)।</p>
+          </div>
+        </div>
+        <a routerLink="/worker/job-board" class="btn-all-board">জব বোর্ডে যান ➔</a>
+      </div>
+
+      <div class="open-requests-grid">
+        @for (req of openWorkRequests(); track req.id) {
+          <div class="open-request-card">
+            <div class="orc-top">
+              <span class="cat-pill">🔧 {{ req.categoryName }}</span>
+              <span class="price-tag">{{ req.estimatedPrice | taka }}</span>
+            </div>
+
+            <h3 class="orc-desc">"{{ req.description }}"</h3>
+
+            <div class="orc-meta">
+              <span class="meta-item"><i class="pi pi-map-marker"></i> {{ req.location.address }}</span>
+              <span class="meta-item"><i class="pi pi-user"></i> {{ req.customerName }}</span>
+              <span class="meta-item"><i class="pi pi-clock"></i> {{ req.timeline.createdAt | timeAgo }}</span>
+            </div>
+
+            <div class="orc-footer">
+              <span class="fcfs-note">⚡ যে আগে নিবেন তিনিই পাবেন</span>
+              <button type="button" class="btn-grab-now" (click)="quickGrab(req)">
+                <i class="pi pi-bolt"></i>
+                <span>কাজটি নিন (Grab)</span>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- KPI Cards Grid -->
+  <section class="kpi-grid">
+    <!-- Card 1: Today's Jobs -->
+    <div class="kpi-card card-jobs">
+      <div class="kpi-header">
+        <span class="kpi-title">আজকের কাজ</span>
+        <div class="kpi-icon-wrap icon-blue">
+          <i class="pi pi-check-circle"></i>
+        </div>
+      </div>
+      <div class="kpi-body">
+        <h3 class="kpi-value">{{ todayCompletedJobsCount() | bnNumber }} টি</h3>
+        <span class="kpi-trend trend-up">
+          <i class="pi pi-arrow-up"></i> সর্বমোট {{ (currentWorker()?.totalJobs || 0) | bnNumber }} টি সফল কাজ
+        </span>
+      </div>
+    </div>
+
+    <!-- Card 2: Today's Earnings -->
+    <div class="kpi-card card-earnings">
+      <div class="kpi-header">
+        <span class="kpi-title">আজকের মোট আয়</span>
+        <div class="kpi-icon-wrap icon-green">
+          <i class="pi pi-money-bill"></i>
+        </div>
+      </div>
+      <div class="kpi-body">
+        <h3 class="kpi-value value-green">{{ todayEarnings() | taka }}</h3>
+        <span class="kpi-trend">
+          ওয়ালেট ব্যালেন্স: {{ (currentWorker()?.walletBalance || 0) | taka }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Card 3: Acceptance Rate -->
+    <div class="kpi-card card-accept">
+      <div class="kpi-header">
+        <span class="kpi-title">গ্রহণযোগ্যতার হার</span>
+        <div class="kpi-icon-wrap icon-orange">
+          <i class="pi pi-chart-line"></i>
+        </div>
+      </div>
+      <div class="kpi-body">
+        <h3 class="kpi-value">{{ (currentWorker()?.acceptRate || 92) | bnNumber }}%</h3>
+        <span class="kpi-trend">
+          সম্পন্নতার হার: {{ (currentWorker()?.completionRate || 98) | bnNumber }}%
+        </span>
+      </div>
+    </div>
+
+    <!-- Card 4: Rating & Reviews -->
+    <div class="kpi-card card-rating">
+      <div class="kpi-header">
+        <span class="kpi-title">রেটিং ও রিভিউ</span>
+        <div class="kpi-icon-wrap icon-yellow">
+          <i class="pi pi-star-fill"></i>
+        </div>
+      </div>
+      <div class="kpi-body">
+        <h3 class="kpi-value value-star">⭐ {{ (currentWorker()?.rating || 4.8) | bnNumber }}</h3>
+        <span class="kpi-trend">
+          {{ (currentWorker()?.ratingCount || 15) | bnNumber }} টি গ্রাহক রিভিউ
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Action & Job Board Teaser Section -->
+  <section class="dashboard-section">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">সর্বশেষ সম্পন্ন কাজের তালিকা</h2>
+        <p class="section-sub">আপনার সম্পূর্ণ হওয়া পূর্ববর্তী কাজের বিবরণ</p>
+      </div>
+      <a routerLink="/worker/job-board" class="btn-outline">
+        <i class="pi pi-search"></i>
+        <span>খোলা কাজের বোর্ড দেখুন</span>
+      </a>
+    </div>
+
+    <!-- Recent Jobs Table / List -->
+    <div class="jobs-table-card">
+      @if (recentJobs().length > 0) {
+        <div class="table-responsive">
+          <table class="worker-table">
+            <thead>
+              <tr>
+                <th>কাজের বিবরণ</th>
+                <th>কাস্টমার</th>
+                <th>তারিখ</th>
+                <th>মূল্য / আয়</th>
+                <th>স্ট্যাটাস</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (job of recentJobs(); track job.id) {
+                <tr>
+                  <td>
+                    <div class="job-cell-desc">
+                      <strong>{{ job.categoryName }}</strong>
+                      <span class="job-address-snippet">{{ job.location.address }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="customer-cell">
+                      <span>{{ job.customerName }}</span>
+                      <span class="rating-mini">⭐ {{ (job.customerRating || 5.0) | bnNumber }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="time-text">{{ job.timeline.createdAt | timeAgo }}</span>
+                  </td>
+                  <td>
+                    <div class="price-cell">
+                      <strong class="text-green">{{ (job.workerEarning || job.finalPrice || job.estimatedPrice) | taka }}</strong>
+                      @if (job.commission) {
+                        <span class="commission-cut">কমিশন: {{ job.commission | taka }}</span>
+                      }
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge badge-success">
+                      <i class="pi pi-check"></i> সম্পন্ন
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="empty-jobs-state">
+          <i class="pi pi-inbox empty-icon"></i>
+          <h4>কোনো পূর্ববর্তী কাজ পাওয়া যায়নি</h4>
+          <p>অনলাইন থাকুন এবং কাস্টমারদের দ্রুত সেবা দিয়ে আয় শুরু করুন।</p>
+        </div>
+      }
+    </div>
+  </section>
+</div>
+
+<!-- INCOMING 30-SECOND COUNTDOWN JOB OFFER POPUP MODAL -->
+@if (incomingOffer(); as offer) {
+  <div class="offer-popup-backdrop">
+    <div class="offer-popup-card" role="dialog" aria-modal="true">
+      <!-- Popup Header -->
+      <div class="offer-header">
+        <div class="header-tag">
+          <span class="pulse-beacon"></span>
+          <span>নতুন কাজের রিকোয়েস্ট এসেছে!</span>
+        </div>
+        <button type="button" class="btn-close-popup" (click)="rejectOffer()" title="বন্ধ করুন">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <!-- Circular Countdown Timer -->
+      <div class="timer-section">
+        <div class="circular-timer-wrapper">
+          <svg class="timer-svg" viewBox="0 0 100 100">
+            <!-- Background circle -->
+            <circle class="timer-circle-bg" cx="50" cy="50" r="45"></circle>
+            <!-- Animated progress circle -->
+            <circle 
+              class="timer-circle-progress" 
+              cx="50" 
+              cy="50" 
+              r="45"
+              [style.strokeDashoffset]="calculateProgressDash()"
+              [class.timer-urgent]="remainingSeconds() <= 10">
+            </circle>
+          </svg>
+          <div class="timer-label">
+            <span class="seconds-num" [class.urgent]="remainingSeconds() <= 10">
+              {{ remainingSeconds() | bnNumber }}
+            </span>
+            <span class="seconds-unit">সেকেন্ড বাকি</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Job Details Card -->
+      <div class="offer-job-body">
+        <div class="offer-price-highlight">
+          <span class="price-title">আনুমানিক পারিশ্রমিক</span>
+          <span class="price-amount">{{ offer.job.estimatedPrice | taka }}</span>
+        </div>
+
+        <div class="job-category-badge">
+          <i class="pi pi-wrench"></i>
+          <span>{{ offer.job.categoryName }}</span>
+        </div>
+
+        <p class="offer-job-desc">
+          "{{ offer.job.description }}"
+        </p>
+
+        <!-- Customer & Location Details -->
+        <div class="offer-meta-box">
+          <div class="meta-item">
+            <i class="pi pi-user meta-icon"></i>
+            <div>
+              <span class="meta-label">কাস্টমার</span>
+              <strong>{{ offer.job.customerName }} (⭐ {{ (offer.job.customerRating || 4.9) | bnNumber }})</strong>
+            </div>
+          </div>
+
+          <div class="meta-item">
+            <i class="pi pi-map-marker meta-icon"></i>
+            <div>
+              <span class="meta-label">ঠিকানা</span>
+              <strong>{{ offer.job.location.address }}</strong>
+            </div>
+          </div>
+
+          <div class="meta-item">
+            <i class="pi pi-compass meta-icon"></i>
+            <div>
+              <span class="meta-label">দূরত্ব</span>
+              <strong>প্রায় ১.২ কিমি দূরে</strong>
+            </div>
+          </div>
+        </div>
+
+        @if (offer.job.photos.length > 0) {
+          <div class="job-photos-preview">
+            <span class="photos-title">কাজের ছবি:</span>
+            <div class="photos-grid">
+              @for (photo of offer.job.photos; track photo) {
+                <img [src]="photo" alt="Job preview" class="preview-img" />
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="offer-actions">
+        <button 
+          type="button" 
+          class="btn-reject" 
+          (click)="rejectOffer()">
+          <i class="pi pi-times-circle"></i>
+          <span>প্রত্যাখ্যান করুন</span>
+        </button>
+
+        <button 
+          type="button" 
+          class="btn-accept" 
+          (click)="acceptOffer()">
+          <i class="pi pi-check-circle"></i>
+          <span>কাজটি গ্রহণ করুন</span>
+        </button>
+      </div>
+    </div>
+  </div>
+}

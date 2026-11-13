@@ -1,0 +1,92 @@
+.sa-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  .page-header {
+    h2 { margin: 0; font-size: 20px; font-weight: 800; }
+    .subtitle { margin: 4px 0 0 0; font-size: 13px; color: var(--text-secondary); }
+  }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+
+    .kpi-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px;
+
+      .kpi-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        flex-shrink: 0;
+
+        &.teal { background: #ccfbf1; color: #0f766e; }
+        &.orange { background: #ffedd5; color: #ea580c; }
+        &.blue { background: #e0f2fe; color: #0284c7; }
+        &.purple { background: #f3e8ff; color: #7e22ce; }
+      }
+
+      .kpi-meta {
+        display: flex;
+        flex-direction: column;
+
+        .label { font-size: 11.5px; color: var(--text-secondary); }
+        .val { font-size: 20px; font-weight: 800; }
+        .trend { font-size: 11px; margin-top: 2px; }
+      }
+    }
+  }
+
+  .breakdown-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+
+    .bars-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+
+      .breakdown-item {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        .item-head {
+          display: flex;
+          justify-content: space-between;
+          font-size: 13px;
+        }
+
+        .item-track {
+          width: 100%;
+          height: 8px;
+          background: var(--bg-page);
+          border-radius: 4px;
+          overflow: hidden;
+
+          .item-fill {
+            height: 100%;
+            border-radius: 4px;
+
+            &.bg-teal { background: var(--primary-color); }
+            &.bg-orange { background: var(--accent-color); }
+          }
+        }
+      }
+    }
+  }
+}

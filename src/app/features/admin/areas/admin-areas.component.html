@@ -1,0 +1,93 @@
+<div class="admin-page-container">
+  <div class="page-header">
+    <div>
+      <h2>সার্ভিস জোন ও এরিয়া ব্যবস্থাপনা (Areas Module)</h2>
+      <p class="subtitle">অপারেশনাল জোনের পরিধি, সক্রিয়করণ ও ডিমান্ড সার্জ মাল্টিপ্লায়ার নিয়ন্ত্রণ</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-outline-sm" (click)="exportCsv()">
+        <i class="pi pi-download"></i> CSV ডাউনলোড
+      </button>
+      <button class="btn-primary-sm" (click)="showCreateModal.set(true)">
+        <i class="pi pi-plus"></i> নতুন এরিয়া যোগ করুন
+      </button>
+    </div>
+  </div>
+
+  <div class="card table-card">
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>জোনের নাম</th>
+            <th>উপজেলা ও জেলা</th>
+            <th>কেন্দ্রীয় স্থানাঙ্ক</th>
+            <th>ব্যাসার্ধ (কিমি)</th>
+            <th>সার্জ মাল্টিপ্লায়ার</th>
+            <th>স্ট্যাটাস</th>
+            <th>অ্যাকশন</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (area of areas(); track area.id) {
+            <tr>
+              <td><strong>{{ area.zoneName }}</strong></td>
+              <td>{{ area.upazila }}, {{ area.district }}</td>
+              <td><code>{{ area.center.lat.toFixed(4) }}, {{ area.center.lng.toFixed(4) }}</code></td>
+              <td>{{ area.radiusKm | bnNumber }} কিমি</td>
+              <td>
+                <div class="surge-box">
+                  <span class="surge-val" [class.high]="area.surgeMultiplier > 1.0">
+                    {{ area.surgeMultiplier }}x
+                  </span>
+                  <button class="btn-xs" (click)="adjustSurge(area)" title="সার্জ পরিবর্তন">
+                    <i class="pi pi-bolt"></i>
+                  </button>
+                </div>
+              </td>
+              <td>
+                <button class="status-toggle" [class.active]="area.isActive" (click)="toggleActive(area)">
+                  {{ area.isActive ? 'সক্রিয়' : 'নিষ্ক্রিয়' }}
+                </button>
+              </td>
+              <td>
+                <button class="btn-sm btn-outline text-danger" (click)="deleteArea(area.id)">
+                  মুছুন
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Create Area Modal -->
+  @if (showCreateModal()) {
+    <div class="modal-backdrop" (click)="showCreateModal.set(false)">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <h3>নতুন অপারেশনাল জোন তৈরি করুন</h3>
+        <div class="form-group my-2">
+          <label>জোনের নাম (বাংলা)</label>
+          <input type="text" [(ngModel)]="newZoneName" class="input-field" placeholder="উদাঃ জাহাঙ্গীরনগর বিশ্ববিদ্যালয় এলাকা" />
+        </div>
+        <div class="form-group my-2">
+          <label>উপজেলা</label>
+          <input type="text" [(ngModel)]="newUpazila" class="input-field" placeholder="সাভার" />
+        </div>
+        <div class="form-group my-2">
+          <label>কভারেজ ব্যাসার্ধ (কিমি)</label>
+          <input type="number" [(ngModel)]="newRadius" class="input-field" min="1" max="25" />
+        </div>
+        <div class="form-group my-2">
+          <label>প্রাথমিক সার্জ মাল্টিপ্লায়ার (উদাঃ ১.০)</label>
+          <input type="number" [(ngModel)]="newSurge" class="input-field" step="0.1" min="1.0" max="3.0" />
+        </div>
+        <div class="modal-actions mt-3">
+          <button class="btn-outline" (click)="showCreateModal.set(false)">বাতিল</button>
+          <button class="btn-primary" (click)="createArea()">তৈরি করুন</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,517 @@
+<div class="tracking-container">
+  @if (currentJob(); as job) {
+    <!-- Top Bar Navigation -->
+    <div class="tracking-top-nav">
+      <a routerLink="/customer/home" class="btn-back">
+        <span class="pi pi-arrow-left"></span>
+        <span>ম্যাপে ফিরে যান</span>
+      </a>
+
+      <div class="live-status-pill" [class.completed]="job.status === 'completed'" [class.cancelled]="job.status.includes('cancelled')">
+        <span class="pulse-indicator"></span>
+        <span class="status-name">{{ getStatusText(job.status) }}</span>
+      </div>
+
+      <a routerLink="/customer/bookings" class="all-bookings-link">
+        <span>সকল বুকিং</span>
+      </a>
+    </div>
+
+    <div class="tracking-content-grid">
+      <!-- Left Column: Status Timeline & OTP Security -->
+      <div class="timeline-column">
+        <!-- Interactive Simulation Control (Testing Helper) -->
+        <div class="simulation-banner">
+          <div class="sim-info">
+            <span class="sim-icon">🧪</span>
+            <div>
+              <span class="sim-title">লাইভ ডেমো সিমুলেটর</span>
+              <p class="sim-sub">ওয়ার্কারের অবস্থান ও কাজের ধাপ পরিবর্তন টেস্ট করুন</p>
+            </div>
+          </div>
+          <button type="button" class="btn-advance-step" (click)="advanceSimulationStep()" [disabled]="job.status === 'completed' || job.status.includes('cancelled')">
+            <span>ধাপ পরিবর্তন করুন ⏩</span>
+          </button>
+        </div>
+
+        <!-- 4-Digit Start OTP Card (Prominent Uber-style verification) -->
+        @if (job.status !== 'completed' && !job.status.includes('cancelled')) {
+          <div class="otp-card">
+            <div class="otp-header">
+              <div class="otp-icon-wrap">🔐</div>
+              <div class="otp-title-text">
+                <h3 class="otp-title">৪-সংখ্যার কাজ শুরুর ওটিপি (OTP)</h3>
+                <p class="otp-subtitle">এই OTP ওয়ার্কারকে বলুন কাজ শুরু করার জন্য</p>
+              </div>
+            </div>
+
+            <div class="otp-display-row">
+              @for (char of job.startOtp.split(''); track $index) {
+                <div class="otp-digit-box">{{ char | bnNumber }}</div>
+              }
+              <button type="button" class="btn-copy-otp" (click)="copyOtp(job.startOtp)" title="OTP কপি করুন">
+                <span class="pi" [class.pi-copy]="!copySuccess()" [class.pi-check]="copySuccess()"></span>
+                <span>{{ copySuccess() ? 'কপি হয়েছে!' : 'কপি' }}</span>
+              </button>
+            </div>
+
+            <div class="otp-security-note">
+              <span class="sec-icon">🛡️</span>
+              <span class="sec-text">কর্মী আপনার বাসায় পৌঁছানোর পর তার হাতে কাজ শুরুর অনুমতি হিসেবে এই কোডটি বলবেন। অন্য কাউকে এই কোড শেয়ার করবেন না।</span>
+            </div>
+          </div>
+        }
+
+        <!-- Job Status Timeline -->
+        <div class="timeline-card card">
+          <h3 class="card-heading">কাজের অগ্রগতি ট্র্যাকিং</h3>
+
+          <div class="steps-flow">
+            @for (step of timelineSteps; track step.key; let i = $index) {
+              <div class="step-item" 
+                   [class.completed]="i < currentStepIndex() || (i === currentStepIndex() && job.status === 'completed')"
+                   [class.active]="i === currentStepIndex() && job.status !== 'completed'"
+                   [class.upcoming]="i > currentStepIndex()">
+                
+                <div class="step-marker">
+                  <div class="marker-circle">
+                    @if (i < currentStepIndex() || (i === currentStepIndex() && job.status === 'completed')) {
+                      <span class="check-icon">✓</span>
+                    } @else {
+                      <span class="step-num">{{ i + 1 | bnNumber }}</span>
+                    }
+                  </div>
+                  @if (i < timelineSteps.length - 1) {
+                    <div class="connecting-line"></div>
+                  }
+                </div>
+
+                <div class="step-body">
+                  <div class="step-title-line">
+                    <span class="step-icon">{{ step.icon }}</span>
+                    <h4 class="step-title">{{ step.titleBn }}</h4>
+                    @if (i === currentStepIndex() && job.status !== 'completed') {
+                      <span class="current-badge">বর্তমান অবস্থা</span>
+                    }
+                  </div>
+                  <p class="step-desc">{{ step.descBn }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Worker Profile & Bill Breakdown -->
+      <div class="details-column">
+        <!-- Worker Contact Card -->
+        <div class="worker-live-card card">
+          <h3 class="card-heading">নিযুক্ত কর্মীর তথ্য</h3>
+
+          @if (job.workerId) {
+            <div class="worker-profile-row">
+              <div class="worker-avatar">
+                <img [src]="job.workerPhoto || 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=150&auto=format&fit=crop&q=80'" [alt]="job.workerName" />
+                <span class="avatar-verified-badge">✓</span>
+              </div>
+
+              <div class="worker-details">
+                <h4 class="worker-fullname">{{ job.workerName || 'রহিম প্লাম্বার' }}</h4>
+                <div class="worker-submeta">
+                  <span class="cat-pill">🔧 {{ job.categoryName }}</span>
+                  <span class="rating-txt">⭐ ৫.০ (১৮টি কাজ)</span>
+                </div>
+                <div class="worker-masked-phone">
+                  <span class="phone-icon">📞</span>
+                  <span class="phone-number">{{ (job.status !== 'searching' && job.status !== 'pending') ? (job.workerPhone || '01712345678') : (job.workerPhone || '01712345678' | maskPhone) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="worker-action-buttons">
+              <a [href]="'tel:' + (job.workerPhone || '01712345678')" class="btn-call-worker">
+                <span class="pi pi-phone"></span>
+                <span>সরাসরি কল দিন</span>
+              </a>
+              <button type="button" class="btn-chat-worker" (click)="openChat()">
+                <span class="pi pi-comments"></span>
+                <span>ইন-অ্যাপ চ্যাট</span>
+              </button>
+              <button type="button" class="btn-share-trip" (click)="openShare()">
+                <span class="pi pi-share-alt"></span>
+                <span>ট্রিপ শেয়ার</span>
+              </button>
+            </div>
+
+            <div class="worker-secondary-actions">
+              <button type="button" class="btn-report-dispute" (click)="openReport()">
+                <span class="pi pi-exclamation-triangle"></span>
+                <span>সমস্যা বা অভিযোগ রিপোর্ট করুন</span>
+              </button>
+              <button type="button" class="btn-safety-check" (click)="openSafetyModal()" style="margin-top: 8px; background: none; border: 1px solid var(--border-color); padding: 8px; border-radius: 8px; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px;">
+                <i class="pi pi-shield text-teal"></i>
+                <span>আপনি কি নিরাপদ আছেন? (Safety Check)</span>
+              </button>
+            </div>
+
+            <!-- In-App Price Renegotiation Alert (Item 21) -->
+            @if (job.renegotiationStatus === 'pending') {
+              <div class="card renegotiation-prompt-card my-3 p-3" style="border: 2px dashed #f97316; background: #fff7ed; border-radius: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                  <i class="pi pi-dollar" style="color: #ea580c; font-weight: bold;"></i>
+                  <h4 style="margin: 0; font-size: 14px;">মূল্য পুনর্নির্ধারণ প্রস্তাব</h4>
+                </div>
+                <p style="margin: 0 0 10px 0; font-size: 13px; color: #4b5563;">
+                  কারিগর কাজের নতুন মূল্য <strong>{{ job.renegotiatedPrice | taka }}</strong> প্রস্তাব করেছেন।
+                </p>
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="btn-primary" style="flex: 1; padding: 6px 12px; font-size: 13px;" (click)="respondRenegotiation(true)">অনুমোদন</button>
+                  <button type="button" class="btn-cancel" style="padding: 6px 12px; font-size: 13px; border: 1px solid #d1d5db; background: #fff; border-radius: 6px; cursor: pointer;" (click)="respondRenegotiation(false)">প্রত্যাখ্যান</button>
+                </div>
+              </div>
+            }
+
+            <!-- Material Cost Approval Alert (Item 22) -->
+            @if (job.materialApprovalStatus === 'pending') {
+              <div class="card material-cost-card my-3 p-3" style="border: 2px dashed #0f766e; background: #f0fdfa; border-radius: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                  <i class="pi pi-receipt" style="color: #0f766e; font-weight: bold;"></i>
+                  <h4 style="margin: 0; font-size: 14px;">মালামাল খরচের অনুমোদন</h4>
+                </div>
+                <p style="margin: 0 0 8px 0; font-size: 13px; color: #4b5563;">
+                  মালামাল বাবদ খরচ: <strong>{{ job.materialCost | taka }}</strong>
+                </p>
+                @if (job.materialReceiptPhoto) {
+                  <div style="margin-bottom: 8px;">
+                    <img [src]="job.materialReceiptPhoto" alt="Receipt" style="max-height: 100px; border-radius: 6px; border: 1px solid #e5e7eb;" />
+                  </div>
+                }
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="btn-primary" style="flex: 1; padding: 6px 12px; font-size: 13px;" (click)="respondMaterialCost(true)">অনুমোদন</button>
+                  <button type="button" class="btn-cancel" style="padding: 6px 12px; font-size: 13px; border: 1px solid #d1d5db; background: #fff; border-radius: 6px; cursor: pointer;" (click)="respondMaterialCost(false)">প্রত্যাখ্যান</button>
+                </div>
+              </div>
+            }
+
+            <!-- Completed Payment Button (Item 19) -->
+            @if (job.status === 'completed' || job.status === 'paid') {
+              <div class="payment-action-box my-3">
+                <a [routerLink]="['/customer/payment', job.id]" class="btn-primary w-100 py-3 text-center text-white" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 10px;">
+                  <i class="pi pi-credit-card"></i> বিল পরিশোধ ও ইনভয়েস দেখুন
+                </a>
+              </div>
+            }
+          } @else {
+            <div class="open-work-request-box">
+              <div class="radar-pulse-wrap">
+                <div class="pulse-ring"></div>
+                <div class="pulse-ring delay"></div>
+                <div class="center-icon">🔧</div>
+              </div>
+
+              <h4 class="owr-title">উন্মুক্ত কাজের রিকোয়েস্ট — প্লাম্বারের অপেক্ষায়...</h4>
+              <p class="owr-desc">
+                আপনার এলাকার ভেরিফায়েড প্লাম্বারদের কাছে নোটিফিকেশন পৌঁছে গেছে।
+                <strong>যে প্লাম্বার সবার প্রথমে কাজটি গ্রহণ (Grab) করবেন, তিনিই সেবা দিতে আসবেন।</strong>
+              </p>
+
+              <div class="owr-badge-row">
+                <span class="badge badge-warning">⚡ প্রথম গ্রহণকারী নিয়ম (FCFS Grab)</span>
+                <span class="badge badge-success">🟢 ২ জন প্লাম্বার সক্রিয়</span>
+              </div>
+
+              <!-- Live Demo Simulation Controls -->
+              <div class="simulator-grab-card">
+                <span class="sim-label">🧪 লাইভ টেস্ট: ডেমো প্লাম্বার দিয়ে কাজ গ্রহণ করান</span>
+                <div class="sim-buttons">
+                  <button type="button" class="btn-demo-grab" (click)="simulateGrab('worker_rahim_1')">
+                    <span>⚡ রহিম প্লাম্বারকে দিয়ে Grab করান</span>
+                  </button>
+                  <button type="button" class="btn-demo-grab alt" (click)="simulateGrab('worker_kalam_5')">
+                    <span>⚡ কালাম প্লাম্বারকে দিয়ে Grab করান</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Job & Billing Summary Card -->
+        <div class="bill-summary-card card">
+          <div class="bill-header">
+            <h3 class="card-heading">বিল ও সার্ভিসের বিবরণ</h3>
+            <span class="job-id-pill">আইডি: #{{ job.id }}</span>
+          </div>
+
+          <div class="bill-rows-list">
+            <div class="bill-row">
+              <span class="b-label">সার্ভিস ক্যাটাগরি:</span>
+              <span class="b-value"><strong>{{ job.categoryName }}</strong></span>
+            </div>
+
+            <div class="bill-row">
+              <span class="b-label">কাজের বিবরণ:</span>
+              <span class="b-value text-right">{{ job.description }}</span>
+            </div>
+
+            <div class="bill-row">
+              <span class="b-label">সার্ভিস লোকেশন:</span>
+              <span class="b-value text-right">{{ job.location.address || 'সাভার বাজার, সাভার, ঢাকা' }}</span>
+            </div>
+
+            <div class="bill-row">
+              <span class="b-label">অর্ডার সময়:</span>
+              <span class="b-value">{{ job.timeline.createdAt | timeAgo }}</span>
+            </div>
+
+            <div class="bill-divider"></div>
+
+            <div class="bill-row">
+              <span class="b-label">প্রাথমিক পরিদর্শন ও সার্ভিস ফি:</span>
+              <span class="b-value">{{ job.estimatedPrice | taka }}</span>
+            </div>
+
+            @if (job.materialCost) {
+              <div class="bill-row">
+                <span class="b-label">যন্ত্রাংশ খরচ:</span>
+                <span class="b-value">{{ job.materialCost | taka }}</span>
+              </div>
+            }
+
+            <div class="bill-row total-row">
+              <span class="b-label">সর্বমোট প্রদেয় বিল:</span>
+              <span class="b-value total-price">
+                {{ (job.finalPrice || job.estimatedPrice) | taka }}
+              </span>
+            </div>
+
+            <div class="bill-row payment-status-row">
+              <span class="b-label">পরিশোধের মাধ্যম:</span>
+              <div class="payment-badge-wrap">
+                <span class="badge" [class.badge-success]="job.paymentStatus === 'paid'" [class.badge-warning]="job.paymentStatus !== 'paid'">
+                  {{ job.paymentMethod === 'cash' ? '💵 ক্যাশ' : job.paymentMethod === 'bkash' ? '📱 বিকাশ' : 'অন্যান্য' }} 
+                  ({{ job.paymentStatus === 'paid' ? 'পরিশোধিত' : 'কাজ শেষে প্রদেয়' }})
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Action Buttons -->
+          <div class="tracking-actions-bar">
+            @if (job.status === 'completed') {
+              <a [routerLink]="['/customer/bookings']" class="btn-primary w-full">
+                <span>রিভিউ দিন ও সমাপ্ত করুন ⭐</span>
+              </a>
+            } @else if (!job.status.includes('cancelled')) {
+              <button type="button" class="btn-cancel-job" (click)="openCancelModal()">
+                <span>অর্ডার বাতিল করতে চান?</span>
+              </button>
+            } @else {
+              <div class="cancelled-banner">
+                <span>এই অর্ডারটি বাতিল করা হয়েছে।</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="no-job-state card">
+      <span class="no-job-icon">📋</span>
+      <h3>কোনো চলমান কাজের ট্র্যাকিং পাওয়া যায়নি</h3>
+      <p>আপনি বর্তমানে কোনো চলমান সার্ভিসের সাথে যুক্ত নেই। নতুন কর্মী ডাকতে নিচের বাটনে চাপুন।</p>
+      <div class="actions">
+        <a routerLink="/customer/home" class="btn-primary">ম্যাপ থেকে কর্মী ডাকুন</a>
+        <a routerLink="/customer/bookings" class="btn-outline">পূর্ববর্তী বুকিং দেখুন</a>
+      </div>
+    </div>
+  }
+
+  <!-- Cancel Order Modal -->
+  @if (showCancelModal()) {
+    <div class="modal-backdrop" (click)="closeCancelModal()">
+      <div class="modal-card cancel-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">অর্ডার বাতিলের কারণ</h3>
+          <button class="close-btn" (click)="closeCancelModal()">✕</button>
+        </div>
+
+        <div class="cancel-modal-body">
+          <p class="cancel-desc">আপনি কি নিশ্চিত যে এই কাজটি বাতিল করতে চান? অনুগ্রহ করে বাতিলের কারণ নির্বাচন করুন:</p>
+
+          <div class="reasons-list">
+            <label class="reason-option" [class.selected]="cancelReason() === 'দেরি হচ্ছে'">
+              <input type="radio" name="creason" value="দেরি হচ্ছে" [checked]="cancelReason() === 'দেরি হচ্ছে'" (change)="cancelReason.set('দেরি হচ্ছে')" />
+              <span>ওয়ার্কার আসতে অতিরিক্ত দেরি করছে</span>
+            </label>
+
+            <label class="reason-option" [class.selected]="cancelReason() === 'ভুল অর্ডার'">
+              <input type="radio" name="creason" value="ভুল অর্ডার" [checked]="cancelReason() === 'ভুল অর্ডার'" (change)="cancelReason.set('ভুল অর্ডার')" />
+              <span>ভুলবশত অর্ডার তৈরি করা হয়েছে</span>
+            </label>
+
+            <label class="reason-option" [class.selected]="cancelReason() === 'অন্য মিস্ত্রি পেয়েছি'">
+              <input type="radio" name="creason" value="অন্য মিস্ত্রি পেয়েছি" [checked]="cancelReason() === 'অন্য মিস্ত্রি পেয়েছি'" (change)="cancelReason.set('অন্য মিস্ত্রি পেয়েছি')" />
+              <span>স্থানীয় অন্য মিস্ত্রি দ্বারা কাজ করানো হয়েছে</span>
+            </label>
+
+            <label class="reason-option" [class.selected]="cancelReason() === 'অতিরিক্ত ফি দাবি'">
+              <input type="radio" name="creason" value="অতিরিক্ত ফি দাবি" [checked]="cancelReason() === 'অতিরিক্ত ফি দাবি'" (change)="cancelReason.set('অতিরিক্ত ফি দাবি')" />
+              <span>ওয়ার্কার অতিরিক্ত পারিশ্রমিক দাবি করেছেন</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" (click)="closeCancelModal()">ফিরে যান</button>
+          <button type="button" class="btn-danger-confirm" (click)="confirmCancel()">
+            <span>হ্যাঁ, অর্ডার বাতিল করুন</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- In-App Chat Modal -->
+  @if (showChatModal() && currentJob(); as job) {
+    <app-job-chat
+      [jobId]="job.id"
+      [currentUserId]="currentUser()?.uid || 'user_customer_demo_1'"
+      [currentUserName]="currentUser()?.name || 'তানভীর আহমেদ'"
+      [currentUserRole]="'customer'"
+      [partnerName]="job.workerName || 'রহিম প্লাম্বার'"
+      [partnerPhoto]="job.workerPhoto || ''"
+      [partnerRoleBn]="job.categoryName"
+      (closeChat)="closeChat()"
+    ></app-job-chat>
+  }
+
+  <!-- Live Trip Share Modal -->
+  @if (showShareModal() && currentJob(); as job) {
+    <div class="modal-backdrop" (click)="closeShare()">
+      <div class="modal-card share-trip-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-icon">🔗</span>
+            <h3 class="modal-title">লাইভ ট্রিপ শেয়ার করুন</h3>
+          </div>
+          <button class="close-btn" (click)="closeShare()">✕</button>
+        </div>
+
+        <div class="share-modal-body">
+          <div class="share-safety-badge">
+            <span class="ss-icon">🛡️</span>
+            <span>পরিবারের সদস্য বা পরিচিত কারও সাথে শেয়ার করুন যাতে তারা রিয়েল-টাইমে দেখতে পারেন কর্মী কখন আসছেন ও কার সাথে কাজ চলছে।</span>
+          </div>
+
+          <div class="share-link-box">
+            <input type="text" class="link-input" [value]="getTrackingUrl()" readonly />
+            <button type="button" class="btn-copy-link" (click)="copyShareUrl()">
+              <span>{{ shareCopied() ? 'কপি হয়েছে!' : 'কপি করুন' }}</span>
+            </button>
+          </div>
+
+          <div class="share-channels">
+            <button type="button" class="btn-share-whatsapp" (click)="shareWhatsApp()">
+              <span class="pi pi-whatsapp"></span>
+              <span>হোয়াটসঅ্যাপে (WhatsApp) পাঠান</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" (click)="closeShare()">বন্ধ করুন</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Dispute / Problem Report Modal -->
+  @if (showReportModal() && currentJob(); as job) {
+    <div class="modal-backdrop" (click)="closeReport()">
+      <div class="modal-card dispute-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-icon">⚠️</span>
+            <h3 class="modal-title">অভিযোগ দাখিল করুন (Dispute Report)</h3>
+          </div>
+          <button class="close-btn" (click)="closeReport()">✕</button>
+        </div>
+
+        <div class="dispute-modal-body">
+          @if (!reportSubmitted()) {
+            <p class="dispute-desc">কাজের বিষয়ে কোনো অসন্তোষ বা অনিয়ম থাকলে অ্যাডমিনকে জানান। অভিযোগটি সাভার উপজেলা কন্ট্রোল রুম সরাসরি তদন্ত করবে।</p>
+
+            <div class="form-group mb-3">
+              <label class="form-label">সমস্যার ধরন</label>
+              <select class="form-select" [ngModel]="reportType()" (ngModelChange)="reportType.set($event)">
+                <option value="overcharge">অতিরিক্ত পারিশ্রমিক দাবি করেছে</option>
+                <option value="behavior">অপেশাদার বা অসৌজন্যমূলক আচরণ</option>
+                <option value="quality">কাজের মান সন্তোষজনক নয় / ক্ষতি করেছে</option>
+                <option value="no_show">কর্মী উপস্থিত হননি / ভুয়া স্ট্যাটাস</option>
+                <option value="other">অন্যান্য সমস্যা</option>
+              </select>
+            </div>
+
+            <div class="form-group mb-3">
+              <label class="form-label">সমস্যার তীব্রতা (Severity)</label>
+              <div class="severity-chips">
+                <button type="button" class="sev-chip" [class.selected]="reportSeverity() === 'low'" (click)="reportSeverity.set('low')">সাধারণ</button>
+                <button type="button" class="sev-chip" [class.selected]="reportSeverity() === 'medium'" (click)="reportSeverity.set('medium')">মাঝারি</button>
+                <button type="button" class="sev-chip danger" [class.selected]="reportSeverity() === 'high'" (click)="reportSeverity.set('high')">জরুরি / গুরুতর</button>
+              </div>
+            </div>
+
+            <div class="form-group mb-3">
+              <label class="form-label">বিস্তারিত বিবরণ</label>
+              <textarea 
+                class="form-textarea" 
+                rows="3" 
+                placeholder="সমস্যা সম্পর্কে সংক্ষেপে লিখুন..."
+                [ngModel]="reportDescription()"
+                (ngModelChange)="reportDescription.set($event)"
+              ></textarea>
+            </div>
+          } @else {
+            <div class="report-success-state">
+              <span class="rss-icon">✅</span>
+              <h4>অভিযোগটি অ্যাডমিন সেন্টারে পাঠানো হয়েছে</h4>
+              <p>অ্যাডমিন টিম তদন্ত শেষে দ্রুত পদক্ষেপ নেবে এবং আপনার সাথে যোগাযোগ করবে।</p>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" (click)="closeReport()">বন্ধ করুন</button>
+          @if (!reportSubmitted()) {
+            <button type="button" class="btn-danger-confirm" (click)="submitReport()">অভিযোগ নিশ্চিত করুন</button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- "Are you safe?" Safety Check Modal (Item 25) -->
+  @if (showSafetyModal()) {
+    <div class="modal-backdrop" (click)="dismissSafetyModal()">
+      <div class="modal-content safety-modal-card" (click)="$event.stopPropagation()" style="max-width: 420px; padding: 24px; border-radius: 16px; background: var(--bg-surface); text-align: center;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 16px auto;">
+          <i class="pi pi-shield"></i>
+        </div>
+        <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 800;">আপনি কি নিরাপদ আছেন?</h3>
+        <p style="margin: 0 0 20px 0; font-size: 13.5px; color: var(--text-secondary); line-height: 1.5;">
+          কাজখোঁজ আপনার নিরাপত্তাকে সর্বোচ্চ গুরুত্ব দেয়। যেকোনো অনাকাঙ্ক্ষিত পরিস্থিতিতে সরাসরি জরুরি সাহায্য নিতে পারেন।
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <button type="button" class="btn-primary" style="padding: 12px; font-size: 14px;" (click)="dismissSafetyModal()">
+            <i class="pi pi-check"></i> হ্যাঁ, আমি সম্পূর্ণ নিরাপদ আছি
+          </button>
+          <button type="button" class="btn-danger" style="background: #ef4444; color: #fff; border: none; border-radius: var(--radius-md); padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" (click)="triggerSafetySos()">
+            <i class="pi pi-exclamation-triangle"></i> জরুরি SOS অ্যালার্ম পাঠান
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

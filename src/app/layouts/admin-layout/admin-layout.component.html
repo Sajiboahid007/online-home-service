@@ -1,0 +1,129 @@
+<div class="admin-container">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <span class="logo-icon">🛠️</span>
+      <div class="brand">
+        <h2>কাজখোঁজ</h2>
+        <span class="badge" [class.badge-warning]="isSuperAdmin()" [class.badge-info]="!isSuperAdmin()">
+          {{ isSuperAdmin() ? '👑 Super Admin' : '🛡️ Admin' }}
+        </span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-chart-bar"></i>
+        <span>ড্যাশবোর্ড ও অ্যানালিটিক্স</span>
+      </a>
+
+      <a routerLink="/admin/live-map" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-map"></i>
+        <span>লাইভ অপারেশন ম্যাপ</span>
+      </a>
+
+      <a routerLink="/admin/jobs" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-list"></i>
+        <span>জবস ও অর্ডার ব্যবস্থাপনা</span>
+      </a>
+
+      <a routerLink="/admin/verification" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-id-card"></i>
+        <span>ওয়ার্কার ভেরিফিকেশন</span>
+        @if (pendingVerificationCount() > 0) {
+          <span class="count-pill">{{ pendingVerificationCount() | bnNumber }}</span>
+        }
+      </a>
+
+      <a routerLink="/admin/users" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-users"></i>
+        <span>ইউজার ও ওয়ার্কার ম্যানেজমেন্ট</span>
+      </a>
+
+      <a routerLink="/admin/reviews" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-star"></i>
+        <span>রিভিউ ও রেটিং মডারেশন</span>
+      </a>
+
+      <a routerLink="/admin/transactions" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-wallet"></i>
+        <span>লেনদেন ও উত্তোলন</span>
+      </a>
+
+      <a routerLink="/admin/pricing" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-dollar"></i>
+        <span>প্রাইসিং ও কমিশন ম্যাট্রিক্স</span>
+      </a>
+
+      <a routerLink="/admin/areas" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-compass"></i>
+        <span>সার্ভিস এরিয়া ও জোন</span>
+      </a>
+
+      <a routerLink="/admin/reports" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-shield"></i>
+        <span>জরুরি SOS ও কমপ্লেইন ডেস্ক</span>
+        @if (activeSOSAlertsCount() > 0) {
+          <span class="count-pill badge-danger">{{ activeSOSAlertsCount() | bnNumber }}</span>
+        }
+      </a>
+
+      @if (isSuperAdmin()) {
+        <a routerLink="/superadmin/dashboard" class="nav-item highlight-super" style="color: #f59e0b; font-weight: 700;">
+          <i class="pi pi-crown"></i>
+          <span>সুপার অ্যাডমিন পোর্টাল</span>
+        </a>
+      }
+
+      <div class="nav-divider"></div>
+
+      <div class="demo-switch-panel">
+        <span class="panel-title">ভূমিকা পরিবর্তন করুন:</span>
+        <div class="switch-buttons">
+          <button (click)="switchRole('customer')" class="switch-btn">👤 কাস্টমার ভিউ</button>
+          <button (click)="switchRole('worker')" class="switch-btn">🔧 ওয়ার্কার ভিউ</button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="admin-user-info">
+        <img [src]="currentUser()?.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'" alt="Avatar" class="avatar" />
+        <div class="user-details">
+          <span class="name">{{ currentUser()?.name }}</span>
+          <span class="role">{{ isSuperAdmin() ? 'প্রধান প্রশাসক' : 'অঞ্চল নিয়ন্ত্রক' }}</span>
+        </div>
+      </div>
+      <button (click)="logout()" class="logout-btn" title="লগআউট">
+        <i class="pi pi-sign-out"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="admin-main">
+    <header class="admin-topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">{{ isSuperAdmin() ? 'কাজখোঁজ কন্ট্রোল সেন্টার' : 'সাভার জোন এডমিন প্যানেল' }}</h1>
+        <span class="last-updated">রিয়েল-টাইম সিস্টেম কানেক্টেড 🟢</span>
+      </div>
+
+      <div class="topbar-right" style="display: flex; align-items: center; gap: 12px;">
+        <app-notification-center></app-notification-center>
+
+        <button type="button" class="icon-toggle-btn" (click)="themeService.toggleDarkMode()" [title]="themeService.isDarkMode() ? 'লাইট মোড' : 'ডার্ক মোড'" style="background:none; border:none; cursor:pointer; font-size:16px; padding:6px; color:inherit;">
+          <i class="pi" [ngClass]="themeService.isDarkMode() ? 'pi-sun' : 'pi-moon'"></i>
+        </button>
+
+        <button routerLink="/customer/home" class="btn-outline">
+          <i class="pi pi-external-link"></i>
+          <span>কাস্টমার অ্যাপ দেখুন</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="admin-content-area">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

@@ -1,0 +1,165 @@
+<div class="payment-page" *ngIf="job(); else loading">
+  <div class="top-bar">
+    <button class="back-btn" (click)="goBack()">
+      <i class="pi pi-arrow-left"></i> ট্র্যাকিং-এ ফিরুন
+    </button>
+    <h2>বিল পরিশোধ ও ইনভয়েস</h2>
+  </div>
+
+  <div class="payment-grid">
+    <!-- Invoice Details Card -->
+    <div class="card invoice-card" id="printable-invoice">
+      <div class="invoice-header">
+        <div class="brand-box">
+          <span class="logo-text">কাজখোঁজ</span>
+          <span class="sub-text">অন-ডিমান্ড হোম সার্ভিস</span>
+        </div>
+        <div class="inv-meta">
+          <span class="inv-number">ইনভয়েস #{{ invoiceNumber() }}</span>
+          <span class="inv-date">{{ job()!.timeline.completedAt || job()!.timeline.createdAt | date:'mediumDate' }}</span>
+        </div>
+      </div>
+
+      <div class="service-summary">
+        <h4>{{ job()!.categoryName }} সেবা</h4>
+        <p class="desc">{{ job()!.description }}</p>
+        <div class="worker-line">
+          <span>কারিগর: <strong>{{ job()!.workerName || 'মোঃ রহিম উদ্দিন' }}</strong></span>
+          <span>গ্রাহক: <strong>{{ job()!.customerName }}</strong></span>
+        </div>
+      </div>
+
+      <div class="bill-breakdown">
+        <div class="bill-row">
+          <span>সার্ভিস / পারিশ্রমিক</span>
+          <span>{{ (job()!.estimatedPrice || 350) | taka }}</span>
+        </div>
+
+        @if (job()!.materialCost) {
+          <div class="bill-row">
+            <span>মালামাল ক্রয়ের খরচ</span>
+            <span>{{ job()!.materialCost! | taka }}</span>
+          </div>
+        }
+
+        <div class="bill-row">
+          <span>প্ল্যাটফর্ম সেবা ফি</span>
+          <span>{{ (job()!.platformFee || 20) | taka }}</span>
+        </div>
+
+        @if (job()!.couponDiscount) {
+          <div class="bill-row discount">
+            <span>কুপন ডিসকাউন্ট ({{ job()!.couponCode }})</span>
+            <span>-{{ job()!.couponDiscount! | taka }}</span>
+          </div>
+        }
+
+        <div class="divider"></div>
+
+        <div class="bill-row total-row">
+          <span>সর্বমোট প্রদেয় বিল</span>
+          <span class="total-amount">{{ totalBill() | taka }}</span>
+        </div>
+      </div>
+
+      <div class="payment-status-badge" [class.paid]="job()!.paymentStatus === 'paid'">
+        @if (job()!.paymentStatus === 'paid') {
+          <i class="pi pi-check-circle"></i> বিল পরিশোধ সম্পন্ন ({{ job()!.paymentMethod | uppercase }})
+        } @else {
+          <i class="pi pi-clock"></i> বিল অপরিশোধিত রয়েছে
+        }
+      </div>
+
+      <div class="print-action">
+        <button type="button" class="btn-outline w-100" (click)="printInvoice()">
+          <i class="pi pi-print"></i> ইনভয়েস প্রিন্ট বা ডাউনলোড করুন
+        </button>
+      </div>
+    </div>
+
+    <!-- Payment Methods Choice (if unpaid) -->
+    @if (job()!.paymentStatus !== 'paid') {
+      <div class="card methods-card">
+        <h3>পেমেন্ট পদ্ধতি নির্বাচন করুন</h3>
+        <p class="subtitle">নিরাপদ ও সহজ উপায়ে বিল পরিশোধ করুন</p>
+
+        <div class="method-options">
+          <label class="method-box" [class.selected]="selectedMethod() === 'bkash'">
+            <input type="radio" name="paymentMethod" value="bkash" [(ngModel)]="selectedMethod" />
+            <div class="method-info">
+              <span class="m-icon bkash">bK</span>
+              <div>
+                <strong>বিকাশ (bKash)</strong>
+                <p>সহজ ডিজিটাল পেমেন্ট</p>
+              </div>
+            </div>
+            <i class="pi pi-check checkmark"></i>
+          </label>
+
+          <label class="method-box" [class.selected]="selectedMethod() === 'nagad'">
+            <input type="radio" name="paymentMethod" value="nagad" [(ngModel)]="selectedMethod" />
+            <div class="method-info">
+              <span class="m-icon nagad">নগদ</span>
+              <div>
+                <strong>নগদ (Nagad)</strong>
+                <p>দ্রুত ও ক্যাশব্যাক অফার</p>
+              </div>
+            </div>
+            <i class="pi pi-check checkmark"></i>
+          </label>
+
+          <label class="method-box" [class.selected]="selectedMethod() === 'card'">
+            <input type="radio" name="paymentMethod" value="card" [(ngModel)]="selectedMethod" />
+            <div class="method-info">
+              <span class="m-icon card"><i class="pi pi-credit-card"></i></span>
+              <div>
+                <strong>ডেবিট / ক্রেডিট কার্ড</strong>
+                <p>ভিসা, মাস্টারকার্ড বা নেক্সাস</p>
+              </div>
+            </div>
+            <i class="pi pi-check checkmark"></i>
+          </label>
+
+          <label class="method-box" [class.selected]="selectedMethod() === 'cash'">
+            <input type="radio" name="paymentMethod" value="cash" [(ngModel)]="selectedMethod" />
+            <div class="method-info">
+              <span class="m-icon cash">৳</span>
+              <div>
+                <strong>ক্যাশ অন ডেলিভারি (নগদ টাকা)</strong>
+                <p>কাজ শেষে সরাসরি কারিগরকে দিন</p>
+              </div>
+            </div>
+            <i class="pi pi-check checkmark"></i>
+          </label>
+        </div>
+
+        <div class="pay-btn-box">
+          <button class="btn-primary w-100 py-3" [disabled]="isProcessing()" (click)="confirmPayment()">
+            @if (isProcessing()) {
+              <i class="pi pi-spin pi-spinner"></i> পেমেন্ট প্রক্রিয়াধীন...
+            } @else {
+              <i class="pi pi-lock"></i> ৳{{ totalBill() }} পরিশোধ নিশ্চিত করুন
+            }
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="card success-card">
+        <div class="success-icon">
+          <i class="pi pi-check"></i>
+        </div>
+        <h3>পেমেন্ট সফল হয়েছে!</h3>
+        <p>কাজখোঁজ ব্যবহার করার জন্য আপনাকে ধন্যবাদ।</p>
+        <button class="btn-primary mt-3" (click)="router.navigate(['/customer/bookings'])">
+          আমার বুকিংস দেখুন
+        </button>
+      </div>
+    }
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="p-4 text-center">
+    <app-skeleton-loader height="300px"></app-skeleton-loader>
+  </div>
+</ng-template>

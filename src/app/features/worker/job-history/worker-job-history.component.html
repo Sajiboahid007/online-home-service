@@ -1,0 +1,69 @@
+<div class="job-history-container">
+  <div class="page-header">
+    <div>
+      <h2>কাজের পূর্ববর্তী ইতিহাস (Job History)</h2>
+      <p class="subtitle">আপনার সম্পন্নকৃত এবং পূর্ববর্তী সকল কাজের রেকর্ড</p>
+    </div>
+    <div class="stats-pill">
+      মোট সম্পন্ন: <strong>{{ completedJobs().length | bnNumber }} টি কাজ</strong>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="filter-tabs">
+      <button class="tab-btn" [class.active]="filterStatus() === 'all'" (click)="filterStatus.set('all')">সকল কাজ</button>
+      <button class="tab-btn" [class.active]="filterStatus() === 'completed'" (click)="filterStatus.set('completed')">সম্পন্ন</button>
+      <button class="tab-btn" [class.active]="filterStatus() === 'cancelled'" (click)="filterStatus.set('cancelled')">বাতিলকৃত</button>
+    </div>
+  </div>
+
+  <!-- Jobs List -->
+  <div class="jobs-list">
+    @if (filteredJobs().length === 0) {
+      <div class="card text-center p-5">
+        <i class="pi pi-inbox" style="font-size: 2.5rem; opacity: 0.5;"></i>
+        <p class="mt-2 text-secondary">এই ক্যাটাগরিতে কোনো কাজের রেকর্ড পাওয়া যায়নি।</p>
+      </div>
+    } @else {
+      @for (job of filteredJobs(); track job.id) {
+        <div class="card job-history-card">
+          <div class="card-top">
+            <div>
+              <span class="job-id">#{{ job.id }}</span>
+              <h4 class="job-cat">{{ job.categoryName }}</h4>
+            </div>
+            <div class="status-wrap">
+              @if (job.status === 'completed' || job.status === 'paid') {
+                <span class="badge badge-success"><i class="pi pi-check"></i> সম্পন্ন</span>
+              } @else if (job.status.includes('cancelled')) {
+                <span class="badge badge-danger"><i class="pi pi-times"></i> বাতিলকৃত</span>
+              } @else {
+                <span class="badge badge-warning">{{ job.status }}</span>
+              }
+            </div>
+          </div>
+
+          <p class="job-desc">{{ job.description }}</p>
+
+          <div class="location-row">
+            <i class="pi pi-map-marker text-teal"></i>
+            <span>{{ job.location.address || 'সাভার বাজার, সাভার' }}</span>
+          </div>
+
+          <div class="card-bottom">
+            <div class="time-info">
+              <i class="pi pi-calendar"></i>
+              <span>{{ job.timeline.completedAt || job.timeline.createdAt | date:'medium' }}</span>
+            </div>
+
+            <div class="earnings-box">
+              <span class="earning-label">আপনার আয়:</span>
+              <span class="earning-val">{{ (job.workerEarning || job.estimatedPrice || 350) | taka }}</span>
+            </div>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

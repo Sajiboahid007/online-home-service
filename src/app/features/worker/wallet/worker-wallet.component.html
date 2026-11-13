@@ -1,0 +1,432 @@
+<div class="wallet-container">
+  <!-- Page Header -->
+  <header class="wallet-header">
+    <div>
+      <h1 class="page-title">ওয়ালেট ও কমিশন ট্র্যাকার</h1>
+      <p class="page-sub">
+        আপনার কাজের আয়, ওয়ালেট ব্যালেন্স এবং প্ল্যাটফর্ম কমিশন ম্যানেজ করুন।
+      </p>
+    </div>
+  </header>
+
+  <!-- Summary KPI Cards -->
+  <section class="wallet-kpi-grid">
+    <!-- Card 1: Wallet Balance -->
+    <div class="card kpi-wallet-card">
+      <div class="card-icon-title">
+        <div class="icon-wrap icon-green">
+          <i class="pi pi-wallet"></i>
+        </div>
+        <span class="card-label">উত্তোলনযোগ্য ব্যালেন্স</span>
+      </div>
+      <div class="card-amount text-green">
+        {{ (currentWorker()?.walletBalance || 0) | taka }}
+      </div>
+      <p class="card-hint">অনলাইন পেমেন্ট বা প্রিপেইড বুকিংয়ের অর্জিত অর্থ</p>
+      <button 
+        type="button" 
+        class="btn-action-withdraw" 
+        (click)="openWithdrawModal()"
+        [disabled]="(currentWorker()?.walletBalance || 0) < 100">
+        <i class="pi pi-arrow-up-right"></i>
+        <span>টাকা উত্তোলন (Withdraw)</span>
+      </button>
+    </div>
+
+    <!-- Card 2: Commission Due -->
+    <div 
+      class="card kpi-wallet-card" 
+      [class.card-due-danger]="(currentWorker()?.commissionDue || 0) >= 400">
+      <div class="card-icon-title">
+        <div class="icon-wrap icon-orange">
+          <i class="pi pi-exclamation-triangle"></i>
+        </div>
+        <span class="card-label">প্ল্যাটফর্ম বকেয়া কমিশন</span>
+      </div>
+      <div class="card-amount text-orange">
+        {{ (currentWorker()?.commissionDue || 0) | taka }}
+      </div>
+      <p class="card-hint">
+        সর্বোচ্চ সীমা <strong>৳৫০০</strong>
+        @if ((currentWorker()?.commissionDue || 0) >= 400) {
+          <span class="text-danger font-bold"> (⚠️ সীমা প্রায় পূর্ণ)</span>
+        }
+      </p>
+      <button 
+        type="button" 
+        class="btn-action-repay" 
+        (click)="openRepayModal()"
+        [disabled]="(currentWorker()?.commissionDue || 0) <= 0">
+        <i class="pi pi-credit-card"></i>
+        <span>বকেয়া কমিশন পরিশোধ করুন</span>
+      </button>
+    </div>
+
+    <!-- Card 3: Total Earnings -->
+    <div class="card kpi-wallet-card">
+      <div class="card-icon-title">
+        <div class="icon-wrap icon-blue">
+          <i class="pi pi-chart-bar"></i>
+        </div>
+        <span class="card-label">সর্বমোট অর্জিত আয়</span>
+      </div>
+      <div class="card-amount text-blue">
+        {{ totalEarnings() | taka }}
+      </div>
+      <p class="card-hint">
+        কাজখোঁজ প্ল্যাটফর্মে সর্বমোট সম্পন্ন কাজ: {{ (currentWorker()?.totalJobs || 0) | bnNumber }} টি
+      </p>
+      <a routerLink="/worker/dashboard" class="link-view-jobs">
+        <span>কাজের বিবরণ দেখুন</span>
+        <i class="pi pi-arrow-right"></i>
+      </a>
+    </div>
+  </section>
+
+  <!-- COMMISSION DUE TRACKER & PROGRESS BAR -->
+  <section class="card commission-tracker-card">
+    <div class="tracker-header">
+      <div class="tracker-title-box">
+        <h3 class="tracker-title">বকেয়া কমিশন ট্র্যাকার (Due Limit Progress)</h3>
+        <p class="tracker-desc">
+          কাস্টমার ক্যাশ টাকা দিলে প্ল্যাটফর্মের ১৫% কমিশন আপনার এখানে জমা হয়। বকেয়া ৳৫০০ পৌঁছালে আপনার আইডি অটোমেটিক সাময়িক স্থগিত হবে।
+        </p>
+      </div>
+
+      <div class="due-pill" [class.due-urgent]="(currentWorker()?.commissionDue || 0) >= 400">
+        <span class="due-amt">{{ (currentWorker()?.commissionDue || 0) | taka }}</span>
+        <span class="due-max">/ ৳৫০০ সর্বোচ্চ</span>
+      </div>
+    </div>
+
+    <!-- Visual Progress Bar -->
+    <div class="progress-container">
+      <div class="progress-bar-track">
+        <div 
+          class="progress-bar-fill" 
+          [style.width.%]="dueProgressPercent()"
+          [class.fill-safe]="dueProgressPercent() < 60"
+          [class.fill-warning]="dueProgressPercent() >= 60 && dueProgressPercent() < 80"
+          [class.fill-danger]="dueProgressPercent() >= 80">
+        </div>
+      </div>
+      <div class="progress-labels">
+        <span>৳০ (কোনো বকেয়া নেই)</span>
+        <span class="limit-target">৳৫০০ (অ্যাকাউন্ট স্থগিত সীমা)</span>
+      </div>
+    </div>
+
+    <!-- Alerts if near threshold -->
+    @if ((currentWorker()?.commissionDue || 0) >= 500) {
+      <div class="tracker-alert alert-danger">
+        <i class="pi pi-ban"></i>
+        <span>আপনার বকেয়া কমিশন ৳৫০০ ছাড়িয়েছে! নতুন কাজের কল পেতে অবিলম্বে বিকাশ বা নগদ দিয়ে বকেয়া পরিশোধ করুন।</span>
+      </div>
+    } @else if ((currentWorker()?.commissionDue || 0) >= 400) {
+      <div class="tracker-alert alert-warning">
+        <i class="pi pi-exclamation-circle"></i>
+        <span>সতর্কতা: আপনার বকেয়া কমিশন ৳৪০০ অতিক্রম করেছে। ঝামেলাহীন কাজ পেতে এখনি পরিশোধ করুন।</span>
+      </div>
+    }
+  </section>
+
+  <!-- TRANSACTION HISTORY TABLE -->
+  <section class="card transactions-card">
+    <div class="tx-header">
+      <div>
+        <h3 class="tx-title">লেনদেনের ইতিহাস (Transaction History)</h3>
+        <p class="tx-desc">আপনার ওয়ালেটের সকল জমা, উত্তোলন ও কমিশন পরিশোধের রেকর্ড</p>
+      </div>
+
+      <!-- Filters -->
+      <div class="tx-filters">
+        <button 
+          type="button" 
+          class="tx-filter-btn" 
+          [class.active]="txFilter() === 'all'"
+          (click)="txFilter.set('all')">
+          সব
+        </button>
+        <button 
+          type="button" 
+          class="tx-filter-btn" 
+          [class.active]="txFilter() === 'job_payment'"
+          (click)="txFilter.set('job_payment')">
+          জব পেমেন্ট
+        </button>
+        <button 
+          type="button" 
+          class="tx-filter-btn" 
+          [class.active]="txFilter() === 'due_payment'"
+          (click)="txFilter.set('due_payment')">
+          কমিশন পরিশোধ
+        </button>
+        <button 
+          type="button" 
+          class="tx-filter-btn" 
+          [class.active]="txFilter() === 'withdraw'"
+          (click)="txFilter.set('withdraw')">
+          উত্তোলন
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    @if (transactions().length > 0) {
+      <div class="table-responsive">
+        <table class="tx-table">
+          <thead>
+            <tr>
+              <th>বিবরণ ও আইডি</th>
+              <th>পেমেন্ট মাধ্যম</th>
+              <th>তারিখ ও সময়</th>
+              <th>পরিমাণ</th>
+              <th>স্ট্যাটাস</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (tx of transactions(); track tx.id) {
+              <tr>
+                <td>
+                  <div class="tx-cell-desc">
+                    <strong>{{ tx.description }}</strong>
+                    <span class="tx-id-code">ID: {{ tx.id }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="method-tag" [class.method-bkash]="tx.method === 'bkash'" [class.method-nagad]="tx.method === 'nagad'">
+                    {{ tx.method.toUpperCase() }}
+                  </span>
+                </td>
+                <td>
+                  <span class="tx-date">{{ tx.createdAt | timeAgo }}</span>
+                </td>
+                <td>
+                  <div class="tx-amount-cell">
+                    @if (tx.type === 'job_payment') {
+                      <strong class="text-green">+ {{ tx.amount | taka }}</strong>
+                    } @else if (tx.type === 'due_payment') {
+                      <strong class="text-blue">- {{ tx.amount | taka }}</strong>
+                    } @else if (tx.type === 'withdraw') {
+                      <strong class="text-orange">- {{ tx.amount | taka }}</strong>
+                    } @else {
+                      <strong>{{ tx.amount | taka }}</strong>
+                    }
+                  </div>
+                </td>
+                <td>
+                  @if (tx.status === 'success') {
+                    <span class="badge badge-success">সফল</span>
+                  } @else if (tx.status === 'pending') {
+                    <span class="badge badge-warning">অপেক্ষমাণ</span>
+                  } @else {
+                    <span class="badge badge-danger">ব্যর্থ</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="empty-tx-state">
+        <i class="pi pi-receipt empty-icon"></i>
+        <h4>কোনো লেনদেন পাওয়া যায়নি</h4>
+        <p>আপনার অ্যাকাউন্ট থেকে কোনো লেনদেন সম্পন্ন হলে এখানে তালিকাভুক্ত হবে।</p>
+      </div>
+    }
+  </section>
+
+  <!-- REPAY COMMISSION MODAL DIALOG (bKash / Nagad Simulation) -->
+  @if (showRepayModal()) {
+    <div class="modal-backdrop">
+      <div class="modal-dialog repay-dialog">
+        <div class="modal-header">
+          <h3>বকেয়া কমিশন পরিশোধ</h3>
+          <button type="button" class="btn-close" (click)="closeRepayModal()">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Method Selection -->
+          <div class="method-selector-row">
+            <button 
+              type="button" 
+              class="method-btn bkash-btn" 
+              [class.selected]="repayMethod() === 'bkash'"
+              (click)="repayMethod.set('bkash')">
+              <span class="logo-text bkash-pink">bKash</span>
+              <span>বিকাশ পেমেন্ট</span>
+            </button>
+
+            <button 
+              type="button" 
+              class="method-btn nagad-btn" 
+              [class.selected]="repayMethod() === 'nagad'"
+              (click)="repayMethod.set('nagad')">
+              <span class="logo-text nagad-orange">Nagad</span>
+              <span>নগদ পেমেন্ট</span>
+            </button>
+          </div>
+
+          <!-- Amount -->
+          <div class="form-group">
+            <label for="repayAmount">পরিশোধের পরিমাণ (৳):</label>
+            <div class="input-taka-wrap">
+              <span class="taka-mark">৳</span>
+              <input 
+                id="repayAmount" 
+                type="number" 
+                class="form-control" 
+                [(ngModel)]="repayAmount" 
+                [max]="currentWorker()?.commissionDue || 0"
+                min="1" />
+            </div>
+            <span class="input-sub">বর্তমান মোট বকেয়া: {{ (currentWorker()?.commissionDue || 0) | taka }}</span>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="form-group">
+            <label for="repayPhone">{{ repayMethod().toUpperCase() }} অ্যাকাউন্ট নম্বর:</label>
+            <input 
+              id="repayPhone" 
+              type="tel" 
+              class="form-control" 
+              [(ngModel)]="repayPhone" 
+              placeholder="01XXXXXXXXX" />
+          </div>
+
+          <!-- Simulated PIN -->
+          <div class="form-group">
+            <label for="repayPin">সিমুলেটেড পিন নম্বর (পরীক্ষামূলক):</label>
+            <input 
+              id="repayPin" 
+              type="password" 
+              class="form-control" 
+              [(ngModel)]="repayPin" 
+              placeholder="পিন কোড লিখুন" />
+          </div>
+
+          @if (repayErrorMessage()) {
+            <div class="modal-alert alert-error">
+              <i class="pi pi-times-circle"></i>
+              <span>{{ repayErrorMessage() }}</span>
+            </div>
+          }
+
+          @if (repaySuccessMessage()) {
+            <div class="modal-alert alert-success">
+              <i class="pi pi-check-circle"></i>
+              <span>{{ repaySuccessMessage() }}</span>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" (click)="closeRepayModal()">বাতিল</button>
+          <button 
+            type="button" 
+            class="btn-primary" 
+            [class.btn-bkash]="repayMethod() === 'bkash'"
+            [class.btn-nagad]="repayMethod() === 'nagad'"
+            (click)="submitRepayment()">
+            <i class="pi pi-check"></i>
+            <span>{{ repayAmount() | taka }} পরিশোধ নিশ্চিত করুন</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- WITHDRAW REQUEST MODAL DIALOG -->
+  @if (showWithdrawModal()) {
+    <div class="modal-backdrop">
+      <div class="modal-dialog withdraw-dialog">
+        <div class="modal-header">
+          <h3>টাকা উত্তোলনের অনুরোধ (Withdraw)</h3>
+          <button type="button" class="btn-close" (click)="closeWithdrawModal()">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="balance-available-pill">
+            <span>উত্তোলনযোগ্য ব্যালেন্স:</span>
+            <strong>{{ (currentWorker()?.walletBalance || 0) | taka }}</strong>
+          </div>
+
+          <!-- Method Selection -->
+          <div class="method-selector-row">
+            <button 
+              type="button" 
+              class="method-btn bkash-btn" 
+              [class.selected]="withdrawMethod() === 'bkash'"
+              (click)="withdrawMethod.set('bkash')">
+              <span class="logo-text bkash-pink">bKash</span>
+              <span>বিকাশ ওয়ালেট</span>
+            </button>
+
+            <button 
+              type="button" 
+              class="method-btn nagad-btn" 
+              [class.selected]="withdrawMethod() === 'nagad'"
+              (click)="withdrawMethod.set('nagad')">
+              <span class="logo-text nagad-orange">Nagad</span>
+              <span>নগদ ওয়ালেট</span>
+            </button>
+          </div>
+
+          <!-- Amount -->
+          <div class="form-group">
+            <label for="withdrawAmount">উত্তোলনের পরিমাণ (৳):</label>
+            <div class="input-taka-wrap">
+              <span class="taka-mark">৳</span>
+              <input 
+                id="withdrawAmount" 
+                type="number" 
+                class="form-control" 
+                [(ngModel)]="withdrawAmount" 
+                min="100" 
+                [max]="currentWorker()?.walletBalance || 0" />
+            </div>
+            <span class="input-sub">সর্বনিম্ন উত্তোলন ৳১০০</span>
+          </div>
+
+          <!-- Destination Phone -->
+          <div class="form-group">
+            <label for="withdrawPhone">{{ withdrawMethod().toUpperCase() }} ব্যক্তিগত/পার্সোনাল নম্বর:</label>
+            <input 
+              id="withdrawPhone" 
+              type="tel" 
+              class="form-control" 
+              [(ngModel)]="withdrawPhone" 
+              placeholder="01XXXXXXXXX" />
+          </div>
+
+          @if (withdrawErrorMessage()) {
+            <div class="modal-alert alert-error">
+              <i class="pi pi-times-circle"></i>
+              <span>{{ withdrawErrorMessage() }}</span>
+            </div>
+          }
+
+          @if (withdrawSuccessMessage()) {
+            <div class="modal-alert alert-success">
+              <i class="pi pi-check-circle"></i>
+              <span>{{ withdrawSuccessMessage() }}</span>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" (click)="closeWithdrawModal()">বাতিল</button>
+          <button type="button" class="btn-primary" (click)="submitWithdrawal()">
+            <i class="pi pi-send"></i>
+            <span>অনুরোধ জমা দিন</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

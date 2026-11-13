@@ -1,0 +1,504 @@
+<div class="home-map-wrapper">
+  <!-- Address Search & Geocoding Bar (Item 45) -->
+  <div class="search-geocoding-container" style="position: absolute; top: 12px; left: 16px; right: 16px; z-index: 100; max-width: 440px;">
+    <div style="position: relative; width: 100%;">
+      <div style="display: flex; align-items: center; background: var(--bg-surface); border-radius: 24px; padding: 6px 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 1px solid var(--border-color);">
+        <i class="pi pi-search" style="color: var(--primary-color); font-size: 14px; margin-right: 8px;"></i>
+        <input 
+          type="text" 
+          [ngModel]="searchQuery()" 
+          (ngModelChange)="onSearchInput($event)" 
+          placeholder="সাভার, ঢাকা বা যেকোনো ঠিকানা খুঁজুন..." 
+          style="border: none; outline: none; background: transparent; width: 100%; font-family: inherit; font-size: 13.5px;" 
+        />
+        @if (searchQuery()) {
+          <i class="pi pi-times" (click)="searchQuery.set(''); searchResults.set([])" style="cursor: pointer; color: var(--text-secondary); font-size: 12px;"></i>
+        }
+      </div>
+
+      <!-- Autocomplete Dropdown -->
+      @if (searchResults().length > 0) {
+        <div style="position: absolute; top: 44px; left: 0; right: 0; background: var(--bg-surface); border-radius: 12px; box-shadow: var(--shadow-lg); border: 1px solid var(--border-color); overflow: hidden; z-index: 101;">
+          @for (item of searchResults(); track item.address) {
+            <div (click)="selectSearchResult(item)" style="padding: 10px 14px; font-size: 13px; cursor: pointer; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px;">
+              <i class="pi pi-map-marker text-teal"></i>
+              <span>{{ item.address }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Top Floating Category Bar -->
+  <div class="category-chips-container" style="top: 60px;">
+    <div class="category-chips-scroll">
+      <button 
+        type="button" 
+        class="cat-chip" 
+        [class.active]="selectedCategoryId() === 'all'"
+        (click)="selectCategory('all')"
+      >
+        <span class="cat-chip-icon">✨</span>
+        <span class="cat-chip-text">সব কাজ</span>
+      </button>
+
+      <!-- Safety filter for female/trusted workers (Item 24) -->
+      <button 
+        type="button" 
+        class="cat-chip safety-chip" 
+        [class.active]="onlyTrustedOrFemale()"
+        (click)="toggleTrustedFilter()"
+        style="border-color: #0f766e;"
+        title="শুধুমাত্র বিশ্বস্ত ও ভেরিফাইড কারিগর ফিল্টার"
+      >
+        <span class="cat-chip-icon">🛡️</span>
+        <span class="cat-chip-text">বিশ্বস্ত কারিগর</span>
+      </button>
+
+      @for (cat of categories(); track cat.id) {
+        <button 
+          type="button" 
+          class="cat-chip" 
+          [class.active]="selectedCategoryId() === cat.id"
+          (click)="selectCategory(cat.id)"
+        >
+          <span class="cat-chip-icon">{{ cat.icon }}</span>
+          <span class="cat-chip-text">{{ cat.nameBn }}</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Interactive MapLibre Vector Map -->
+  <div #mapContainer class="vector-map-container"></div>
+
+  <!-- Map Floating Controls & Legend -->
+  <div class="map-floating-overlay">
+    <div class="map-legend">
+      <span class="legend-item"><span class="dot online"></span> প্রস্তুত ({{ onlineWorkersCount() | bnNumber }})</span>
+      <span class="legend-item"><span class="dot busy"></span> ব্যস্ত</span>
+      <span class="legend-item"><span class="dot offline"></span> অফলাইন</span>
+    </div>
+
+    <button type="button" class="btn-recenter" (click)="recenterToUser()" title="আমার অবস্থানে ফিরে যান">
+      <span class="pi pi-compass"></span>
+      <span class="recenter-text">আমার লোকেশন</span>
+    </button>
+  </div>
+
+  <!-- Instant Request & Work Request Sticky CTA Banner -->
+  <div class="instant-call-banner">
+    <a routerLink="/customer/create-request" class="btn-post-work-request" title="নতুন কাজের চাহিদা পোস্ট করুন">
+      <span class="btn-icon">📝</span>
+      <div class="btn-col">
+        <span class="btn-text">কাজের রিকোয়েস্ট পোস্ট করুন</span>
+        <span class="btn-subtext">যে প্লাম্বার আগে গ্রহণ করবেন তিনিই কাজ পাবেন</span>
+      </div>
+    </a>
+    <button type="button" class="btn-instant-request" (click)="openInstantBooking()">
+      <span class="lightning-pulse">⚡</span>
+      <div class="btn-col">
+        <span class="btn-text">তাৎক্ষণিক বুকিং</span>
+        <span class="btn-subtext">নিকটস্থ সেরা টেকনিশিয়ান ৩ মিনিটে</span>
+      </div>
+    </button>
+  </div>
+
+  <!-- Slide-up Bottom Sheet: Nearby Workers -->
+  <div class="bottom-sheet" [class.expanded]="isSheetExpanded()">
+    <!-- Sheet Drag Handle / Header -->
+    <div class="sheet-handle-bar" (click)="toggleSheet()">
+      <div class="handle-pill"></div>
+      <div class="sheet-title-row">
+        <div class="sheet-title-text">
+          <span class="sheet-title">নিকটবর্তী ওয়ার্কার তালিকা</span>
+          <span class="sheet-counter badge badge-neutral">{{ nearbyWorkers().length | bnNumber }} জন উপলব্ধ</span>
+        </div>
+        <button type="button" class="sheet-toggle-btn">
+          <span class="pi" [class.pi-chevron-up]="!isSheetExpanded()" [class.pi-chevron-down]="isSheetExpanded()"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Workers List Content -->
+    <div class="sheet-content">
+      @if (nearbyWorkers().length === 0) {
+        <div class="empty-workers-state">
+          <span class="empty-icon">🔍</span>
+          <p class="empty-title">এই ক্যাটাগরিতে কোনো কর্মী পাওয়া যায়নি</p>
+          <p class="empty-sub">অন্য ক্যাটাগরি বেছে নিন অথবা একটু পরে আবার চেষ্টা করুন।</p>
+          <button class="btn-outline btn-sm" (click)="selectCategory('all')">সব ক্যাটাগরি দেখুন</button>
+        </div>
+      } @else {
+        <div class="worker-cards-grid">
+          @for (worker of nearbyWorkers(); track worker.uid) {
+            <div class="worker-card" [class.busy-card]="worker.isBusy" (click)="flyToWorker(worker)">
+              <!-- Worker Photo & Status -->
+              <div class="worker-avatar-wrap">
+                <img [src]="worker.photoURL" [alt]="worker.name" class="worker-img" />
+                <span class="status-indicator" [class.online]="worker.isOnline && !worker.isBusy" [class.busy]="worker.isBusy" [class.offline]="!worker.isOnline"></span>
+              </div>
+
+              <!-- Worker Info -->
+              <div class="worker-main-info">
+                <div class="worker-name-line">
+                  <h4 class="worker-name">{{ worker.name }}</h4>
+                  @if (worker.verified) {
+                    <span class="verified-pill" title="এনআইডি ও ব্যাকগ্রাউন্ড ভেরিফায়েড">✓ ভেরিফায়েড</span>
+                  }
+                  @if (worker.trustedBadge) {
+                    <span class="trusted-pill" title="বিশেষভাবে বিশ্বস্ত কারিগর">⭐ ট্রাস্টেড</span>
+                  }
+                </div>
+
+                <div class="worker-metrics">
+                  <span class="rating-badge">
+                    ⭐ {{ worker.rating | bnNumber }} <small>({{ worker.ratingCount | bnNumber }})</small>
+                  </span>
+                  <span class="divider-dot">•</span>
+                  <span class="experience-text">{{ worker.experienceYears | bnNumber }} বছর অভিজ্ঞতা</span>
+                  @if (worker.distanceKm !== undefined) {
+                    <span class="divider-dot">•</span>
+                    <span class="distance-text">📍 {{ worker.distanceKm | bnNumber }} কিমি</span>
+                  }
+                  <span class="divider-dot">•</span>
+                  <span class="phone-text">📞 {{ worker.phone | maskPhone }}</span>
+                </div>
+
+                <div class="worker-skills-tags">
+                  @for (skill of worker.skills.slice(0, 3); track skill) {
+                    <span class="skill-tag">{{ skill }}</span>
+                  }
+                </div>
+              </div>
+
+              <!-- Price & Booking CTA -->
+              <div class="worker-cta-box" (click)="$event.stopPropagation()">
+                <div class="price-rate">
+                  <span class="rate-amount">{{ worker.rate | taka }}</span>
+                  <span class="rate-unit">/ {{ worker.rateUnit === 'job' ? 'কাজ' : worker.rateUnit === 'hour' ? 'ঘণ্টা' : 'দিন' }}</span>
+                </div>
+
+                <div class="card-buttons">
+                  <button type="button" class="btn-card-profile" (click)="openWorkerProfile(worker)">
+                    প্রোফাইল
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn-card-book" 
+                    [disabled]="worker.isBusy || !worker.isOnline"
+                    (click)="startDirectBooking(worker)"
+                  >
+                    {{ worker.isBusy ? 'ব্যস্ত' : 'বুক করুন' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Worker Detail Profile Modal -->
+  @if (selectedWorker(); as w) {
+    <div class="modal-backdrop" (click)="closeWorkerProfile()">
+      <div class="modal-card worker-profile-modal" (click)="$event.stopPropagation()">
+        <!-- Header -->
+        <div class="profile-header-banner">
+          <button class="close-profile-btn" (click)="closeWorkerProfile()">✕</button>
+          <div class="profile-avatar-large">
+            <img [src]="w.photoURL" [alt]="w.name" />
+            <span class="status-badge" [class.online]="w.isOnline && !w.isBusy" [class.busy]="w.isBusy" [class.offline]="!w.isOnline">
+              {{ w.isOnline ? (w.isBusy ? 'ব্যস্ত' : 'অনলাইন') : 'অফলাইন' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="profile-modal-content">
+          <div class="name-section">
+            <h3 class="profile-name">{{ w.name }}</h3>
+            <div class="badge-row">
+              @if (w.verified) {
+                <span class="badge badge-success">✓ জাতীয় পরিচয়পত্র ভেরিফায়েড</span>
+              }
+              @if (w.trustedBadge) {
+                <span class="badge badge-info">⭐ ৫ স্টার প্ল্যাটফর্ম স্পেশালিস্ট</span>
+              }
+              @if (w.isPremium) {
+                <span class="badge badge-warning">👑 প্রিমিয়াম প্রো</span>
+              }
+            </div>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="profile-stats-grid">
+            <div class="stat-box">
+              <span class="stat-num">⭐ {{ w.rating | bnNumber }}</span>
+              <span class="stat-lbl">{{ w.ratingCount | bnNumber }} টি রিভিউ</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num">{{ w.totalJobs | bnNumber }}+</span>
+              <span class="stat-lbl">কাজ সম্পন্ন</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num">{{ w.completionRate | bnNumber }}%</span>
+              <span class="stat-lbl">সফলতার হার</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num">{{ w.experienceYears | bnNumber }} বছর</span>
+              <span class="stat-lbl">বাস্তব অভিজ্ঞতা</span>
+            </div>
+          </div>
+
+          <!-- Bio -->
+          @if (w.bio) {
+            <div class="profile-bio-box">
+              <h4>অভিজ্ঞতার বিবরণ</h4>
+              <p>{{ w.bio }}</p>
+            </div>
+          }
+
+          <!-- Skills -->
+          <div class="profile-skills-box">
+            <h4>বিশেষ পারদর্শিতা</h4>
+            <div class="skills-wrap">
+              @for (skill of w.skills; track skill) {
+                <span class="skill-pill">{{ skill }}</span>
+              }
+            </div>
+          </div>
+
+          <!-- Pricing & Distance -->
+          <div class="profile-price-banner">
+            <div>
+              <span class="pb-label">প্রস্তাবিত পারিশ্রমিক</span>
+              <div class="pb-price">
+                <strong>{{ w.rate | taka }}</strong>
+                <span>/ {{ w.rateUnit === 'job' ? 'ফিক্সড রেট কাজ' : w.rateUnit === 'hour' ? 'প্রতি ঘণ্টা' : 'প্রতি দিন' }}</span>
+              </div>
+            </div>
+            @if (w.distanceKm !== undefined) {
+              <div class="pb-dist">
+                <span>📍 প্রায় {{ w.distanceKm | bnNumber }} কিমি দূরে</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="profile-modal-footer">
+          <button 
+            type="button" 
+            class="btn-fav-toggle" 
+            [class.active]="isFavorite(w.uid)"
+            (click)="toggleFavorite(w)"
+            title="প্রিয় কারিগর হিসেবে সংরক্ষণ করুন"
+          >
+            <span>{{ isFavorite(w.uid) ? '❤️ প্রিয় কারিগর' : '🤍 প্রিয়তে রাখুন' }}</span>
+          </button>
+          <button type="button" class="btn-outline" (click)="closeWorkerProfile()">ফিরে যান</button>
+          <button 
+            type="button" 
+            class="btn-primary" 
+            [disabled]="w.isBusy || !w.isOnline"
+            (click)="startDirectBooking(w)"
+          >
+            {{ w.isBusy ? 'কর্মী বর্তমানে অন্য কাজে ব্যস্ত' : 'সরাসরি বুকিং নিশ্চিত করুন' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Instant Uber-style Booking Request Modal -->
+  @if (showInstantBookingModal()) {
+    <div class="modal-backdrop" (click)="closeInstantBooking()">
+      <div class="modal-card instant-booking-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-icon">{{ bookingMode() === 'scheduled' ? '📅' : bookingMode() === 'bulk_labor' ? '👥' : '⚡' }}</span>
+            <h3 class="modal-title">
+              {{ bookingMode() === 'scheduled' ? 'ভবিষ্যতের জন্য কাজ শিডিউল করুন' : bookingMode() === 'bulk_labor' ? 'দিনমজুর বাল্ক বুকিং (গ্রুপ সার্ভিস)' : 'তাৎক্ষণিক কর্মী ডাকুন (Instant Request)' }}
+            </h3>
+          </div>
+          <button class="close-btn" (click)="closeInstantBooking()">✕</button>
+        </div>
+
+        <div class="instant-modal-body">
+          <!-- Booking Mode Tabs -->
+          <div class="booking-mode-tabs">
+            <button 
+              type="button" 
+              class="mode-tab-btn" 
+              [class.active]="bookingMode() === 'instant'"
+              (click)="setBookingMode('instant')"
+            >
+              <span class="tab-icon">⚡</span>
+              <span class="tab-name">তাৎক্ষণিক কর্মী</span>
+            </button>
+
+            <button 
+              type="button" 
+              class="mode-tab-btn" 
+              [class.active]="bookingMode() === 'scheduled'"
+              (click)="setBookingMode('scheduled')"
+            >
+              <span class="tab-icon">📅</span>
+              <span class="tab-name">শিডিউল বুকিং</span>
+            </button>
+
+            <button 
+              type="button" 
+              class="mode-tab-btn" 
+              [class.active]="bookingMode() === 'bulk_labor'"
+              (click)="setBookingMode('bulk_labor')"
+            >
+              <span class="tab-icon">👥</span>
+              <span class="tab-name">দিনমজুর বাল্ক</span>
+            </button>
+          </div>
+
+          <!-- Bulk Laborer count selector -->
+          @if (bookingMode() === 'bulk_labor') {
+            <div class="bulk-counter-card">
+              <div class="bcc-info">
+                <span class="bcc-title">শ্রমিক সংখ্যা নির্বাচন করুন</span>
+                <span class="bcc-sub">বাসা বদল, মাল ওঠানামা বা মাটির কাজের জন্য</span>
+              </div>
+              <div class="bcc-stepper">
+                <button type="button" class="btn-step" (click)="changeLaborCount(-1)" [disabled]="bulkLaborCount() <= 2">−</button>
+                <span class="count-val">{{ bulkLaborCount() | bnNumber }} জন</span>
+                <button type="button" class="btn-step" (click)="changeLaborCount(1)" [disabled]="bulkLaborCount() >= 10">+</button>
+              </div>
+            </div>
+          }
+
+          <!-- Scheduled Date and Slot selector -->
+          @if (bookingMode() === 'scheduled') {
+            <div class="scheduled-selectors-card">
+              <div class="form-group mb-2">
+                <label class="form-label">কাজের তারিখ</label>
+                <div class="schedule-chips">
+                  @for (d of ['আজ বিকেলে', 'আগামীকাল', 'পরশু দিন', 'শুক্রবার']; track d) {
+                    <button 
+                      type="button" 
+                      class="sch-chip" 
+                      [class.active]="scheduledDate() === d"
+                      (click)="scheduledDate.set(d)"
+                    >
+                      {{ d }}
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">সময় স্লট</label>
+                <div class="schedule-chips">
+                  @for (slot of ['সকাল ৯:০০ - ১২:০০', 'দুপুর ১২:০০ - ৩:০০', 'বিকাল ৩:০০ - ৬:০০', 'সন্ধ্যা ৬:০০ - রাত ৯:০০']; track slot) {
+                    <button 
+                      type="button" 
+                      class="sch-chip" 
+                      [class.active]="scheduledTimeSlot() === slot"
+                      (click)="scheduledTimeSlot.set(slot)"
+                    >
+                      {{ slot }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Category selection (for instant and scheduled) -->
+          @if (bookingMode() !== 'bulk_labor') {
+            <div class="form-group">
+              <label class="form-label">সেবার ধরন নির্বাচন করুন</label>
+              <div class="category-select-grid">
+                @for (cat of categories(); track cat.id) {
+                  <button 
+                    type="button" 
+                    class="cat-option-btn" 
+                    [class.selected]="bookingCategory() === cat.id"
+                    (click)="bookingCategory.set(cat.id)"
+                  >
+                    <span class="co-icon">{{ cat.icon }}</span>
+                    <span class="co-name">{{ cat.nameBn }}</span>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Description -->
+          <div class="form-group">
+            <label class="form-label">কাজের বিবরণ বা সমস্যা সংক্ষেপে লিখুন</label>
+            <textarea 
+              class="form-textarea" 
+              rows="3" 
+              placeholder="যেমন: বাথরুমের পানির কল নষ্ট বা লাইন লিক করছে..." 
+              [ngModel]="bookingDescription()"
+              (ngModelChange)="bookingDescription.set($event)"
+            ></textarea>
+          </div>
+
+          <!-- Address -->
+          <div class="form-group">
+            <label class="form-label">সার্ভিস লোকেশন</label>
+            <div class="location-preview-box">
+              <span class="lpb-icon">📍</span>
+              <span class="lpb-address">{{ userLocation().address || 'সাভার বাজার রোড, সাভার, ঢাকা' }}</span>
+            </div>
+          </div>
+
+          <!-- Payment method -->
+          <div class="form-group">
+            <label class="form-label">পরিশোধের মাধ্যম</label>
+            <div class="payment-methods-grid">
+              <label class="payment-choice" [class.selected]="bookingPaymentMethod() === 'cash'">
+                <input type="radio" name="paymethod" value="cash" [checked]="bookingPaymentMethod() === 'cash'" (change)="bookingPaymentMethod.set('cash')" />
+                <span class="pay-name">💵 কাজ শেষে ক্যাশ</span>
+              </label>
+
+              <label class="payment-choice" [class.selected]="bookingPaymentMethod() === 'bkash'">
+                <input type="radio" name="paymethod" value="bkash" [checked]="bookingPaymentMethod() === 'bkash'" (change)="bookingPaymentMethod.set('bkash')" />
+                <span class="pay-name">📱 বিকাশ (bKash)</span>
+              </label>
+
+              <label class="payment-choice" [class.selected]="bookingPaymentMethod() === 'nagad'">
+                <input type="radio" name="paymethod" value="nagad" [checked]="bookingPaymentMethod() === 'nagad'" (change)="bookingPaymentMethod.set('nagad')" />
+                <span class="pay-name">🟧 নগদ (Nagad)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Estimated pricing notice -->
+          <div class="pricing-summary-card">
+            <div class="ps-row">
+              <span>প্রাথমিক ভিজিট ও পরীক্ষণ ফি:</span>
+              <strong class="ps-val">{{ 350 | taka }}</strong>
+            </div>
+            <p class="ps-note">* কোনো যন্ত্রাংশ বা বাড়তি কাজের প্রয়োজন হলে ওয়ার্কার কাজ শুরুর আগেই কাস্টমারকে মূল্য জানাবেন।</p>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeInstantBooking()">বাতিল</button>
+          <button 
+            type="button" 
+            class="btn-primary" 
+            [disabled]="isSubmittingJob()"
+            (click)="submitInstantBooking()"
+          >
+            @if (isSubmittingJob()) {
+              <span>অনুসন্ধান চলছে...</span>
+            } @else {
+              <span>🚀 এখনই অর্ডার নিশ্চিত করুন</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

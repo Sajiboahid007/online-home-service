@@ -1,0 +1,86 @@
+<div class="sa-dashboard">
+  <div class="page-header">
+    <div>
+      <h2>সার্বিক প্ল্যাটফর্ম রাজস্ব ও কর্মক্ষমতা (Super Admin KPI Dashboard)</h2>
+      <p class="subtitle">বাংলাদেশ জুড়ে কাজখোঁজের রাজস্ব, সক্রিয় কাজ ও নেটওয়ার্ক প্রবৃদ্ধি</p>
+    </div>
+  </div>
+
+  <!-- KPI Metrics Grid -->
+  <div class="kpi-grid">
+    <div class="card kpi-card">
+      <div class="kpi-icon teal"><i class="pi pi-wallet"></i></div>
+      <div class="kpi-meta">
+        <span class="label">মোট প্ল্যাটফর্ম রাজস্ব (GMV)</span>
+        <span class="val">৳১,৮২,৪৫০</span>
+        <span class="trend text-success"><i class="pi pi-arrow-up"></i> +১৮.২% এই মাসে</span>
+      </div>
+    </div>
+
+    <div class="card kpi-card">
+      <div class="kpi-icon orange"><i class="pi pi-percentage"></i></div>
+      <div class="kpi-meta">
+        <span class="label">মোট সংগৃহীত কমিশন</span>
+        <span class="val">৳২৭,৩৬৭</span>
+        <span class="trend text-success">গড় কমিশন ১৫%</span>
+      </div>
+    </div>
+
+    <div class="card kpi-card">
+      <div class="kpi-icon blue"><i class="pi pi-check-circle"></i></div>
+      <div class="kpi-meta">
+        <span class="label">সফলভাবে সম্পন্ন কাজ</span>
+        <span class="val">৫১২ টি</span>
+        <span class="trend text-success">সাফল্যের হার ৯৬.৪%</span>
+      </div>
+    </div>
+
+    <div class="card kpi-card">
+      <div class="kpi-icon purple"><i class="pi pi-users"></i></div>
+      <div class="kpi-meta">
+        <span class="label">মোট সক্রিয় ওয়ার্কার নেটওয়ার্ক</span>
+        <span class="val">৬৮ জন</span>
+        <span class="trend">সাভার ও আশুলিয়া জোন</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Breakdown Sections -->
+  <div class="breakdown-grid">
+    <!-- Area Revenue Breakdown -->
+    <div class="card">
+      <h3>অঞ্চলভিত্তিক রাজস্ব বন্টন (Revenue by Area)</h3>
+      <div class="bars-list mt-3">
+        @for (area of areaRevenue(); track area.name) {
+          <div class="breakdown-item">
+            <div class="item-head">
+              <span>{{ area.name }}</span>
+              <strong>{{ area.revenue | taka }} ({{ area.percentage }}%)</strong>
+            </div>
+            <div class="item-track">
+              <div class="item-fill bg-teal" [style.width.%]="area.percentage"></div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Category Revenue Breakdown -->
+    <div class="card">
+      <h3>ক্যাটাগরিভিত্তিক রাজস্ব (Revenue by Category)</h3>
+      <div class="bars-list mt-3">
+        @for (cat of categoryRevenue(); track cat.name) {
+          <div class="breakdown-item">
+            <div class="item-head">
+              <span>{{ cat.name }}</span>
+              <strong>{{ cat.revenue | taka }} ({{ cat.percentage }}%)</strong>
+            </div>
+            <div class="item-track">
+              <div class="item-fill bg-orange" [style.width.%]="cat.percentage"></div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

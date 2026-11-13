@@ -1,0 +1,459 @@
+<div class="active-job-container">
+  @if (job(); as currentJob) {
+    <!-- Top Action Bar -->
+    <header class="job-action-bar">
+      <div class="bar-left">
+        <a routerLink="/worker/dashboard" class="btn-back">
+          <i class="pi pi-arrow-left"></i>
+          <span>ড্যাশবোর্ড</span>
+        </a>
+        <div class="job-id-pill">
+          <span>জব আইডি:</span>
+          <strong>#{{ currentJob.id }}</strong>
+        </div>
+      </div>
+
+      <div class="bar-right">
+        <button type="button" class="btn-sos" (click)="triggerSosAlert()" title="জরুরি নিরাপত্তা সহায়তা">
+          <i class="pi pi-shield"></i>
+          <span>জরুরি SOS</span>
+        </button>
+        <button type="button" class="btn-cancel" (click)="openCancelDialog()" title="কাজ বাতিল">
+          <span>বাতিল</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Progressive Stepper Header -->
+    <section class="stepper-card">
+      <div class="stepper-track">
+        <!-- Step 1 -->
+        <div class="step-node" [class.active]="currentStep() === 1" [class.completed]="currentStep() > 1">
+          <div class="node-circle">
+            @if (currentStep() > 1) {
+              <i class="pi pi-check"></i>
+            } @else {
+              <span>১</span>
+            }
+          </div>
+          <span class="node-label">রওনা দিন</span>
+        </div>
+        <div class="step-line" [class.completed]="currentStep() > 1"></div>
+
+        <!-- Step 2 -->
+        <div class="step-node" [class.active]="currentStep() === 2" [class.completed]="currentStep() > 2">
+          <div class="node-circle">
+            @if (currentStep() > 2) {
+              <i class="pi pi-check"></i>
+            } @else {
+              <span>২</span>
+            }
+          </div>
+          <span class="node-label">পৌঁছেছি</span>
+        </div>
+        <div class="step-line" [class.completed]="currentStep() > 2"></div>
+
+        <!-- Step 3 -->
+        <div class="step-node" [class.active]="currentStep() === 3" [class.completed]="currentStep() > 3">
+          <div class="node-circle">
+            @if (currentStep() > 3) {
+              <i class="pi pi-check"></i>
+            } @else {
+              <span>৩</span>
+            }
+          </div>
+          <span class="node-label">OTP যাচাই</span>
+        </div>
+        <div class="step-line" [class.completed]="currentStep() > 3"></div>
+
+        <!-- Step 4 -->
+        <div class="step-node" [class.active]="currentStep() === 4" [class.completed]="currentStep() >= 5">
+          <div class="node-circle">
+            @if (currentStep() >= 5) {
+              <i class="pi pi-check"></i>
+            } @else {
+              <span>৪</span>
+            }
+          </div>
+          <span class="node-label">কাজ সম্পন্ন</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Workspace Two-Column Grid -->
+    <div class="workspace-grid">
+      <!-- Left Column: Customer & Job Detail Card -->
+      <div class="customer-job-details">
+        <!-- Customer Info Box -->
+        <div class="card customer-card">
+          <div class="customer-header">
+            <div class="customer-avatar-wrap">
+              <img 
+                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120" 
+                [alt]="currentJob.customerName" 
+                class="customer-avatar" />
+              <div class="rating-badge">
+                ⭐ {{ (currentJob.customerRating || 4.9) | bnNumber }}
+              </div>
+            </div>
+
+            <div class="customer-meta">
+              <h3 class="customer-name">{{ currentJob.customerName }}</h3>
+              <span class="customer-phone">{{ currentJob.customerPhone }}</span>
+              <span class="badge badge-info">ক্যাশ অন সার্ভিস</span>
+            </div>
+
+            <div class="customer-call-action">
+              <a [href]="'tel:' + currentJob.customerPhone" class="btn-call-customer">
+                <i class="pi pi-phone"></i>
+                <span>কল</span>
+              </a>
+              <button type="button" class="btn-chat-customer" (click)="openChat()">
+                <i class="pi pi-comments"></i>
+                <span>চ্যাট</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="address-box">
+            <i class="pi pi-map-marker marker-icon"></i>
+            <div class="address-text">
+              <span class="address-label">কাজের ঠিকানা:</span>
+              <strong>{{ currentJob.location.address }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Job Problem Description Card -->
+        <div class="card problem-card">
+          <div class="problem-header">
+            <div class="category-pill">
+              <i class="pi pi-wrench"></i>
+              <span>{{ currentJob.categoryName }}</span>
+            </div>
+            <div class="header-right-meta">
+              <span class="est-price">বাজেট: {{ currentJob.estimatedPrice | taka }}</span>
+              <span class="time-badge">{{ currentJob.timeline.createdAt | timeAgo }}</span>
+            </div>
+          </div>
+
+          <p class="description-text">
+            "{{ currentJob.description }}"
+          </p>
+
+          @if (currentJob.photos.length > 0) {
+            <div class="job-photos-section">
+              <span class="section-subtitle">কাস্টমারের পাঠানো ছবি:</span>
+              <div class="photos-gallery">
+                @for (img of currentJob.photos; track img) {
+                  <img [src]="img" alt="Job issue" class="gallery-photo" />
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive Progressive Step Action Panel -->
+      <div class="step-interactive-panel card">
+        <!-- STEP 1: রওনা দিন -->
+        @if (currentStep() === 1) {
+          <div class="step-box step-one">
+            <div class="step-header">
+              <div class="step-icon-badge">
+                <i class="pi pi-car"></i>
+              </div>
+              <div>
+                <h3 class="step-title">ধাপ ১: রওনা দেওয়ার প্রস্তুতি</h3>
+                <p class="step-subtitle">আপনি কাজটি গ্রহণ করেছেন। অবিলম্বে কাস্টমারের লোকেশনে রওনা দিন।</p>
+              </div>
+            </div>
+
+            <div class="step-tip-box">
+              <i class="pi pi-info-circle"></i>
+              <span>জরুরি টুলবক্স ও মালামাল সাথে নিয়েছেন কিনা নিশ্চিত করুন। কাস্টমার আপনার আসার অপেক্ষায় আছেন।</span>
+            </div>
+
+            <button type="button" class="btn-step-action btn-travel" (click)="startTrip()">
+              <i class="pi pi-send"></i>
+              <span>আমি কাস্টমারের ঠিকানায় রওনা দিয়েছি</span>
+            </button>
+          </div>
+        }
+
+        <!-- STEP 2: পৌঁছানো নিশ্চিতকরণ -->
+        @if (currentStep() === 2) {
+          <div class="step-box step-two">
+            <div class="step-header">
+              <div class="step-icon-badge icon-arrived">
+                <i class="pi pi-map-marker"></i>
+              </div>
+              <div>
+                <h3 class="step-title">ধাপ ২: গন্তব্যে পৌঁছানো</h3>
+                <p class="step-subtitle">আপনি কাস্টমারের ঠিকানার উদ্দেশ্যে যাত্রা করছেন। ঠিকানায় পৌঁছে বাটনটি চাপুন।</p>
+              </div>
+            </div>
+
+            <div class="travel-status-card">
+              <span class="travel-pulse"></span>
+              <strong>লাইভ ট্রিপ চলমান আছে</strong>
+              <p>কাস্টমার অ্যাপের ম্যাপে আপনার রিয়েল-টাইম অবস্থান দেখতে পাচ্ছেন।</p>
+            </div>
+
+            <button type="button" class="btn-step-action btn-arrived" (click)="markArrived()">
+              <i class="pi pi-check-circle"></i>
+              <span>আমি কাস্টমারের বাসায়/ঠিকানায় পৌঁছেছি</span>
+            </button>
+          </div>
+        }
+
+        <!-- STEP 3: OTP যাচাই -->
+        @if (currentStep() === 3) {
+          <div class="step-box step-three">
+            <div class="step-header">
+              <div class="step-icon-badge icon-otp">
+                <i class="pi pi-key"></i>
+              </div>
+              <div>
+                <h3 class="step-title">ধাপ ৩: কাস্টমারের ৪-সংখ্যার OTP যাচাই</h3>
+                <p class="step-subtitle">কাজ শুরু করার আগে কাস্টমারের ফোন দেখে ৪ সংখ্যার কোডটি চেয়ে নিন।</p>
+              </div>
+            </div>
+
+            <!-- OTP Input 4-digit Boxes -->
+            <div class="otp-inputs-wrapper">
+              <input 
+                id="otp-input-1" 
+                type="text" 
+                maxlength="1" 
+                class="otp-digit-input" 
+                [(ngModel)]="otpDigit1" 
+                (input)="onOtpInput(1, $event)" 
+                autofocus />
+              <input 
+                id="otp-input-2" 
+                type="text" 
+                maxlength="1" 
+                class="otp-digit-input" 
+                [(ngModel)]="otpDigit2" 
+                (input)="onOtpInput(2, $event)" />
+              <input 
+                id="otp-input-3" 
+                type="text" 
+                maxlength="1" 
+                class="otp-digit-input" 
+                [(ngModel)]="otpDigit3" 
+                (input)="onOtpInput(3, $event)" />
+              <input 
+                id="otp-input-4" 
+                type="text" 
+                maxlength="1" 
+                class="otp-digit-input" 
+                [(ngModel)]="otpDigit4" 
+                (input)="onOtpInput(4, $event)" />
+            </div>
+
+            <!-- Demo helper test hint -->
+            <div class="demo-otp-helper">
+              <span>টেস্ট/ডেমো কোড:</span>
+              <button type="button" class="btn-demo-otp" (click)="fillDemoOtp()">
+                অটো-কোড বসান ({{ currentJob.startOtp }})
+              </button>
+            </div>
+
+            @if (otpError()) {
+              <div class="otp-alert alert-error">
+                <i class="pi pi-times-circle"></i>
+                <span>{{ otpError() }}</span>
+              </div>
+            }
+
+            @if (otpSuccess()) {
+              <div class="otp-alert alert-success">
+                <i class="pi pi-check-circle"></i>
+                <span>{{ otpSuccess() }}</span>
+              </div>
+            }
+
+            <button type="button" class="btn-step-action btn-verify-otp" (click)="verifyOtpAndStart()">
+              <i class="pi pi-unlock"></i>
+              <span>OTP যাচাই ও কাজ শুরু করুন</span>
+            </button>
+          </div>
+        }
+
+        <!-- STEP 4: কাজ সম্পন্ন ও বিলিং -->
+        @if (currentStep() === 4) {
+          <div class="step-box step-four">
+            <div class="step-header">
+              <div class="step-icon-badge icon-complete">
+                <i class="pi pi-calculator"></i>
+              </div>
+              <div>
+                <h3 class="step-title">ধাপ ৪: কাজ সম্পন্ন ও বিল হিসাব</h3>
+                <p class="step-subtitle">কাজ শেষ হলে বিলের পরিমাণ ও মালামালের খরচ দিয়ে বিল নিশ্চিত করুন।</p>
+              </div>
+            </div>
+
+            <!-- Billing Form -->
+            <div class="billing-form">
+              <div class="form-group">
+                <label for="laborCost">সার্ভিস পারিশ্রমিক (মজুরি ৳):</label>
+                <div class="input-with-taka">
+                  <span class="taka-symbol">৳</span>
+                  <input 
+                    id="laborCost" 
+                    type="number" 
+                    class="form-control" 
+                    [(ngModel)]="laborCost" 
+                    min="100" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="materialCost">মালামাল বা যন্ত্রাংশ খরচ (প্রযোজ্য হলে ৳):</label>
+                <div class="input-with-taka">
+                  <span class="taka-symbol">৳</span>
+                  <input 
+                    id="materialCost" 
+                    type="number" 
+                    class="form-control" 
+                    [(ngModel)]="materialCost" 
+                    min="0" />
+                </div>
+              </div>
+
+              <!-- Bill Breakdown Summary -->
+              <div class="breakdown-card">
+                <div class="breakdown-row">
+                  <span>কাস্টমার মোট পরিশোধ করবেন:</span>
+                  <strong>{{ totalCustomerBill() | taka }}</strong>
+                </div>
+                <div class="breakdown-row text-muted">
+                  <span>প্ল্যাটফর্ম কমিশন (১৫%):</span>
+                  <span>- {{ commissionAmount() | taka }}</span>
+                </div>
+                <div class="breakdown-divider"></div>
+                <div class="breakdown-row highlight-earning">
+                  <span>আপনার নীট আয়:</span>
+                  <strong class="text-green">{{ netWorkerEarning() | taka }}</strong>
+                </div>
+              </div>
+
+              <!-- After Work Photo Selector -->
+              <div class="after-photo-picker">
+                <label class="picker-label">কাজের পরের ছবি যুক্ত করুন (ঐচ্ছিক):</label>
+                <div class="sample-photos-row">
+                  @for (photo of sampleAfterPhotos; track photo) {
+                    <img 
+                      [src]="photo" 
+                      alt="Sample after work" 
+                      class="sample-photo-thumb"
+                      [class.selected]="afterWorkPhoto() === photo"
+                      (click)="selectAfterPhoto(photo)" />
+                  }
+                </div>
+              </div>
+
+              <button type="button" class="btn-step-action btn-final-complete" (click)="completeActiveJob()">
+                <i class="pi pi-check"></i>
+                <span>কাজ সম্পন্ন হয়েছে নিশ্চিত করুন</span>
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- STEP 5 / Completed View -->
+        @if (currentStep() >= 5) {
+          <div class="step-box step-completed-view">
+            <div class="celebration-icon">
+              <i class="pi pi-check"></i>
+            </div>
+            <h2>অভিনন্দন! কাজ সম্পন্ন হয়েছে 🎉</h2>
+            <p>কাস্টমারের কাছ থেকে নগদ বা অনলাইন পেমেন্ট গ্রহণ সম্পন্ন হয়েছে।</p>
+
+            <div class="completed-summary-pill">
+              <span class="summary-label">আপনার অর্জিত মোট আয়:</span>
+              <span class="summary-val">{{ (currentJob.workerEarning || netWorkerEarning()) | taka }}</span>
+            </div>
+
+            <div class="post-actions">
+              <a routerLink="/worker/dashboard" class="btn-primary">
+                <i class="pi pi-home"></i>
+                <span>ড্যাশবোর্ডে ফিরে যান</span>
+              </a>
+              <a routerLink="/worker/wallet" class="btn-outline">
+                <i class="pi pi-wallet"></i>
+                <span>ওয়ালেট হিসাব দেখুন</span>
+              </a>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <!-- Empty / Not Found State -->
+    <div class="card not-found-card">
+      <i class="pi pi-exclamation-circle not-found-icon"></i>
+      <h3>কোনো সক্রিয় কাজ পাওয়া যায়নি</h3>
+      <p>এই মুহূর্তে আপনার কোনো চলমান কাজ নেই। জব বোর্ড থেকে নতুন কাজ গ্রহণ করতে পারেন।</p>
+      <div class="empty-actions">
+        <a routerLink="/worker/job-board" class="btn-primary">
+          <i class="pi pi-briefcase"></i>
+          <span>জব বোর্ডে কাজ খুঁজুন</span>
+        </a>
+        <a routerLink="/worker/dashboard" class="btn-outline">
+          <i class="pi pi-home"></i>
+          <span>ড্যাশবোর্ড</span>
+        </a>
+      </div>
+    </div>
+  }
+
+  <!-- CANCEL JOB MODAL -->
+  @if (showCancelModal()) {
+    <div class="modal-backdrop">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>কাজ বাতিল করার কারণ</h3>
+          <button type="button" class="btn-close" (click)="closeCancelDialog()">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="warning-text">
+            সতর্কতা: ঘনঘন কাজ বাতিল করলে আপনার গ্রহণযোগ্যতার হার কমে যাবে এবং অ্যাকাউন্টে পেনাল্টি হতে পারে।
+          </p>
+          <div class="form-group">
+            <label for="cancelReason">বাতিলের কারণ উল্লেখ করুন:</label>
+            <select id="cancelReason" class="form-control" [(ngModel)]="cancelReason">
+              <option value="">কারণ নির্বাচন করুন</option>
+              <option value="কাস্টমারের সাথে ফোনে যোগাযোগ সম্ভব হচ্ছে না">কাস্টমারের সাথে ফোনে যোগাযোগ সম্ভব হচ্ছে না</option>
+              <option value="কাজের ঠিকানায় পৌঁছানো সম্ভব নয়">কাজের ঠিকানায় পৌঁছানো সম্ভব নয়</option>
+              <option value="টুলস বা প্রয়োজনীয় পার্টস অমিল">টুলস বা প্রয়োজনীয় পার্টস অমিল</option>
+              <option value="ব্যক্তিগত জরুরি প্রয়োজন">ব্যক্তিগত জরুরি প্রয়োজন</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" (click)="closeCancelDialog()">ফিরে যান</button>
+          <button type="button" class="btn-danger" (click)="confirmCancelJob()">বাতিল নিশ্চিত করুন</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- In-App Chat Modal -->
+  @if (showChatModal() && job(); as j) {
+    <app-job-chat
+      [jobId]="j.id"
+      [currentUserId]="j.workerId || 'worker_rahim_1'"
+      [currentUserName]="j.workerName || 'মোঃ রহিম উদ্দিন'"
+      [currentUserRole]="'worker'"
+      [partnerName]="j.customerName"
+      [partnerPhoto]="'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120'"
+      [partnerRoleBn]="'কাস্টমার'"
+      (closeChat)="closeChat()"
+    ></app-job-chat>
+  }
+</div>

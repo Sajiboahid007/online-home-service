@@ -1,0 +1,140 @@
+.job-history-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px 16px 80px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+    }
+    .subtitle {
+      margin: 4px 0 0 0;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .stats-pill {
+      background: var(--primary-light);
+      color: var(--primary-color);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+  }
+
+  .filter-bar {
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+
+      .tab-btn {
+        background: none;
+        border: none;
+        padding: 6px 14px;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        color: var(--text-secondary);
+
+        &.active {
+          background: var(--primary-color);
+          color: white;
+        }
+      }
+    }
+  }
+
+  .jobs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .job-history-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all 0.2s;
+
+      &:hover {
+        transform: translateY(-2px);
+      }
+
+      .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+
+        .job-id {
+          font-size: 11px;
+          color: var(--text-secondary);
+          font-family: monospace;
+        }
+
+        .job-cat {
+          margin: 2px 0 0 0;
+          font-size: 15px;
+          font-weight: 700;
+        }
+      }
+
+      .job-desc {
+        margin: 0;
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
+
+      .location-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12.5px;
+        color: var(--text-secondary);
+      }
+
+      .card-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 10px;
+        border-top: 1px dashed var(--border-color);
+
+        .time-info {
+          font-size: 12px;
+          color: var(--text-secondary);
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .earnings-box {
+          display: flex;
+          align-items: baseline;
+          gap: 6px;
+
+          .earning-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+          }
+
+          .earning-val {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--accent-color);
+          }
+        }
+      }
+    }
+  }
+}

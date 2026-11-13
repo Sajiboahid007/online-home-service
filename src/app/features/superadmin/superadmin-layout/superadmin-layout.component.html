@@ -1,0 +1,93 @@
+<div class="superadmin-wrapper">
+  <!-- Sidebar -->
+  <aside class="superadmin-sidebar">
+    <div class="sidebar-brand">
+      <div class="crown-icon">👑</div>
+      <div class="brand-text">
+        <span class="brand-title">কাজখোঁজ</span>
+        <span class="brand-sub">সুপার অ্যাডমিন হাব</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/superadmin/dashboard" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-chart-bar"></i>
+        <span>প্ল্যাটফর্ম ড্যাশবোর্ড</span>
+      </a>
+
+      <a routerLink="/superadmin/admins" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-user-plus"></i>
+        <span>এডমিন ম্যানেজমেন্ট</span>
+      </a>
+
+      <a routerLink="/superadmin/categories" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-th-large"></i>
+        <span>সার্ভিস ক্যাটাগরি CRUD</span>
+      </a>
+
+      <a routerLink="/superadmin/dispatch" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-sliders-h"></i>
+        <span>কমিশন ও ডিসপ্যাচ সেটিংস</span>
+      </a>
+
+      <a routerLink="/superadmin/blacklist" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-ban"></i>
+        <span>ব্যান রুলস ও ব্ল্যাকলিস্ট</span>
+      </a>
+
+      <a routerLink="/superadmin/coupons" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-ticket"></i>
+        <span>কুপন ও প্রমোশন কোড</span>
+      </a>
+
+      <a routerLink="/superadmin/audit-logs" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-history"></i>
+        <span>অডিট লগ (Audit Trail)</span>
+      </a>
+
+      <a routerLink="/superadmin/settings" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-cog"></i>
+        <span>প্ল্যাটফর্ম গ্লোবাল সেটিংস</span>
+      </a>
+
+      <div class="nav-divider"></div>
+
+      <a routerLink="/admin/dashboard" class="nav-item zone-admin-link">
+        <i class="pi pi-arrow-left"></i>
+        <span>সাভার জোন এডমিনে যান</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" (click)="logout()">
+        <i class="pi pi-sign-out"></i> লগআউট
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="superadmin-main">
+    <header class="superadmin-topbar">
+      <div class="topbar-title">
+        <h1>সুপার অ্যাডমিন কেন্দ্রীয় নিয়ন্ত্রণ কক্ষ</h1>
+        <span class="status-live">সিস্টেম রিয়েল-টাইম সক্রিয় 🟢</span>
+      </div>
+
+      <div class="topbar-actions">
+        <app-notification-center></app-notification-center>
+
+        <button type="button" class="icon-toggle-btn" (click)="themeService.toggleDarkMode()" [title]="themeService.isDarkMode() ? 'লাইট মোড' : 'ডার্ক মোড'" style="background:none; border:none; cursor:pointer; font-size:16px; padding:6px; color:inherit;">
+          <i class="pi" [ngClass]="themeService.isDarkMode() ? 'pi-sun' : 'pi-moon'"></i>
+        </button>
+
+        <a routerLink="/customer/home" class="btn-outline-sm" target="_blank">
+          <i class="pi pi-external-link"></i> কাস্টমার ভিউ
+        </a>
+      </div>
+    </header>
+
+    <div class="superadmin-content">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

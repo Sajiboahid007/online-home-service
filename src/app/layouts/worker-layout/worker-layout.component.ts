@@ -1,0 +1,88 @@
+import { Component, computed, signal, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule, Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
+import { WorkerService } from '../../core/services/worker.service';
+import { JobService } from '../../core/services/job.service';
+import { ThemeService } from '../../core/services/theme.service';
+import { WorkerProfile } from '../../core/models/worker.model';
+import { NotificationCenterComponent } from '../../shared/components/notification-center/notification-center.component';
+import { BnNumberPipe } from '../../shared/pipes/bn-number.pipe';
+import { TakaPipe } from '../../shared/pipes/taka.pipe';
+
+@Component({
+  selector: 'app-worker-layout',
+  standalone: true,
+  imports: [CommonModule, RouterModule, NotificationCenterComponent, BnNumberPipe, TakaPipe],
+  templateUrl: './worker-layout.component.html',
+  styleUrl: './worker-layout.component.scss'
+})
+export class WorkerLayoutComponent {
+  public authService = inject(AuthService);
+  public workerService = inject(WorkerService);
+  public jobService = inject(JobService);
+  public themeService = inject(ThemeService);
+  private router = inject(Router);
+
+  public mobileMenuOpen = signal<boolean>(false);
+
+  // Fallback to first default worker if session hasn't explicitly selected one
+  public currentWorker = computed<WorkerProfile | null>(() => {
+    const authWorker = this.authService.currentWorker();
+    const uid = authWorker?.uid || 'worker_rahim_1';
+    const found = this.workerService.getWorkerById(uid);
+    if (found) return found;
+    if (authWorker) return authWorker;
+    const defaultFirst = this.workerService.workers()[0];
+    return defaultFirst || null;
+  });
+
+  public currentUser = this.authService.currentUser;
+
+  // Active jobs for current worker (accepted, on_the_way, arrived, in_progress)
+  public activeJob = computed(() => {
+    const worker = this.currentWorker();
+    if (!worker) return null;
+    const activeStatuses = ['accepted', 'on_the_way', 'arrived', 'in_progress'];
+    return this.jobService.jobs().find(j => j.workerId === worker.uid && activeStatuses.includes(j.status)) || null;
+  });
+
+  // Count open jobs on board in worker's category
+  public openJobsCount = computed(() => {
+    const worker = this.currentWorker();
+    const catId = worker?.categoryIds?.[0];
+    return this.jobService.getOpenBoardJobs(catId).length;
+  });
+
+  constructor() {}
+
+  public toggleMobileMenu(): void {
+    this.mobileMenuOpen.update(v => !v);
+  }
+
+  public closeMobileMenu(): void {
+    this.mobileMenuOpen.set(false);
+  }
+
+  public toggleOnline(): void {
+    const worker = this.currentWorker();
+    if (!worker) return;
+
+    const newOnline = !worker.isOnline;
+    this.workerService.toggleOnlineStatus(worker.uid, newOnline);
+  }
+
+  public switchRole(role: 'customer' | 'admin'): void {
+    this.authService.loginAsDemo(role);
+    this.router.navigate([role === 'admin' ? '/admin/dashboard' : '/customer/home']);
+  }
+
+  public switchWorker(workerKey: 'worker' | 'worker_kalam'): void {
+    this.authService.loginAsDemo(workerKey);
+    this.router.navigate(['/worker/dashboard']);
+  }
+
+  public logout(): void {
+    this.authService.logout();
+  }
+}

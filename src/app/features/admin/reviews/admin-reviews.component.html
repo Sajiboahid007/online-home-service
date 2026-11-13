@@ -1,0 +1,62 @@
+<div class="admin-page-container">
+  <div class="page-header">
+    <div>
+      <h2>রিভিউ ও ফিডব্যাক মডারেশন (Reviews Moderation)</h2>
+      <p class="subtitle">গ্রাহক ও কারিগরদের রিভিউ পর্যবেক্ষণ এবং অনৈতিক মন্তব্য গোপন বা মুছে ফেলুন</p>
+    </div>
+    <button class="btn-outline-sm" (click)="exportCsv()">
+      <i class="pi pi-download"></i> CSV ডাউনলোড
+    </button>
+  </div>
+
+  <div class="card table-card">
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>রিভিউ আইডি</th>
+            <th>প্রেরক</th>
+            <th>প্রাপক</th>
+            <th>তারকা (Stars)</th>
+            <th>মন্তব্য ও বিবরণ</th>
+            <th>ট্যাগসমূহ</th>
+            <th>স্ট্যাটাস</th>
+            <th>অ্যাকশন</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (rev of reviews(); track rev.id) {
+            <tr>
+              <td><code>#{{ rev.id }}</code></td>
+              <td><strong>{{ rev.fromName }}</strong></td>
+              <td>{{ rev.toUid }}</td>
+              <td><span class="text-warning font-bold">⭐ {{ rev.stars }}</span></td>
+              <td class="comment-cell">{{ rev.comment }}</td>
+              <td>
+                <div class="tags-row">
+                  @for (t of rev.tags || []; track t) {
+                    <span class="badge badge-neutral">{{ t }}</span>
+                  }
+                </div>
+              </td>
+              <td>
+                @if (rev.isHidden) {
+                  <span class="badge badge-danger">লুকানো (Hidden)</span>
+                } @else {
+                  <span class="badge badge-success">দৃশ্যমান (Public)</span>
+                }
+              </td>
+              <td>
+                <div class="action-btn-group">
+                  <button class="btn-sm" [ngClass]="rev.isHidden ? 'btn-primary' : 'btn-danger'" (click)="toggleHide(rev.id)">
+                    {{ rev.isHidden ? 'দৃশ্যমান করুন' : 'লুকান' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

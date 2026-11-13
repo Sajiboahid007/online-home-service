@@ -1,0 +1,58 @@
+<div class="worker-card" [class.premium]="worker.isPremium">
+  @if (worker.isPremium) {
+    <div class="pro-tag"><i class="pi pi-star-fill"></i> PRO</div>
+  }
+  
+  <div class="worker-card-header">
+    <div class="avatar-wrap">
+      <img [src]="worker.photoURL || 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=150'" [alt]="worker.name" />
+      <span class="status-indicator" [class.online]="worker.isOnline" [class.busy]="worker.isBusy"></span>
+    </div>
+
+    <div class="worker-info">
+      <div class="name-row">
+        <h4>{{ worker.name }}</h4>
+        @if (worker.verified) {
+          <span class="verified-icon" title="ভেরিফাইড কারিগর"><i class="pi pi-check-circle"></i></span>
+        }
+        @if (worker.trustedBadge) {
+          <span class="trusted-icon" title="বিশ্বস্ত কারিগর"><i class="pi pi-shield"></i></span>
+        }
+      </div>
+
+      <div class="rating-row">
+        <app-rating-stars [rating]="worker.rating" [count]="worker.ratingCount"></app-rating-stars>
+        <span class="job-count">({{ worker.totalJobs | bnNumber }} কাজ)</span>
+      </div>
+
+      @if (worker.distanceKm !== undefined) {
+        <div class="distance-text">
+          <i class="pi pi-map-marker"></i>
+          <span>{{ worker.distanceKm.toFixed(1) | bnNumber }} কিমি দূরে</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="skills-row">
+    @for (skill of (worker.skills || []).slice(0, 3); track skill) {
+      <span class="skill-tag">{{ skill }}</span>
+    }
+  </div>
+
+  <div class="worker-card-footer">
+    <div class="price-box">
+      <span class="rate-amount">{{ worker.rate | taka }}</span>
+      <span class="rate-unit">/ {{ worker.rateUnit === 'hour' ? 'ঘণ্টা' : worker.rateUnit === 'day' ? 'দিন' : 'কাজ' }}</span>
+    </div>
+
+    <div class="btn-group">
+      <button type="button" class="btn-outline-sm" (click)="viewProfile.emit(worker)">
+        বিস্তারিত
+      </button>
+      <button type="button" class="btn-primary-sm" (click)="directBook.emit(worker)">
+        সরাসরি বুক
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,144 @@
+<div class="dashboard-wrapper">
+  <!-- Metrics KPI Grid -->
+  <div class="kpi-grid">
+    <div class="kpi-card card">
+      <div class="kpi-icon-box bg-teal">
+        <i class="pi pi-check-circle"></i>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">মোট সফল কাজ</span>
+        <h3 class="kpi-value">{{ totalCompletedJobs() | bnNumber }} টি</h3>
+        <span class="kpi-trend text-success"><i class="pi pi-arrow-up"></i> ৯৮% সম্পন্নতার হার</span>
+      </div>
+    </div>
+
+    <div class="kpi-card card">
+      <div class="kpi-icon-box bg-emerald">
+        <i class="pi pi-bolt"></i>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">অনলাইন ওয়ার্কার</span>
+        <h3 class="kpi-value">{{ onlineWorkersCount() | bnNumber }} জন</h3>
+        <span class="kpi-trend text-primary">সাভার ও আশুলিয়া জোন</span>
+      </div>
+    </div>
+
+    <div class="kpi-card card">
+      <div class="kpi-icon-box bg-orange">
+        <i class="pi pi-wallet"></i>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">মোট প্ল্যাটফর্ম আয়</span>
+        <h3 class="kpi-value">{{ totalPlatformRevenue() | taka }}</h3>
+        <span class="kpi-trend text-warning">১৫% কমিশন হিসাব</span>
+      </div>
+    </div>
+
+    <div class="kpi-card card">
+      <div class="kpi-icon-box bg-rose">
+        <i class="pi pi-exclamation-triangle"></i>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">ওয়ার্কারদের বকেয়া কমিশন</span>
+        <h3 class="kpi-value">{{ totalDueCommission() | taka }}</h3>
+        <span class="kpi-trend text-danger">সীমা অতিক্রম করলে অটো-লক</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Operational Status & Quick Actions -->
+  <div class="dashboard-sections-grid">
+    <!-- Recent Jobs Management -->
+    <div class="section-card card">
+      <div class="section-header">
+        <div>
+          <h3>সাম্প্রতিক সার্ভিস অর্ডার</h3>
+          <p>চলমান ও সম্পন্ন সকল কাজের তালিকা</p>
+        </div>
+        <button routerLink="/admin/live-map" class="btn-outline btn-sm">
+          <i class="pi pi-map-marker"></i> ম্যাপে ট্র্যাক করুন
+        </button>
+      </div>
+
+      <div class="table-container">
+        <table class="kajkhoj-table">
+          <thead>
+            <tr>
+              <th>জব আইডি</th>
+              <th>ক্যাটাগরি</th>
+              <th>কাস্টমার</th>
+              <th>নিয়োগকৃত ওয়ার্কার</th>
+              <th>অবস্থা</th>
+              <th>বিল ও কমিশন</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (job of jobs(); track job.id) {
+              <tr>
+                <td><code>#{{ job.id.substring(job.id.length - 6) }}</code></td>
+                <td>
+                  <span class="cat-pill">{{ job.categoryName }}</span>
+                </td>
+                <td>
+                  <div class="customer-cell">
+                    <strong>{{ job.customerName }}</strong>
+                    <small>{{ job.customerPhone | maskPhone }}</small>
+                  </div>
+                </td>
+                <td>
+                  @if (job.workerName) {
+                    <div class="worker-cell">
+                      <span>{{ job.workerName }}</span>
+                      <small>⭐ ৪.৮</small>
+                    </div>
+                  } @else {
+                    <span class="badge badge-warning">অপেক্ষমাণ</span>
+                  }
+                </td>
+                <td>
+                  <span class="badge" 
+                    [class.badge-success]="job.status === 'completed'"
+                    [class.badge-info]="job.status === 'in_progress' || job.status === 'on_the_way'"
+                    [class.badge-warning]="job.status === 'searching' || job.status === 'pending'">
+                    {{ job.status === 'completed' ? 'সম্পন্ন' : job.status === 'in_progress' ? 'চলমান' : 'খোঁজা হচ্ছে' }}
+                  </span>
+                </td>
+                <td>
+                  <strong>{{ (job.finalPrice || job.estimatedPrice) | taka }}</strong>
+                  <div class="sub-fee">কমিশন: {{ (job.commission || 0) | taka }}</div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Active Areas & Surge Control -->
+    <div class="section-card card">
+      <div class="section-header">
+        <div>
+          <h3>অঞ্চলভিত্তিক চাহিদা ও নিয়ন্ত্রণ</h3>
+          <p>সাভার বিভাগের জোনসমূহ</p>
+        </div>
+      </div>
+
+      <div class="area-list">
+        @for (area of areas(); track area.id) {
+          <div class="area-row">
+            <div class="area-info">
+              <h4>{{ area.zoneName }}</h4>
+              <span>{{ area.upazila }}, {{ area.district }} • ব্যাসার্ধ: {{ area.radiusKm | bnNumber }} কিমি</span>
+            </div>
+            <div class="area-controls">
+              <span class="surge-badge" [class.active]="area.surgeMultiplier > 1.0">
+                সার্জ: {{ area.surgeMultiplier }}x
+              </span>
+              <span class="badge badge-success">সক্রিয়</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

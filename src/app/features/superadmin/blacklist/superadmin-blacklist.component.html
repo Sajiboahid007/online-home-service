@@ -1,0 +1,222 @@
+<div class="sa-blacklist-page">
+  <div class="page-header">
+    <div>
+      <h2>ব্যান রুলস ও ব্ল্যাকলিস্ট ব্যবস্থাপনা (Ban Rules & Blacklist)</h2>
+      <p class="subtitle">স্বয়ংক্রিয় সাসপেনশন শর্তাবলী, স্থায়ী ব্ল্যাকলিস্ট রেকর্ড এবং আবেদন (Appeals) রিভিউ</p>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs-header">
+    <button class="tab-btn" [class.active]="activeTab() === 'rules'" (click)="activeTab.set('rules')">
+      <i class="pi pi-sliders-h"></i> অটো-ব্যান শর্তাবলী (Ban Rules)
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'blacklist'" (click)="activeTab.set('blacklist')">
+      <i class="pi pi-ban"></i> ব্ল্যাকলিস্ট রেকর্ডস ({{ blacklist().length }})
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'appeals'" (click)="activeTab.set('appeals')">
+      <i class="pi pi-envelope"></i> ইউজার আপিল ডেস্ক ({{ pendingAppealsCount() }} পেন্ডিং)
+    </button>
+  </div>
+
+  <!-- TAB 1: Ban Rules -->
+  @if (activeTab() === 'rules') {
+    <div class="card ban-rules-card mt-3">
+      <div class="card-header">
+        <h3><i class="pi pi-shield"></i> স্বয়ংক্রিয় রেটিং ও ক্যান্সেলেশন বরখাস্ত নীতি</h3>
+        <button class="btn-primary" (click)="saveBanRules()">
+          <i class="pi pi-save"></i> রুলস সংরক্ষণ
+        </button>
+      </div>
+
+      <div class="card-body">
+        <p class="description">সিস্টেম স্বয়ংক্রিয়ভাবে ব্যাকগ্রাউন্ডে কর্মীদের পারফরম্যান্স যাচাই করে এই শর্তসাপেক্ষে সতর্কতা অথবা বরখাস্ত করে।</p>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>সতর্কীকরণ রেটিং সীমা (Warning Threshold)</label>
+            <input type="number" [(ngModel)]="warnRating" class="input-field" step="0.1" min="1" max="5" />
+            <small class="hint">রেটিং এর নিচে নামলে কর্মীকে ওয়ার্নিং নোটিফিকেশন পাঠানো হবে (ডিফল্ট ৩.৫)।</small>
+          </div>
+
+          <div class="form-group">
+            <label>বরখাস্তকরণ রেটিং সীমা (Suspension Threshold)</label>
+            <input type="number" [(ngModel)]="suspendRating" class="input-field" step="0.1" min="1" max="5" />
+            <small class="hint">রেটিং এর নিচে নামলে অ্যাকাউন্ট স্বয়ংক্রিয় সাসপেন্ড হবে (ডিফল্ট ২.৫)।</small>
+          </div>
+
+          <div class="form-group">
+            <label>ন্যূনতম সম্পন্ন কাজের সংখ্যা (Min Jobs for Evaluation)</label>
+            <input type="number" [(ngModel)]="minJobsForRating" class="input-field" min="1" max="50" />
+            <small class="hint">সাসপেনশন রুলস কার্যকর হওয়ার পূর্বে ন্যূনতম কাজের সংখ্যা (ডিফল্ট ১০টি)।</small>
+          </div>
+
+          <div class="form-group">
+            <label>সর্বোচ্চ গ্রহণযোগ্য বাতিল হার (Max Cancel Rate %)</label>
+            <input type="number" [(ngModel)]="maxCancelRate" class="input-field" min="5" max="100" />
+            <small class="hint">কাজ গ্রহণের পর ক্যান্সেলেশন অনুপাত এর বেশি হলে একাউন্ট ফ্রিজ হবে (ডিফল্ট ২০%)।</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 2: Blacklist Records -->
+  @if (activeTab() === 'blacklist') {
+    <div class="card mt-3">
+      <div class="card-header">
+        <h3><i class="pi pi-list"></i> ব্ল্যাকলিস্টেড ফোন নম্বর, এনআইডি ও ডিভাইস আইডি</h3>
+        <button class="btn-primary" (click)="showAddModal.set(true)">
+          <i class="pi pi-plus"></i> নতুন এন্ট্রি যুক্ত করুন
+        </button>
+      </div>
+
+      <div class="card-body p-0">
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>আইটেম ধরন</th>
+                <th>মান (Value)</th>
+                <th>ব্যানের কারণ</th>
+                <th>কর্তৃপক্ষ</th>
+                <th>তারিখ</th>
+                <th>পদক্ষেপ</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of blacklist(); track item.id) {
+                <tr>
+                  <td>
+                    <span class="badge" [ngClass]="{
+                      'badge-phone': item.type === 'phone',
+                      'badge-nid': item.type === 'nid',
+                      'badge-device': item.type === 'device'
+                    }">
+                      {{ item.type === 'phone' ? 'ফোন নম্বর' : item.type === 'nid' ? 'জাতীয় পরিচয়পত্র' : 'ডিভাইস আইডি' }}
+                    </span>
+                  </td>
+                  <td><code class="val-code">{{ item.value }}</code></td>
+                  <td>{{ item.reason }}</td>
+                  <td>{{ item.bannedBy }}</td>
+                  <td>{{ item.bannedAt | date:'mediumDate' }}</td>
+                  <td>
+                    <button class="btn-sm btn-outline text-success" (click)="removeBlacklist(item.id)">
+                      <i class="pi pi-unlock"></i> মুক্তি দিন
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 3: User Appeals -->
+  @if (activeTab() === 'appeals') {
+    <div class="card mt-3">
+      <div class="card-header">
+        <h3><i class="pi pi-comments"></i> বরখাস্তকৃত ইউজারদের পুনর্বিবেচনার আবেদন</h3>
+      </div>
+
+      <div class="card-body p-0">
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>আবেদনকারীর নাম</th>
+                <th>ফোন</th>
+                <th>রোল</th>
+                <th>আবেদনের কারণ ও ব্যাখ্যা</th>
+                <th>স্ট্যাটাস</th>
+                <th>তারিখ</th>
+                <th>পদক্ষেপ</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (appeal of appeals(); track appeal.id) {
+                <tr>
+                  <td><strong>{{ appeal.userName }}</strong></td>
+                  <td>{{ appeal.userPhone }}</td>
+                  <td>
+                    <span class="badge" [class.badge-worker]="appeal.userRole === 'worker'" [class.badge-customer]="appeal.userRole === 'customer'">
+                      {{ appeal.userRole === 'worker' ? 'কর্মী' : 'গ্রাহক' }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="appeal-reason">
+                      <strong>{{ appeal.reason }}</strong>
+                      <p class="explanation">{{ appeal.explanation }}</p>
+                      @if (appeal.reviewNote) {
+                        <small class="admin-note">এডমিন নোট: {{ appeal.reviewNote }} ({{ appeal.reviewedBy }})</small>
+                      }
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="{
+                      'badge-warning': appeal.status === 'pending',
+                      'badge-success': appeal.status === 'approved',
+                      'badge-danger': appeal.status === 'rejected'
+                    }">
+                      {{ appeal.status === 'pending' ? 'অপেক্ষমান' : appeal.status === 'approved' ? 'গৃহীত (আনব্যান)' : 'প্রত্যাখ্যাত' }}
+                    </span>
+                  </td>
+                  <td>{{ appeal.submittedAt | date:'mediumDate' }}</td>
+                  <td>
+                    @if (appeal.status === 'pending') {
+                      <div class="action-buttons">
+                        <button class="btn-sm btn-approve" (click)="handleAppeal(appeal.id, true)">
+                          অনুমোদন
+                        </button>
+                        <button class="btn-sm btn-reject" (click)="handleAppeal(appeal.id, false)">
+                          বাতিল
+                        </button>
+                      </div>
+                    } @else {
+                      <span class="text-muted">নিষ্পত্তিকৃত</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Add Blacklist Modal -->
+  @if (showAddModal()) {
+    <div class="modal-backdrop" (click)="showAddModal.set(false)">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <h3>ব্ল্যাকলিস্টে নতুন এন্ট্রি যোগ করুন</h3>
+
+        <div class="form-group my-2">
+          <label>আইটেম ধরন</label>
+          <select [(ngModel)]="newType" class="input-field">
+            <option value="phone">ফোন নম্বর (Phone Number)</option>
+            <option value="nid">জাতীয় পরিচয়পত্র নম্বর (NID)</option>
+            <option value="device">ডিভাইস আইডি (Hardware Device ID)</option>
+          </select>
+        </div>
+
+        <div class="form-group my-2">
+          <label>মান (ফোন নম্বর / NID / Device ID)</label>
+          <input type="text" [(ngModel)]="newValue" class="input-field" placeholder="উদাঃ 01700000000 বা 1990..." />
+        </div>
+
+        <div class="form-group my-2">
+          <label>ব্ল্যাকলিস্ট করার কারণ</label>
+          <textarea [(ngModel)]="newReason" class="input-field" rows="3" placeholder="নির্দিষ্ট কারণ উল্লেখ করুন..."></textarea>
+        </div>
+
+        <div class="modal-actions mt-3">
+          <button class="btn-outline" (click)="showAddModal.set(false)">বাতিল</button>
+          <button class="btn-primary" (click)="addBlacklist()">ব্ল্যাকলিস্টে যুক্ত করুন</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

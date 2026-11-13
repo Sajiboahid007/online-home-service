@@ -1,0 +1,71 @@
+<div class="notification-trigger" (click)="toggleOpen()">
+  <button class="icon-btn" aria-label="Notifications" title="বিজ্ঞপ্তি">
+    <i class="pi pi-bell"></i>
+    @if (unreadCount() > 0) {
+      <span class="badge-dot">{{ unreadCount() }}</span>
+    }
+  </button>
+</div>
+
+@if (isOpen()) {
+  <div class="notification-backdrop" (click)="close()"></div>
+  <div class="notification-drawer">
+    <div class="drawer-header">
+      <div class="header-title">
+        <i class="pi pi-bell text-teal"></i>
+        <h3>বিজ্ঞপ্তিসমূহ</h3>
+        @if (unreadCount() > 0) {
+          <span class="count-pill">{{ unreadCount() }} নতুন</span>
+        }
+      </div>
+      <div class="header-actions">
+        <button class="text-btn" (click)="markAllRead()" title="সব পঠিত চিহ্নিত করুন">
+          <i class="pi pi-check-double"></i>
+        </button>
+        <button class="close-btn" (click)="close()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="notification-list">
+      @if (notifications().length === 0) {
+        <div class="empty-notif">
+          <i class="pi pi-inbox"></i>
+          <p>কোনো নতুন বিজ্ঞপ্তি নেই</p>
+        </div>
+      } @else {
+        @for (item of notifications(); track item.id) {
+          <div class="notif-item" [class.unread]="!item.isRead" (click)="onItemClick(item)">
+            <div class="notif-icon" [ngClass]="item.type">
+              @switch (item.type) {
+                @case ('job_offer') { <i class="pi pi-bolt"></i> }
+                @case ('job_status') { <i class="pi pi-wrench"></i> }
+                @case ('due_warning') { <i class="pi pi-exclamation-triangle"></i> }
+                @case ('safety') { <i class="pi pi-shield"></i> }
+                @case ('payment') { <i class="pi pi-wallet"></i> }
+                @default { <i class="pi pi-info-circle"></i> }
+              }
+            </div>
+            <div class="notif-content">
+              <div class="notif-top">
+                <h4>{{ item.title }}</h4>
+                <span class="notif-time">{{ item.createdAt | timeAgo }}</span>
+              </div>
+              <p>{{ item.body }}</p>
+            </div>
+            @if (!item.isRead) {
+              <div class="unread-dot"></div>
+            }
+          </div>
+        }
+      }
+    </div>
+
+    @if (notifications().length > 0) {
+      <div class="drawer-footer">
+        <button class="clear-btn" (click)="clearAll()">সব মুছুন</button>
+      </div>
+    }
+  </div>
+}

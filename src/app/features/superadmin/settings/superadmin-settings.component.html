@@ -1,0 +1,83 @@
+<div class="sa-settings-page">
+  <div class="page-header">
+    <div>
+      <h2>প্ল্যাটফর্ম গ্লোবাল সেটিংস (Global Settings)</h2>
+      <p class="subtitle">সিস্টেম হেল্পলাইন নম্বর, মেইনটেন্যান্স মোড এবং গোপনীয়তা নীতি নিয়ন্ত্রণ</p>
+    </div>
+    <button class="btn-primary" (click)="saveSettings()">
+      <i class="pi pi-check"></i> সেটিংস সংরক্ষণ করুন
+    </button>
+  </div>
+
+  <div class="settings-grid">
+    <!-- Platform Status & Maintenance Mode Card -->
+    <div class="card">
+      <div class="card-header">
+        <i class="pi pi-power-off card-icon"></i>
+        <h3>প্ল্যাটফর্ম অবস্থা ও রক্ষণাবেক্ষণ (Maintenance)</h3>
+      </div>
+      <div class="card-body">
+        <div class="switch-row">
+          <div>
+            <strong>মেইনটেন্যান্স মোড (Maintenance Mode)</strong>
+            <p class="subtext">সক্রিয় থাকলে সাধারণ গ্রাহক ও কর্মীরা অ্যাপে প্রবেশ করতে পারবেন না এবং নোটিশ দেখতে পাবেন।</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" [(ngModel)]="maintenanceMode" />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        @if (maintenanceMode) {
+          <div class="alert-box warning-alert">
+            <i class="pi pi-exclamation-triangle"></i>
+            <span>সতর্কতা: মেইনটেন্যান্স মোড সক্রিয় আছে। প্ল্যাটফর্মে স্বাভাবিক ট্রাফিক বন্ধ রয়েছে।</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Privacy and Phone Masking Card -->
+    <div class="card">
+      <div class="card-header">
+        <i class="pi pi-shield card-icon"></i>
+        <h3>গোপনীয়তা ও ফোন আনমাস্কিং (Privacy Policy)</h3>
+      </div>
+      <div class="card-body">
+        <div class="switch-row">
+          <div>
+            <strong>বুকিংয়ের পূর্বে সম্পূর্ণ ফোন নম্বর প্রদর্শন</strong>
+            <p class="subtext">বন্ধ থাকলে বুকিং নিশ্চিত হওয়া ও স্টার্ট ওটিপির পূর্বে ফোন নম্বর মাস্ক করা থাকবে (017****1234)।</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" [(ngModel)]="showFullPhoneBeforeBooking" />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact & Helpline Card -->
+    <div class="card full-col">
+      <div class="card-header">
+        <i class="pi pi-phone card-icon"></i>
+        <h3>কাস্টমার কেয়ার ও সাপোর্ট হটলাইন</h3>
+      </div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group col">
+            <label>জরুরি সাপোর্ট ফোন নম্বর (Helpdesk Phone)</label>
+            <input type="text" [(ngModel)]="supportPhone" class="input-field" placeholder="01700-000000" />
+            <small class="hint">গ্রাহক ও কর্মীর সহায়তা মেনুতে এবং SOS হটলাইনে এই নম্বর প্রদর্শিত হয়।</small>
+          </div>
+
+          <div class="form-group col">
+            <label>প্ল্যাটফর্ম ব্যাকআপ ফ্রিকোয়েন্সি (Firestore Backup)</label>
+            <input type="text" class="input-field" value="প্রতি ২৪ ঘণ্টা (স্বয়ংক্রিয় ক্লাউড স্ন্যাপশট)" disabled />
+            <small class="hint">Firebase Automated Cloud Backup Policy active.</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

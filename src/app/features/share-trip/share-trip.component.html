@@ -1,0 +1,67 @@
+<div class="share-trip-container" *ngIf="job(); else loading">
+  <div class="top-brand-bar">
+    <div class="brand">
+      <span class="logo-icon">🛠️</span>
+      <span class="brand-name">কাজখোঁজ</span>
+    </div>
+    <div class="live-pill">
+      <span class="pulse-dot"></span> লাইভ ট্র্যাকিং
+    </div>
+  </div>
+
+  <div class="tracking-map-wrap">
+    <div #mapContainer class="live-map"></div>
+
+    <div class="floating-eta-card">
+      <div class="eta-left">
+        <span class="eta-label">আনুমানিক পৌঁছানোর সময়</span>
+        <span class="eta-time">{{ etaMinutes() | bnNumber }} মিনিট</span>
+      </div>
+      <div class="eta-status">
+        @switch (job()!.status) {
+          @case ('on_the_way') { <span class="badge badge-warning">পথে আছেন</span> }
+          @case ('arrived') { <span class="badge badge-info">পৌঁছে গেছেন</span> }
+          @case ('in_progress') { <span class="badge badge-success">কাজ চলমান</span> }
+          @case ('completed') { <span class="badge badge-success">কাজ সম্পন্ন</span> }
+          @default { <span class="badge badge-neutral">প্রক্রিয়াধীন</span> }
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="trip-details-card">
+    <div class="worker-profile-row">
+      <img [src]="job()!.workerPhoto || 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=150'" [alt]="job()!.workerName" class="avatar" />
+      <div class="worker-meta">
+        <h3>{{ job()!.workerName || 'মো: রহিম উদ্দিন' }}</h3>
+        <p class="category-text">{{ job()!.categoryName }}</p>
+        <span class="rating-badge">⭐ ৪.৮ (৩৮টি কাজ)</span>
+      </div>
+      <a [href]="'tel:' + (job()!.workerPhone || '01711223344')" class="call-btn" title="ফোন করুন">
+        <i class="pi pi-phone"></i>
+      </a>
+    </div>
+
+    <div class="trip-destination">
+      <i class="pi pi-map-marker text-teal"></i>
+      <div>
+        <span class="label">সেবার গন্তব্যস্থল:</span>
+        <p class="address">{{ job()!.location.address || 'সাভার বাজার, সাভার, ঢাকা' }}</p>
+      </div>
+    </div>
+
+    <div class="emergency-safety-box">
+      <div class="safety-icon"><i class="pi pi-shield"></i></div>
+      <div class="safety-content">
+        <strong>কাজখোঁজ নিরাপত্তা প্রটোকল</strong>
+        <p>যেকোনো জরুরি প্রয়োজনে সাভার হেল্পলাইন নম্বরে যোগাযোগ করুন: <a href="tel:01700000000">০১৭০০০০০০০০</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="p-5 text-center">
+    <app-skeleton-loader height="350px"></app-skeleton-loader>
+  </div>
+</ng-template>

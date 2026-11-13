@@ -1,0 +1,76 @@
+<div class="verification-page">
+  <div class="page-header">
+    <div>
+      <h2>ওয়ার্কার ভেরিফিকেশন কিউ (KYC রিভিউ)</h2>
+      <p>নিরাপত্তা নিশ্চিত করতে NID ও সেলফি যাচাই করে অনুমোদন দিন</p>
+    </div>
+    <span class="badge badge-info">পেন্ডিং: {{ pendingWorkers().length | bnNumber }} জন</span>
+  </div>
+
+  @if (pendingWorkers().length === 0) {
+    <div class="card empty-card">
+      <i class="pi pi-verified check-icon"></i>
+      <h3>কোনো নতুন ভেরিফিকেশন পেন্ডিং নেই!</h3>
+      <p>সাভার জোনের সকল ওয়ার্কারের তথ্য যাচাই সম্পন্ন হয়েছে।</p>
+    </div>
+  } @else {
+    <div class="verification-grid">
+      @for (worker of pendingWorkers(); track worker.uid) {
+        <div class="worker-kyc-card card">
+          <div class="kyc-header">
+            <img [src]="worker.photoURL" [alt]="worker.name" class="avatar" />
+            <div class="info">
+              <h3>{{ worker.name }}</h3>
+              <span>ফোন: {{ worker.phone }}</span>
+              <span>অভিজ্ঞতা: {{ worker.experienceYears | bnNumber }} বছর</span>
+            </div>
+            <span class="badge badge-warning">পেন্ডিং রিভিউ</span>
+          </div>
+
+          <div class="kyc-details">
+            <div class="detail-group">
+              <label>হোম লোকেশন (বাধ্যতামূলক পিন):</label>
+              <p>📍 {{ worker.homeLocation.address || 'সাভার বাজার, সাভার' }} ({{ worker.homeLocation.lat }}, {{ worker.homeLocation.lng }})</p>
+            </div>
+
+            <div class="detail-group">
+              <label>স্কিল ও ক্যাটাগরি:</label>
+              <div class="skills-chips">
+                @for (skill of worker.skills; track skill) {
+                  <span class="skill-tag">{{ skill }}</span>
+                }
+              </div>
+            </div>
+
+            <div class="detail-group">
+              <label>প্রস্তাবিত রেট:</label>
+              <p class="rate-text">৳{{ worker.rate | bnNumber }} / {{ worker.rateUnit === 'job' ? 'কাজ' : 'ঘণ্টা' }}</p>
+            </div>
+
+            <!-- NID & Selfie Document Previews -->
+            <div class="documents-preview">
+              <div class="doc-box">
+                <span class="doc-title">NID কার্ড (সামনের অংশ)</span>
+                <img src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=300" alt="NID Front" class="doc-img" />
+              </div>
+
+              <div class="doc-box">
+                <span class="doc-title">লাইভ সেলফি</span>
+                <img [src]="worker.photoURL" alt="Selfie" class="doc-img" />
+              </div>
+            </div>
+          </div>
+
+          <div class="kyc-actions">
+            <button (click)="reject(worker.uid)" class="btn-reject">
+              <i class="pi pi-times"></i> বাতিল করুন
+            </button>
+            <button (click)="approve(worker.uid)" class="btn-approve">
+              <i class="pi pi-check"></i> অনুমোদন দিন (Verify)
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

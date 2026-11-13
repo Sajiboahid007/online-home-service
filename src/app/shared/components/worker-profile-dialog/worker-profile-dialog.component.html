@@ -1,0 +1,95 @@
+@if (visible()) {
+  <div class="dialog-backdrop" (click)="close()"></div>
+  <div class="dialog-modal">
+    <button class="close-icon-btn" (click)="close()" title="বন্ধ করুন">
+      <i class="pi pi-times"></i>
+    </button>
+
+    @if (worker) {
+      <div class="dialog-header">
+        <div class="avatar-col">
+          <img [src]="worker.photoURL || 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=150'" [alt]="worker.name" />
+          <span class="status-indicator" [class.online]="worker.isOnline" [class.busy]="worker.isBusy"></span>
+        </div>
+        <div class="header-details">
+          <div class="name-line">
+            <h3>{{ worker.name }}</h3>
+            @if (worker.verified) {
+              <span class="badge badge-success"><i class="pi pi-check-circle"></i> ভেরিফাইড</span>
+            }
+            @if (worker.trustedBadge) {
+              <span class="badge badge-info"><i class="pi pi-shield"></i> বিশ্বস্ত</span>
+            }
+          </div>
+          <p class="phone-masked"><i class="pi pi-phone"></i> {{ worker.phoneMasked }}</p>
+          <div class="stats-row">
+            <app-rating-stars [rating]="worker.rating" [count]="worker.ratingCount"></app-rating-stars>
+            <span class="divider">|</span>
+            <span>{{ worker.totalJobs | bnNumber }} কাজ সম্পন্ন</span>
+            <span class="divider">|</span>
+            <span>{{ ((worker.completionRate || 1) * 100).toFixed(0) | bnNumber }}% সফল</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dialog-body">
+        @if (worker.bio) {
+          <div class="section-block">
+            <h4>পরিচয় ও অভিজ্ঞতা</h4>
+            <p class="bio-text">{{ worker.bio }}</p>
+          </div>
+        }
+
+        <div class="section-block">
+          <h4>দক্ষতাসমূহ</h4>
+          <div class="chips-wrap">
+            @for (skill of worker.skills || []; track skill) {
+              <span class="skill-chip"><i class="pi pi-wrench"></i> {{ skill }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-box">
+            <span class="info-label">সার্ভিস ফি</span>
+            <span class="info-val text-accent">{{ worker.rate | taka }} / {{ worker.rateUnit === 'hour' ? 'ঘণ্টা' : worker.rateUnit === 'day' ? 'দিন' : 'কাজ' }}</span>
+          </div>
+          <div class="info-box">
+            <span class="info-label">সার্ভিস রেডিয়াস</span>
+            <span class="info-val">{{ worker.serviceRadiusKm | bnNumber }} কিমি এলাকা</span>
+          </div>
+          <div class="info-box">
+            <span class="info-label">কাজের অভিজ্ঞতা</span>
+            <span class="info-val">{{ worker.experienceYears | bnNumber }} বছর</span>
+          </div>
+          <div class="info-box">
+            <span class="info-label">বর্তমান অবস্থান</span>
+            <span class="info-val">{{ worker.homeLocation.address || 'সাভার বাজার' }}</span>
+          </div>
+        </div>
+
+        @if (worker.portfolio && worker.portfolio.length > 0) {
+          <div class="section-block">
+            <h4>পোর্টফোলিও ও কাজের ছবি</h4>
+            <div class="portfolio-grid">
+              @for (img of worker.portfolio; track img) {
+                <img [src]="img" alt="Portfolio work" />
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="dialog-footer">
+        <button type="button" class="btn-favorite" (click)="toggleFav()">
+          <i class="pi" [ngClass]="isFav() ? 'pi-heart-fill text-danger' : 'pi-heart'"></i>
+          {{ isFav() ? 'প্রিয় তালিকাভুক্ত' : 'প্রিয়তে রাখুন' }}
+        </button>
+
+        <button type="button" class="btn-book-direct" (click)="onBook()">
+          <i class="pi pi-bolt"></i> সরাসরি বুক করুন ({{ worker.rate | taka }})
+        </button>
+      </div>
+    }
+  </div>
+}

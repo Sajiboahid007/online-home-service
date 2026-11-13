@@ -1,0 +1,105 @@
+<div class="edit-profile-page" *ngIf="worker(); else loading">
+  <div class="page-header">
+    <div>
+      <h2>প্রোফাইল সম্পাদনা ও স্কিল আপডেট</h2>
+      <p class="subtitle">আপনার রেট, কাজের এলাকা, স্কিল ও পোর্টফোলিও পরিচালনা করুন</p>
+    </div>
+  </div>
+
+  @if (hasCancellationWarning()) {
+    <div class="card warning-card">
+      <i class="pi pi-exclamation-triangle"></i>
+      <div>
+        <strong>সতর্কতা: উচ্চ কাজ বাতিলের হার ({{ (worker()!.cancelRate * 100).toFixed(0) | bnNumber }}%)</strong>
+        <p>কাজ গ্রহণ করার পর ঘন ঘন বাতিল করলে ২৪ ঘণ্টার জন্য সাময়িক বরখাস্ত হতে পারেন। দয়া করে সতর্ক থাকুন।</p>
+      </div>
+    </div>
+  }
+
+  <div class="edit-grid">
+    <div class="card main-form">
+      <h3>রেট ও কাজের ব্যাসার্ধ নির্ধারণ</h3>
+
+      <div class="form-group">
+        <div class="label-row">
+          <label>সার্ভিস ফি / পারিশ্রমিক (টাকা)</label>
+          @if (canRewardRate()) {
+            <span class="reward-pill"><i class="pi pi-gift"></i> রেট রিওয়ার্ড সক্রিয় (২০% বেশি রেট অনুমোদন)</span>
+          }
+        </div>
+        <input type="number" [(ngModel)]="rate" class="input-field" [min]="minRateLimit()" [max]="maxRateLimit()" />
+        <span class="hint-text">প্ল্যাটফর্ম অনুমোদিত সীমা: ৳{{ minRateLimit() }} - ৳{{ maxRateLimit() }}</span>
+      </div>
+
+      <div class="form-group">
+        <label>রেটের একক (Unit)</label>
+        <select [(ngModel)]="rateUnit" class="input-field">
+          <option value="job">প্রতি কাজের জন্য (Per Job)</option>
+          <option value="hour">প্রতি ঘণ্টা (Hourly)</option>
+          <option value="day">প্রতি দিন (Daily)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>সার্ভিস রেডিয়াস (কত কিমি দূর পর্যন্ত সেবা দেবেন)</label>
+        <input type="number" [(ngModel)]="serviceRadiusKm" class="input-field" min="1" max="25" />
+        <span class="hint-text">সর্বোচ্চ ২৫ কিমি ব্যাসার্ধ পর্যন্ত সমর্থনযোগ্য</span>
+      </div>
+
+      <div class="form-group">
+        <label>নিজের সম্পর্কে বিবরণ (Bio)</label>
+        <textarea [(ngModel)]="bio" class="input-field" rows="3" placeholder="আপনার অভিজ্ঞতা ও কাজের ধরন সংক্ষেপে লিখুন..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>দক্ষতাসমূহ (Skills)</label>
+        <div class="skills-input-row">
+          <input type="text" [(ngModel)]="newSkill" class="input-field" placeholder="নতুন স্কিল লিখুন (উদাঃ পাইপ ফিটিং)" (keyup.enter)="addSkill()" />
+          <button type="button" class="btn-outline-sm" (click)="addSkill()">যোগ করুন</button>
+        </div>
+        <div class="skills-tags">
+          @for (s of skills(); track s; let idx = $index) {
+            <span class="skill-tag">
+              {{ s }}
+              <i class="pi pi-times remove-icon" (click)="removeSkill(idx)"></i>
+            </span>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Portfolio Photos Management -->
+    <div class="card portfolio-manage-card">
+      <h3>কাজের পোর্টফোলিও ও ছবি (Portfolio)</h3>
+      <p class="subtitle">আপনার নিখুঁত কাজের আগের ও পরের ছবি আপলোড করুন</p>
+
+      <app-image-uploader label="পোর্টফোলিওতে নতুন ছবি যোগ করুন" (imageSelected)="uploadPortfolioPhoto($event)"></app-image-uploader>
+
+      <div class="portfolio-list">
+        @for (img of portfolio(); track img; let idx = $index) {
+          <div class="portfolio-thumb">
+            <img [src]="img" alt="Portfolio thumbnail" />
+            <button class="thumb-delete" (click)="deletePortfolio(idx)" title="ছবি মুছুন">
+              <i class="pi pi-trash"></i>
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="save-bar">
+    @if (saveSuccess()) {
+      <span class="text-success font-bold"><i class="pi pi-check"></i> প্রোফাইল সফলভাবে আপডেট হয়েছে!</span>
+    }
+    <button type="button" class="btn-primary px-5 py-3" (click)="saveProfile()">
+      <i class="pi pi-save"></i> পরিবর্তনসমূহ সংরক্ষণ করুন
+    </button>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="p-5 text-center">
+    <app-skeleton-loader height="300px"></app-skeleton-loader>
+  </div>
+</ng-template>

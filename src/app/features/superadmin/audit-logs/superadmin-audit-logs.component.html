@@ -1,0 +1,83 @@
+<div class="sa-audit-page">
+  <div class="page-header">
+    <div>
+      <h2>অডিট ট্রেইল ও সিস্টেম লগ (Audit Logs)</h2>
+      <p class="subtitle">প্রশাসনিক কার্যকলাপ, সেটিংস পরিবর্তন এবং স্পর্শকাতর সিস্টেম অ্যাকশনের অপরিবর্তনীয় রেকর্ড</p>
+    </div>
+    <button class="btn-outline" (click)="exportLogs()">
+      <i class="pi pi-download"></i> CSV এক্সপোর্ট
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="card filter-card mb-3">
+    <div class="filter-row">
+      <div class="search-wrap">
+        <i class="pi pi-search search-icon"></i>
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          class="search-input"
+          placeholder="অ্যাকশন, কর্মকর্তা বা বিবরণ খুঁজুন..."
+        />
+      </div>
+
+      <div class="filter-group">
+        <label>টার্গেট ধরন:</label>
+        <select [(ngModel)]="selectedType" class="select-field">
+          <option value="all">সকল ধরন (All)</option>
+          <option value="worker">ওয়ার্কার (Worker)</option>
+          <option value="user">ইউজার (User)</option>
+          <option value="settings">সেটিংস (Settings)</option>
+          <option value="pricing">প্রাইসিং (Pricing)</option>
+          <option value="area">এলাকা (Area)</option>
+          <option value="category">ক্যাটাগরি (Category)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logs Table -->
+  <div class="card table-card">
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>সময়কাল (Timestamp)</th>
+            <th>কর্মকর্তা (Actor)</th>
+            <th>অ্যাকশন (Action)</th>
+            <th>টার্গেট (Target)</th>
+            <th>বিবরণ ও কারণ (Details)</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (log of filteredLogs(); track log.id) {
+            <tr>
+              <td class="time-col">{{ log.createdAt | date:'medium' }}</td>
+              <td>
+                <strong>{{ log.actorName }}</strong>
+                <span class="role-badge" [class.badge-super]="log.actorRole === 'superadmin'">
+                  {{ log.actorRole }}
+                </span>
+              </td>
+              <td>
+                <span class="action-tag">{{ log.action }}</span>
+              </td>
+              <td>
+                <span class="target-badge">{{ log.targetType }}</span>
+                <code class="target-id">{{ log.targetId }}</code>
+              </td>
+              <td class="reason-col">
+                {{ log.reason || '-' }}
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="empty-col">কোনো অডিট লগ পাওয়া যায়নি।</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

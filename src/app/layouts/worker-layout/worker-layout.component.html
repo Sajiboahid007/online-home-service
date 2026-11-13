@@ -1,0 +1,336 @@
+<div class="worker-layout-wrapper">
+  <!-- Topbar -->
+  <header class="worker-topbar">
+    <div class="topbar-inner">
+      <!-- Left: Brand & Mobile Menu Toggle -->
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" (click)="toggleMobileMenu()" aria-label="মেনু খুলুন">
+          <i class="pi" [class.pi-bars]="!mobileMenuOpen()" [class.pi-times]="mobileMenuOpen()"></i>
+        </button>
+        <a routerLink="/worker/dashboard" class="worker-brand">
+          <div class="brand-logo-badge">
+            <i class="pi pi-wrench"></i>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">কাজখোঁজ</span>
+            <span class="brand-tag">ওয়ার্কার হাব</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Center: Live Status, Online Switch, Wallet & Due -->
+      <div class="topbar-center">
+        <!-- Live Online/Offline Switch -->
+        <div class="online-switch-container" [class.is-online]="currentWorker()?.isOnline">
+          <button 
+            type="button" 
+            class="status-toggle-btn" 
+            (click)="toggleOnline()"
+            [attr.aria-pressed]="currentWorker()?.isOnline"
+            [title]="currentWorker()?.isOnline ? 'ক্লিক করে অফলাইন করুন' : 'ক্লিক করে অনলাইন হন'">
+            <span class="toggle-slider">
+              <span class="toggle-knob"></span>
+            </span>
+            <span class="toggle-label">
+              @if (currentWorker()?.isOnline) {
+                <span class="pulse-indicator"></span>
+                <span class="text-online">অনলাইন</span>
+              } @else {
+                <span class="text-offline">অফলাইন</span>
+              }
+            </span>
+          </button>
+        </div>
+
+        <!-- Busy / Free Status Badge -->
+        <div class="busy-status-badge">
+          @if (!currentWorker()?.isOnline) {
+            <span class="badge badge-offline">
+              <i class="pi pi-moon"></i> বিশ্রামে আছেন
+            </span>
+          } @else if (currentWorker()?.isBusy) {
+            <span class="badge badge-busy">
+              <i class="pi pi-clock"></i> কাজে ব্যস্ত
+            </span>
+          } @else {
+            <span class="badge badge-ready">
+              <i class="pi pi-check-circle"></i> নতুন কাজের অপেক্ষায়
+            </span>
+          }
+        </div>
+
+        <!-- Wallet Balance Chip -->
+        <a routerLink="/worker/wallet" class="stat-chip wallet-chip" title="ওয়ালেট ব্যালেন্স দেখুন">
+          <i class="pi pi-wallet stat-icon"></i>
+          <span class="stat-label">ব্যালেন্স:</span>
+          <span class="stat-value">{{ (currentWorker()?.walletBalance || 0) | taka }}</span>
+        </a>
+
+        <!-- Commission Due Badge -->
+        <a 
+          routerLink="/worker/wallet" 
+          class="stat-chip due-chip" 
+          [class.due-danger]="(currentWorker()?.commissionDue || 0) >= 400"
+          title="বকেয়া কমিশন ট্র্যাকার">
+          <i class="pi pi-exclamation-circle stat-icon"></i>
+          <span class="stat-label">বকেয়া কমিশন:</span>
+          <span class="stat-value">{{ (currentWorker()?.commissionDue || 0) | taka }}</span>
+          @if ((currentWorker()?.commissionDue || 0) >= 400) {
+            <span class="due-warning-tag">⚠️ সীমা ৫০০</span>
+          }
+        </a>
+
+        <!-- Active Job Quick Indicator -->
+        @if (activeJob(); as job) {
+          <a [routerLink]="['/worker/active', job.id]" class="active-job-indicator" title="চলমান কাজ দেখুন">
+            <span class="active-pulse"></span>
+            <i class="pi pi-spin pi-cog"></i>
+            <span>১টি কাজ চলমান</span>
+          </a>
+        }
+      </div>
+
+      <!-- Right: Worker Profile & Switcher -->
+      <div class="topbar-right">
+        <!-- Notification Center & Dark mode -->
+        <app-notification-center></app-notification-center>
+
+        <button type="button" class="icon-toggle-btn" (click)="themeService.toggleDarkMode()" [title]="themeService.isDarkMode() ? 'লাইট মোড' : 'ডার্ক মোড'" style="background:none; border:none; cursor:pointer; font-size:16px; padding:6px; color:inherit;">
+          <i class="pi" [ngClass]="themeService.isDarkMode() ? 'pi-sun' : 'pi-moon'"></i>
+        </button>
+
+        <!-- Desktop Role Switcher -->
+        <div class="quick-role-switch">
+          @if (currentWorker()?.uid === 'worker_rahim_1') {
+            <button (click)="switchWorker('worker_kalam')" class="role-btn plumber-switch-btn" title="কালাম প্লাম্বার অ্যাকাউন্টে সুইচ করুন">
+              <span>🚰 প্লাম্বার কালামে যান</span>
+            </button>
+          } @else {
+            <button (click)="switchWorker('worker')" class="role-btn plumber-switch-btn" title="রহিম প্লাম্বার অ্যাকাউন্টে সুইচ করুন">
+              <span>🔧 প্লাম্বার রহিমে যান</span>
+            </button>
+          }
+          <button (click)="switchRole('customer')" class="role-btn" title="কাস্টমার মোডে যান">
+            <i class="pi pi-user"></i>
+            <span>কাস্টমার অ্যাপ</span>
+          </button>
+          <button (click)="switchRole('admin')" class="role-btn" title="অ্যাডমিন প্যানেলে যান">
+            <i class="pi pi-shield"></i>
+            <span>অ্যাডমিন</span>
+          </button>
+        </div>
+
+        <!-- Worker Mini Profile -->
+        <div class="worker-profile-pill">
+          <img 
+            [src]="currentWorker()?.photoURL || 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=100'" 
+            [alt]="currentWorker()?.name" 
+            class="profile-avatar" />
+          <div class="profile-meta">
+            <span class="profile-name">{{ currentWorker()?.name }}</span>
+            <div class="profile-sub">
+              <span class="rating">⭐ {{ (currentWorker()?.rating || 5.0) | bnNumber }}</span>
+              @if (currentWorker()?.verified) {
+                <span class="verified-icon" title="ভেরিফায়েড কারিগর">✔</span>
+              }
+            </div>
+          </div>
+          <button (click)="logout()" class="logout-icon-btn" title="লগআউট করুন">
+            <i class="pi pi-sign-out"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secondary Nav Bar (Desktop Navigation) -->
+    <nav class="worker-desktop-nav">
+      <div class="nav-links">
+        <a 
+          routerLink="/worker/dashboard" 
+          routerLinkActive="active" 
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-tab">
+          <i class="pi pi-home"></i>
+          <span>ড্যাশবোর্ড</span>
+        </a>
+
+        @if (activeJob(); as job) {
+          <a 
+            [routerLink]="['/worker/active', job.id]" 
+            routerLinkActive="active" 
+            class="nav-tab nav-tab-active-job">
+            <i class="pi pi-bolt"></i>
+            <span>সক্রিয় কাজ</span>
+            <span class="tab-badge-pulse">চলমান</span>
+          </a>
+        }
+
+        <a 
+          routerLink="/worker/job-board" 
+          routerLinkActive="active" 
+          class="nav-tab">
+          <i class="pi pi-briefcase"></i>
+          <span>জব বোর্ড</span>
+          @if (openJobsCount() > 0) {
+            <span class="tab-badge">{{ openJobsCount() | bnNumber }}</span>
+          }
+        </a>
+
+        <a 
+          routerLink="/worker/wallet" 
+          routerLinkActive="active" 
+          class="nav-tab">
+          <i class="pi pi-wallet"></i>
+          <span>ওয়ালেট ও হিসাব</span>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Mobile Drawer Menu (Overlay) -->
+  @if (mobileMenuOpen()) {
+    <div class="mobile-drawer-backdrop" (click)="closeMobileMenu()"></div>
+    <aside class="mobile-drawer">
+      <div class="drawer-header">
+        <div class="drawer-user">
+          <img [src]="currentWorker()?.photoURL" class="drawer-avatar" alt="User Avatar" />
+          <div>
+            <h4>{{ currentWorker()?.name }}</h4>
+            <span class="worker-category">{{ currentWorker()?.skills?.[0] || 'কারিগর' }}</span>
+          </div>
+        </div>
+        <button class="drawer-close-btn" (click)="closeMobileMenu()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <!-- Online status in mobile drawer -->
+      <div class="drawer-status-card" [class.is-online]="currentWorker()?.isOnline">
+        <div class="status-info">
+          <span>ওয়ার্ক স্ট্যাটাস:</span>
+          <strong>{{ currentWorker()?.isOnline ? '🟢 অনলাইন (কাজ চালু)' : '⚪ অফলাইন (বিশ্রাম)' }}</strong>
+        </div>
+        <button class="btn-primary drawer-toggle-btn" (click)="toggleOnline()">
+          {{ currentWorker()?.isOnline ? 'অফলাইন করুন' : 'অনলাইন চালু করুন' }}
+        </button>
+      </div>
+
+      <nav class="drawer-nav">
+        <a routerLink="/worker/dashboard" (click)="closeMobileMenu()" class="drawer-nav-item">
+          <i class="pi pi-home"></i>
+          <span>ড্যাশবোর্ড</span>
+        </a>
+
+        @if (activeJob(); as job) {
+          <a [routerLink]="['/worker/active', job.id]" (click)="closeMobileMenu()" class="drawer-nav-item highlight">
+            <i class="pi pi-bolt"></i>
+            <span>চলমান সক্রিয় কাজ</span>
+          </a>
+        }
+
+        <a routerLink="/worker/job-board" (click)="closeMobileMenu()" class="drawer-nav-item">
+          <i class="pi pi-briefcase"></i>
+          <span>জব বোর্ড (কাজ খুঁজুন)</span>
+          @if (openJobsCount() > 0) {
+            <span class="count-pill">{{ openJobsCount() | bnNumber }}</span>
+          }
+        </a>
+
+        <a routerLink="/worker/wallet" (click)="closeMobileMenu()" class="drawer-nav-item">
+          <i class="pi pi-wallet"></i>
+          <span>ওয়ালেট ও কমিশন</span>
+        </a>
+
+        <a routerLink="/worker/job-history" (click)="closeMobileMenu()" class="drawer-nav-item">
+          <i class="pi pi-history"></i>
+          <span>কাজের ইতিহাস</span>
+        </a>
+
+        <a routerLink="/worker/earnings" (click)="closeMobileMenu()" class="drawer-nav-item">
+          <i class="pi pi-chart-line"></i>
+          <span>উপার্জন ও আয় বিশ্লেষণ</span>
+        </a>
+
+        <a routerLink="/worker/reviews" (click)="closeMobileMenu()" class="drawer-nav-item">
+          <i class="pi pi-star"></i>
+          <span>রিভিউ ও মূল্যায়ন</span>
+        </a>
+
+        <a routerLink="/worker/edit-profile" (click)="closeMobileMenu()" class="drawer-nav-item">
+          <i class="pi pi-user-edit"></i>
+          <span>প্রোফাইল ও স্কিল এডিট</span>
+        </a>
+
+        <a routerLink="/worker/premium" (click)="closeMobileMenu()" class="drawer-nav-item" style="color: #f59e0b; font-weight: 700;">
+          <i class="pi pi-star-fill"></i>
+          <span>কাজখোঁজ প্রো (Pro)</span>
+        </a>
+
+        <div class="drawer-divider"></div>
+
+        @if (currentWorker()?.uid === 'worker_rahim_1') {
+          <button (click)="switchWorker('worker_kalam'); closeMobileMenu()" class="drawer-nav-item secondary">
+            <span>🚰 প্লাম্বার কালামে সুইচ করুন</span>
+          </button>
+        } @else {
+          <button (click)="switchWorker('worker'); closeMobileMenu()" class="drawer-nav-item secondary">
+            <span>🔧 প্লাম্বার রহিমে সুইচ করুন</span>
+          </button>
+        }
+
+        <button (click)="switchRole('customer'); closeMobileMenu()" class="drawer-nav-item secondary">
+          <i class="pi pi-user"></i>
+          <span>কাস্টমার ভিউতে যান</span>
+        </button>
+
+        <button (click)="switchRole('admin'); closeMobileMenu()" class="drawer-nav-item secondary">
+          <i class="pi pi-shield"></i>
+          <span>অ্যাডমিন প্যানেল</span>
+        </button>
+
+        <button (click)="logout()" class="drawer-nav-item text-danger">
+          <i class="pi pi-sign-out"></i>
+          <span>লগআউট</span>
+        </button>
+      </nav>
+    </aside>
+  }
+
+  <!-- Main Work Area Content -->
+  <main class="worker-content-container">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Mobile Bottom App Bar (Sticky on phones) -->
+  <nav class="mobile-bottom-nav">
+    <a routerLink="/worker/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="bottom-tab">
+      <i class="pi pi-home"></i>
+      <span>ড্যাশবোর্ড</span>
+    </a>
+
+    <a routerLink="/worker/job-board" routerLinkActive="active" class="bottom-tab">
+      <div class="bottom-icon-wrap">
+        <i class="pi pi-briefcase"></i>
+        @if (openJobsCount() > 0) {
+          <span class="badge-dot"></span>
+        }
+      </div>
+      <span>জব বোর্ড</span>
+    </a>
+
+    @if (activeJob(); as job) {
+      <a [routerLink]="['/worker/active', job.id]" routerLinkActive="active" class="bottom-tab highlight-tab">
+        <div class="bottom-icon-wrap">
+          <i class="pi pi-bolt"></i>
+          <span class="active-ring"></span>
+        </div>
+        <span>সক্রিয় কাজ</span>
+      </a>
+    }
+
+    <a routerLink="/worker/wallet" routerLinkActive="active" class="bottom-tab">
+      <i class="pi pi-wallet"></i>
+      <span>ওয়ালেট</span>
+    </a>
+  </nav>
+</div>

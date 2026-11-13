@@ -1,0 +1,321 @@
+<div class="create-request-page">
+  <!-- Top Navigation Header -->
+  <header class="request-header">
+    <a routerLink="/customer/home" class="btn-back">
+      <span class="pi pi-arrow-left"></span>
+      <span>ম্যাপে ফিরুন</span>
+    </a>
+    <div class="header-titles">
+      <h1 class="page-title">কাজের চাহিদা পোস্ট করুন</h1>
+      <p class="page-subtitle">পোস্ট করুন যা প্রয়োজন — যে প্লাম্বার/কারিগর আগে গ্রহণ করবেন তিনিই সেবা দিতে আসবেন</p>
+    </div>
+    <a routerLink="/customer/bookings" class="my-bookings-btn">
+      <span class="pi pi-list"></span>
+      <span>আমার বুকিং</span>
+    </a>
+  </header>
+
+  <div class="request-main-layout">
+    <!-- Left Column: Form -->
+    <div class="form-column">
+      <!-- FCFS Grab Rule Explainer Card -->
+      <div class="grab-rule-banner">
+        <div class="grb-icon">⚡</div>
+        <div class="grb-text">
+          <h3>উন্মুক্ত কাজের চাহিদা (First-Come, First-Served Grab)</h3>
+          <p>
+            আপনার চাহিদা পোস্ট করার সাথে সাথে সাভার এলাকার সকল সক্রিয় ও ভেরিফায়েড কারিগরদের কাছে নোটিফিকেশন পৌঁছে যাবে।
+            <strong>যে প্লাম্বার সবার প্রথমে কাজটি গ্রহণ (Grab) করবেন</strong>, সরাসরি তিনিই আপনার ঠিকানায় রওনা দেবেন।
+          </p>
+        </div>
+        <div class="plumber-counter-chip">
+          <span class="pulse-dot"></span>
+          <span>{{ nearbyPlumbersCount() | bnNumber }} জন প্লাম্বার প্রস্তুত</span>
+        </div>
+      </div>
+
+      <!-- Section 1: Category Picker -->
+      <section class="form-card">
+        <h2 class="card-title">
+          <span class="step-num">১</span>
+          <span>সেবা ও কাজের ধরন নির্বাচন করুন</span>
+        </h2>
+        <div class="category-grid">
+          @for (cat of categories(); track cat.id) {
+            <button
+              type="button"
+              class="cat-card-btn"
+              [class.active]="selectedCategoryId() === cat.id"
+              (click)="selectCategory(cat.id)"
+            >
+              <span class="cat-icon">{{ cat.icon }}</span>
+              <span class="cat-name">{{ cat.nameBn }}</span>
+              @if (cat.id === 'plumber') {
+                <span class="recommended-badge">প্লাম্বার স্পেশাল</span>
+              }
+            </button>
+          }
+        </div>
+      </section>
+
+      <!-- Section 2: Quick Presets (1-Click Fill) -->
+      @if (selectedCategoryId() === 'plumber' || selectedCategoryId() === 'electrician') {
+        <section class="form-card presets-card">
+          <div class="presets-header">
+            <h2 class="card-title">
+              <span class="step-num">২</span>
+              <span>সাধারণ সমস্যা দ্রুত নির্বাচন (১-ক্লিক পূরণ)</span>
+            </h2>
+            <span class="presets-hint">যেকোনো একটিতে ট্যাপ করলেই তথ্য পূরণ হয়ে যাবে</span>
+          </div>
+          <div class="presets-scroll-grid">
+            @for (preset of presets; track preset.label) {
+              @if (preset.category === selectedCategoryId()) {
+                <button
+                  type="button"
+                  class="preset-item-btn"
+                  [class.active]="requestTitle() === preset.title"
+                  (click)="applyPreset(preset)"
+                >
+                  <span class="pi-icon">{{ preset.icon }}</span>
+                  <div class="pi-info">
+                    <span class="pi-label">{{ preset.label }}</span>
+                    <span class="pi-price">{{ preset.suggestedPrice | taka }}</span>
+                  </div>
+                </button>
+              }
+            }
+          </div>
+        </section>
+      }
+
+      <!-- Section 3: Problem Description & Details -->
+      <section class="form-card">
+        <h2 class="card-title">
+          <span class="step-num">৩</span>
+          <span>কাজের বিস্তারিত বিবরণ ও বাজেট</span>
+        </h2>
+
+        <!-- Request Title -->
+        <div class="form-group mb-3">
+          <label class="form-label" for="reqTitle">কাজের শিরোনাম / সংক্ষিপ্ত সমস্যা</label>
+          <input
+            id="reqTitle"
+            type="text"
+            class="form-input"
+            placeholder="যেমন: জরুরি প্লাম্বার প্রয়োজন — বাথরুমে পানির পাইপ লিকেজ"
+            [ngModel]="requestTitle()"
+            (ngModelChange)="requestTitle.set($event)"
+          />
+        </div>
+
+        <!-- Request Details -->
+        <div class="form-group mb-3">
+          <label class="form-label" for="reqDesc">বিস্তারিত বর্ণনা ও নির্দেশনা (যা কারিগরকে জানাতে চান)</label>
+          <textarea
+            id="reqDesc"
+            rows="4"
+            class="form-textarea"
+            placeholder="সমস্যাটি ঠিক কোথায়, কি কারণে হচ্ছে বা কী কী যন্ত্রপাতি লাগবে বিস্তারিত লিখুন..."
+            [ngModel]="requestDescription()"
+            (ngModelChange)="requestDescription.set($event)"
+          ></textarea>
+        </div>
+
+        <!-- Budget / Proposed Price -->
+        <div class="form-group mb-3">
+          <div class="budget-label-row">
+            <label class="form-label" for="reqBudget">প্রস্তাবিত পারিশ্রমিক / বাজেট (টাকা)</label>
+            <span class="budget-hint">ন্যায্য বাজেট দিলে প্লাম্বাররা অবিলম্বে কাজটি ধরবেন</span>
+          </div>
+          <div class="budget-input-wrapper">
+            <span class="currency-symbol">৳</span>
+            <input
+              id="reqBudget"
+              type="number"
+              class="budget-input"
+              [ngModel]="estimatedBudget()"
+              (ngModelChange)="estimatedBudget.set(+$event)"
+              min="100"
+              step="50"
+            />
+          </div>
+          <!-- Quick Budget Buttons -->
+          <div class="quick-budgets-row">
+            @for (amount of [350, 400, 500, 650, 800, 1000]; track amount) {
+              <button
+                type="button"
+                class="budget-chip"
+                [class.active]="estimatedBudget() === amount"
+                (click)="setBudget(amount)"
+              >
+                {{ amount | taka }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Service Location -->
+        <div class="form-group mb-3">
+          <label class="form-label" for="reqAddress">সার্ভিস ঠিকানা / কাজের স্থান</label>
+          <div class="address-input-box">
+            <span class="addr-icon">📍</span>
+            <input
+              id="reqAddress"
+              type="text"
+              class="form-input addr-input"
+              placeholder="বাড়ি নম্বর, রোড, এলাকা..."
+              [ngModel]="customAddress()"
+              (ngModelChange)="customAddress.set($event)"
+            />
+          </div>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="form-group mb-3">
+          <label class="form-label">পরিশোধের মাধ্যম</label>
+          <div class="payment-pills-row">
+            <label class="payment-radio-pill" [class.selected]="paymentMethod() === 'cash'">
+              <input
+                type="radio"
+                name="payMethod"
+                value="cash"
+                [checked]="paymentMethod() === 'cash'"
+                (change)="paymentMethod.set('cash')"
+              />
+              <span class="pill-icon">💵</span>
+              <span class="pill-text">কাজ শেষে নগদ (Cash)</span>
+            </label>
+
+            <label class="payment-radio-pill" [class.selected]="paymentMethod() === 'bkash'">
+              <input
+                type="radio"
+                name="payMethod"
+                value="bkash"
+                [checked]="paymentMethod() === 'bkash'"
+                (change)="paymentMethod.set('bkash')"
+              />
+              <span class="pill-icon">📱</span>
+              <span class="pill-text">বিকাশ (bKash)</span>
+            </label>
+
+            <label class="payment-radio-pill" [class.selected]="paymentMethod() === 'nagad'">
+              <input
+                type="radio"
+                name="payMethod"
+                value="nagad"
+                [checked]="paymentMethod() === 'nagad'"
+                (change)="paymentMethod.set('nagad')"
+              />
+              <span class="pill-icon">🟧</span>
+              <span class="pill-text">নগদ (Nagad)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Optional Photo Selection -->
+        <div class="form-group">
+          <label class="form-label">সমস্যার নমুনা ছবি (ঐচ্ছিক)</label>
+          <div class="photo-selection-grid">
+            @for (photo of availablePhotos; track photo.url) {
+              <div
+                class="photo-card"
+                [class.selected]="selectedPhoto() === photo.url"
+                (click)="selectedPhoto.set(photo.url)"
+              >
+                <img [src]="photo.url" [alt]="photo.label" />
+                <span class="photo-label">{{ photo.label }}</span>
+                @if (selectedPhoto() === photo.url) {
+                  <span class="photo-check">✓</span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- Submit Button -->
+      <div class="submit-action-banner">
+        <button
+          type="button"
+          class="btn-submit-request"
+          [disabled]="isSubmitting()"
+          (click)="submitRequest()"
+        >
+          @if (isSubmitting()) {
+            <span class="pi pi-spin pi-spinner"></span>
+            <span>রিকোয়েস্ট পোস্ট করা হচ্ছে...</span>
+          } @else {
+            <span class="pi pi-send"></span>
+            <span>🚀 কাজের রিকোয়েস্ট পোস্ট করুন (যিনি আগে গ্রহণ করবেন তিনিই কাজ পাবেন)</span>
+          }
+        </button>
+      </div>
+    </div>
+
+    <!-- Right Column: How it Works & Trust Info -->
+    <div class="sidebar-column">
+      <div class="sidebar-card flow-guide-card">
+        <h3 class="guide-title">
+          <span class="pi pi-info-circle"></span>
+          <span>কাজের রিকোয়েস্ট কিভাবে কাজ করে?</span>
+        </h3>
+
+        <div class="guide-steps">
+          <div class="guide-step">
+            <div class="step-badge">১</div>
+            <div class="step-info">
+              <h4>চাহিদা পোস্ট করুন</h4>
+              <p>আপনার যা মেরামত বা ইনস্টল করা প্রয়োজন বিস্তারিত লিখে পোস্ট করুন।</p>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <div class="step-badge">২</div>
+            <div class="step-info">
+              <h4>প্লাম্বারদের নোটিফিকেশন</h4>
+              <p>সাভার এলাকায় উপস্থিত সকল ভেরিফায়েড কারিগরের অ্যাপে অ্যালার্ট যাবে।</p>
+            </div>
+          </div>
+
+          <div class="guide-step highlight-step">
+            <div class="step-badge">৩</div>
+            <div class="step-info">
+              <h4>যে প্লাম্বার আগে গ্রহণ করবেন (First Grab)</h4>
+              <p>প্রথম যে প্লাম্বার 'কাজটি গ্রহণ করুন' চাপবেন, সাথে সাথে তিনি আপনার কাজে নিযুক্ত হবেন।</p>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <div class="step-badge">৪</div>
+            <div class="step-info">
+              <h4>নিরাপদ ওটিপি যাচাই ও কাজ সম্পন্ন</h4>
+              <p>প্লাম্বার পৌঁছালে ৪-সংখ্যার ওটিপি দিয়ে কাজ শুরু করান এবং কাজ শেষে বিল পরিশোধ করুন।</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trust & Security Box -->
+      <div class="sidebar-card safety-guarantee-card">
+        <div class="safety-icon">🛡️</div>
+        <h4>কাজখোঁজ ১০০% বিশ্বস্ততা গ্যারান্টি</h4>
+        <ul class="safety-list">
+          <li>✓ সকল কারিগরের এনআইডি ও পুলিশ ব্যাকগ্রাউন্ড ভেরিফায়েড</li>
+          <li>✓ সরাসরি ৪-সংখ্যার গোপন ওটিপি সুরক্ষা</li>
+          <li>✓ ন্যায্য মূল্যের নিশ্চয়তা ও ইন-অ্যাপ লাইভ চ্যাট</li>
+          <li>✓ ২৪/৭ কাস্টমার সাপোর্ট ও এসওএস জরুরি সুরক্ষা</li>
+        </ul>
+      </div>
+
+      <!-- Quick Call Assistance -->
+      <div class="sidebar-card support-box">
+        <span class="sup-icon">📞</span>
+        <div class="sup-text">
+          <strong>সাহায্য প্রয়োজন?</strong>
+          <p>যেকোনো সমস্যায় আমাদের কাস্টমার কেয়ারে কল করুন: ০১৭০০-০০০০০০</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

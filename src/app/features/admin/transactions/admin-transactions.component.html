@@ -1,0 +1,96 @@
+<div class="admin-page-container">
+  <div class="page-header">
+    <div>
+      <h2>লেনদেন ও উত্তোলন ব্যবস্থাপনা (Transactions & Withdrawals)</h2>
+      <p class="subtitle">কমিশন সংগ্রহ, বকেয়া পরিশোধ এবং কারিগরদের উত্তোলন অনুরোধ অনুমোদন</p>
+    </div>
+    <button class="btn-outline-sm" (click)="exportCsv()">
+      <i class="pi pi-download"></i> CSV ডাউনলোড
+    </button>
+  </div>
+
+  <!-- Withdrawal Queue -->
+  <div class="card mb-4" *ngIf="pendingWithdrawals().length > 0">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h3 class="m-0 text-orange"><i class="pi pi-bell"></i> অপেক্ষমাণ উত্তোলন অনুরোধসমূহ ({{ pendingWithdrawals().length | bnNumber }})</h3>
+      <span class="badge badge-warning">রিভিউ আবশ্যক</span>
+    </div>
+
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>অনুরোধ আইডি</th>
+            <th>কারিগর আইডি</th>
+            <th>পরিমাণ</th>
+            <th>পদ্ধতি</th>
+            <th>বিবরণ</th>
+            <th>অনুরোধের সময়</th>
+            <th>অ্যাকশন</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tx of pendingWithdrawals(); track tx.id) {
+            <tr>
+              <td><code>#{{ tx.id }}</code></td>
+              <td><strong>{{ tx.workerId }}</strong></td>
+              <td><span class="text-success font-bold">{{ tx.amount | taka }}</span></td>
+              <td><span class="badge badge-info">{{ tx.method | uppercase }}</span></td>
+              <td>{{ tx.description }}</td>
+              <td>{{ tx.createdAt | date:'short' }}</td>
+              <td>
+                <div class="action-btn-group">
+                  <button class="btn-sm btn-primary" (click)="approve(tx.id)">অনুমোদন দিন</button>
+                  <button class="btn-sm btn-danger" (click)="reject(tx.id)">প্রত্যাখ্যান</button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- All Transactions History -->
+  <div class="card table-card">
+    <div class="p-3 border-bottom">
+      <h3 class="m-0">সকল লেনদেনের খতিয়ান</h3>
+    </div>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ট্রানজ্যাকশন আইডি</th>
+            <th>ধরন (Type)</th>
+            <th>পরিমাণ</th>
+            <th>মেথড</th>
+            <th>স্ট্যাটাস</th>
+            <th>বিবরণ</th>
+            <th>তারিখ</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tx of transactions(); track tx.id) {
+            <tr>
+              <td><code>#{{ tx.id }}</code></td>
+              <td>
+                <span class="badge" [ngClass]="tx.type === 'withdraw' ? 'badge-warning' : tx.type === 'commission' ? 'badge-info' : 'badge-success'">
+                  {{ tx.type }}
+                </span>
+              </td>
+              <td><strong>{{ tx.amount | taka }}</strong></td>
+              <td>{{ tx.method | uppercase }}</td>
+              <td>
+                <span class="badge" [ngClass]="tx.status === 'success' ? 'badge-success' : tx.status === 'pending' ? 'badge-warning' : 'badge-danger'">
+                  {{ tx.status }}
+                </span>
+              </td>
+              <td>{{ tx.description }}</td>
+              <td>{{ tx.createdAt | date:'short' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

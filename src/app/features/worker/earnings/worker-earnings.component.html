@@ -1,0 +1,101 @@
+<div class="earnings-dashboard-page">
+  <div class="page-header">
+    <div>
+      <h2>উপার্জন ও আয় বিশ্লেষণ (Earnings Dashboard)</h2>
+      <p class="subtitle">আপনার দৈনিক, সাপ্তাহিক ও মাসিক আয়ের হিসাব</p>
+    </div>
+    <div class="wallet-badge">
+      বর্তমান ব্যালেন্স: <strong>{{ walletBalance() | taka }}</strong>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+    <div class="card kpi-card">
+      <div class="kpi-icon teal"><i class="pi pi-calendar"></i></div>
+      <div class="kpi-info">
+        <span class="label">আজকের আয়</span>
+        <span class="value">{{ todayEarnings() | taka }}</span>
+        <span class="subtext">২টি কাজ সম্পন্ন</span>
+      </div>
+    </div>
+
+    <div class="card kpi-card">
+      <div class="kpi-icon orange"><i class="pi pi-chart-line"></i></div>
+      <div class="kpi-info">
+        <span class="label">এই সপ্তাহের আয়</span>
+        <span class="value">{{ weeklyEarnings() | taka }}</span>
+        <span class="subtext">১২টি কাজ সম্পন্ন</span>
+      </div>
+    </div>
+
+    <div class="card kpi-card">
+      <div class="kpi-icon green"><i class="pi pi-wallet"></i></div>
+      <div class="kpi-info">
+        <span class="label">এই মাসের সর্বমোট আয়</span>
+        <span class="value">{{ monthlyEarnings() | taka }}</span>
+        <span class="subtext">৩৮টি কাজ সম্পন্ন</span>
+      </div>
+    </div>
+
+    <div class="card kpi-card">
+      <div class="kpi-icon blue"><i class="pi pi-percentage"></i></div>
+      <div class="kpi-info">
+        <span class="label">পরিশোধিত কমিশন</span>
+        <span class="value">{{ totalCommissionPaid() | taka }}</span>
+        <span class="subtext">১৫% প্ল্যাটফর্ম ফি</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visual Earnings Trend Bars -->
+  <div class="card chart-card">
+    <div class="chart-header">
+      <h3>গত ৭ দিনের আয় পর্যালোচনা</h3>
+      <span class="badge badge-success">গড় আয়: ৳৭৮০ / দিন</span>
+    </div>
+
+    <div class="bar-chart-visual">
+      @for (bar of weeklyTrend(); track bar.day) {
+        <div class="bar-col">
+          <span class="bar-amount">{{ bar.amount | taka }}</span>
+          <div class="bar-track">
+            <div class="bar-fill" [style.height.%]="bar.pct"></div>
+          </div>
+          <span class="bar-day">{{ bar.day }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Detailed Earnings Table -->
+  <div class="card history-breakdown-card">
+    <h3>সাম্প্রতিক আয়ের তালিকা</h3>
+    <div class="table-wrap">
+      <table class="earnings-table">
+        <thead>
+          <tr>
+            <th>তারিখ ও সময়</th>
+            <th>কাজের বিবরণ</th>
+            <th>মোট বিল</th>
+            <th>প্ল্যাটফর্ম কমিশন</th>
+            <th>আপনার নিট আয়</th>
+            <th>স্ট্যাটাস</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of recentEarnings(); track item.id) {
+            <tr>
+              <td>{{ item.date | date:'medium' }}</td>
+              <td>{{ item.description }}</td>
+              <td>{{ item.totalBill | taka }}</td>
+              <td class="text-danger">-{{ item.commission | taka }}</td>
+              <td class="text-success font-bold">{{ item.netEarning | taka }}</td>
+              <td><span class="badge badge-success">পরিশোধিত</span></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

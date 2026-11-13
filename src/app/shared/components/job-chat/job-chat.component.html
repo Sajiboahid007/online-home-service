@@ -1,0 +1,129 @@
+<div class="job-chat-overlay" (click)="onClose()">
+  <div class="job-chat-card" (click)="$event.stopPropagation()">
+    <!-- Chat Header -->
+    <div class="chat-header">
+      <div class="partner-meta">
+        <div class="avatar-wrap">
+          <img [src]="partnerPhoto || 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=100'" [alt]="partnerName" class="avatar-img" />
+          <span class="online-indicator"></span>
+        </div>
+        <div class="partner-info">
+          <div class="partner-name-row">
+            <h4 class="partner-name">{{ partnerName }}</h4>
+            <span class="partner-badge">{{ partnerRoleBn }}</span>
+          </div>
+          <span class="connection-status">🟢 সক্রিয় যোগাযোগ • কাজখোঁজ লাইভ চ্যাট</span>
+        </div>
+      </div>
+
+      <button type="button" class="btn-close" (click)="onClose()" title="চ্যাট বন্ধ করুন">✕</button>
+    </div>
+
+    <!-- Messages Scroll Thread -->
+    <div #messagesScroll class="messages-thread">
+      <div class="chat-security-banner">
+        <span class="cs-icon">🔒</span>
+        <span>নিরাপত্তা নিশ্চিত করতে ও যে কোনো বিরোধে প্রমাণের জন্য কাজখোঁজ সিস্টেমে এই বার্তাগুলো সংরক্ষিত থাকে।</span>
+      </div>
+
+      @if (messages().length === 0) {
+        <div class="empty-chat">
+          <span class="empty-icon">💬</span>
+          <p class="empty-title">কথোপকথন শুরু করুন</p>
+          <p class="empty-sub">নিচের কুইক প্রিসেট বা লিখে বার্তা পাঠান অথবা ভয়েস নোট রেকর্ড করুন।</p>
+        </div>
+      }
+
+      @for (msg of messages(); track msg.id) {
+        <div class="message-row" [class.my-message]="msg.senderId === currentUserId" [class.partner-message]="msg.senderId !== currentUserId">
+          <div class="bubble">
+            <div class="bubble-sender">{{ msg.senderName }}</div>
+
+            @if (msg.isVoiceNote) {
+              <!-- Voice Note Player -->
+              <div class="voice-note-player" (click)="togglePlayVoice(msg.id)">
+                <button type="button" class="btn-play-pause">
+                  <span class="pi" [class.pi-play]="activePlayingVoiceId() !== msg.id" [class.pi-pause]="activePlayingVoiceId() === msg.id"></span>
+                </button>
+                <div class="sound-wave">
+                  @for (height of (msg.voiceMeta?.audioWave || [40, 60, 80, 50, 70, 90, 40]); track $index) {
+                    <span 
+                      class="wave-bar" 
+                      [style.height.%]="height" 
+                      [class.animating]="activePlayingVoiceId() === msg.id"
+                    ></span>
+                  }
+                </div>
+                <span class="voice-duration">
+                  ০:{{ (msg.voiceMeta?.durationSec || 15) | bnNumber }} সে.
+                </span>
+              </div>
+            } @else {
+              <p class="bubble-text">{{ msg.text }}</p>
+            }
+
+            <span class="bubble-time">{{ msg.createdAt | timeAgo }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Quick Bengali Presets -->
+    <div class="quick-presets-bar">
+      <div class="presets-scroll">
+        @for (preset of quickPresets(); track preset) {
+          <button type="button" class="preset-chip" (click)="sendPreset(preset)">
+            <span>💬 {{ preset }}</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Active Voice Recording State -->
+    @if (isRecordingVoice()) {
+      <div class="recording-tray">
+        <div class="recording-pulse-box">
+          <span class="red-record-dot"></span>
+          <span class="rec-label">ভয়েস রেকর্ড হচ্ছে... {{ recordingSeconds() | bnNumber }} সেকেন্ড</span>
+        </div>
+        <div class="recording-actions">
+          <button type="button" class="btn-cancel-rec" (click)="cancelVoiceRecording()">বাতিল</button>
+          <button type="button" class="btn-finish-rec" (click)="finishVoiceRecording()">
+            <span>পাঠান 🚀</span>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Chat Input Controls -->
+    <div class="chat-input-bar">
+      <button 
+        type="button" 
+        class="btn-voice-record" 
+        (click)="startVoiceRecording()"
+        [class.recording]="isRecordingVoice()"
+        title="ভয়েস নোট রেকর্ড করুন (কথা বলে বার্তা দিন)"
+      >
+        <span class="pi pi-microphone"></span>
+      </button>
+
+      <input 
+        type="text" 
+        class="chat-text-input" 
+        placeholder="বার্তা লিখুন..." 
+        [ngModel]="inputText()" 
+        (ngModelChange)="inputText.set($event)"
+        (keyup.enter)="sendMessage()"
+      />
+
+      <button 
+        type="button" 
+        class="btn-send-message" 
+        [disabled]="!inputText().trim()"
+        (click)="sendMessage()"
+      >
+        <span class="pi pi-send"></span>
+      </button>
+    </div>
+  </div>
+</div>
