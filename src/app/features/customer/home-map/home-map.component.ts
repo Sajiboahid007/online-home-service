@@ -17,6 +17,8 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ThemeService } from '../../../core/services/theme.service';
 import { Map as MapLibreMap, Marker } from 'maplibre-gl';
 
+const NEARBY_RADIUS_KM = 30;
+
 @Component({
   selector: 'app-home-map',
   standalone: true,
@@ -65,14 +67,16 @@ export class HomeMapComponent implements AfterViewInit, OnDestroy {
 
   // MapLibre references
   private map?: MapLibreMap;
-  private workerMarkers: Marker[] = [];
   private userMarker?: Marker;
 
-  // Nearby workers based on selected category & location
+  /** Only workers within this distance (km) of the customer's location are listed. */
+  public readonly nearbyRadiusKm = NEARBY_RADIUS_KM;
+
+  // Nearby workers (within NEARBY_RADIUS_KM) based on selected category & location
   public nearbyWorkers = computed(() => {
     const loc = this.userLocation();
     const catId = this.selectedCategoryId() === 'all' ? undefined : this.selectedCategoryId();
-    let workers = this.workerService.getNearbyWorkers(loc.lat, loc.lng, catId);
+    let workers = this.workerService.getNearbyWorkers(loc.lat, loc.lng, catId, NEARBY_RADIUS_KM);
     if (this.onlyTrustedOrFemale()) {
       workers = workers.filter(w => w.trustedBadge || w.verified);
     }
@@ -107,7 +111,6 @@ export class HomeMapComponent implements AfterViewInit, OnDestroy {
 
   public toggleTrustedFilter(): void {
     this.onlyTrustedOrFemale.update(v => !v);
-    this.renderWorkerMarkers();
   }
 
   public async onSearchInput(query: string): Promise<void> {
@@ -134,8 +137,6 @@ export class HomeMapComponent implements AfterViewInit, OnDestroy {
       if (this.userMarker) {
         this.userMarker.setLngLat([item.lng, item.lat]);
       }
-      this.mapService.drawRadiusCircle(this.map, { lat: item.lat, lng: item.lng }, 3);
-      this.renderWorkerMarkers();
     }
   }
 
@@ -148,7 +149,6 @@ export class HomeMapComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.clearMarkers();
     if (this.map) {
       this.map.remove();
     }
@@ -164,39 +164,16 @@ export class HomeMapComponent implements AfterViewInit, OnDestroy {
       14
     );
 
+    // Keep the map clean: only the customer's own location is marked.
+    // Nearby workers are listed in the bottom sheet instead of as map pins.
     this.map.on('load', () => {
       this.userMarker = this.mapService.createUserMarker(loc.lat, loc.lng, this.map!);
-      this.mapService.drawRadiusCircle(this.map!, { lat: loc.lat, lng: loc.lng }, 3);
-      this.renderWorkerMarkers();
     });
   }
 
   public selectCategory(catId: string): void {
     this.selectedCategoryId.set(catId);
     this.bookingCategory.set(catId === 'all' ? 'plumber' : catId);
-    this.renderWorkerMarkers();
-  }
-
-  private renderWorkerMarkers(): void {
-    if (!this.map) return;
-
-    // Clear existing worker markers
-    this.clearMarkers();
-
-    const workers = this.nearbyWorkers();
-    for (const worker of workers) {
-      const marker = this.mapService.createWorkerMarker(worker, this.map, (w) => {
-        this.openWorkerProfile(w);
-      });
-      this.workerMarkers.push(marker);
-    }
-  }
-
-  private clearMarkers(): void {
-    for (const marker of this.workerMarkers) {
-      marker.remove();
-    }
-    this.workerMarkers = [];
   }
 
   public openWorkerProfile(worker: WorkerProfile): void {
@@ -219,16 +196,6 @@ export class HomeMapComponent implements AfterViewInit, OnDestroy {
 
   public closeInstantBooking(): void {
     this.showInstantBookingModal.set(false);
-  }
-
-  public flyToWorker(worker: WorkerProfile): void {
-    if (!this.map) return;
-    this.map.flyTo({
-      center: [worker.homeLocation.lng, worker.homeLocation.lat],
-      zoom: 15,
-      essential: true
-    });
-    this.openWorkerProfile(worker);
   }
 
   public recenterToUser(): void {

@@ -42,7 +42,11 @@ export class WorkerService {
     return this.workersSignal().find(w => w.uid === uid);
   }
 
-  public getNearbyWorkers(userLat: number, userLng: number, categoryId?: string): WorkerProfile[] {
+  /**
+   * Workers sorted by distance from the user, optionally limited to a category
+   * and to those within `maxDistanceKm` of the user's location.
+   */
+  public getNearbyWorkers(userLat: number, userLng: number, categoryId?: string, maxDistanceKm?: number): WorkerProfile[] {
     return this.workersSignal()
       .filter(w => !categoryId || w.categoryIds.includes(categoryId))
       .map(w => {
@@ -52,6 +56,7 @@ export class WorkerService {
           distanceKm: dist
         };
       })
+      .filter(w => maxDistanceKm === undefined || (w.distanceKm ?? Infinity) <= maxDistanceKm)
       .sort((a, b) => (a.distanceKm || 0) - (b.distanceKm || 0));
   }
 

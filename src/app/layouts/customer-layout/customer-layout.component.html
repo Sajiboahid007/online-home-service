@@ -82,10 +82,82 @@
     </div>
   </header>
 
-  <!-- Main Body Content (Router Outlet) -->
-  <main class="customer-main">
-    <router-outlet></router-outlet>
-  </main>
+  <div class="customer-body">
+    <!-- Desktop Sidebar Navigation (replaces the bottom nav on wide screens) -->
+    <aside class="customer-sidebar" [attr.aria-label]="'মেনু' | t">
+      <nav class="sidebar-nav">
+        <span class="sidebar-section-label">{{ 'মেনু' | t }}</span>
+
+        <a routerLink="/customer/home" routerLinkActive="active" class="sidebar-link">
+          <i class="pi pi-map"></i>
+          <span>{{ 'সার্ভিস ম্যাপ' | t }}</span>
+        </a>
+
+        <a routerLink="/customer/create-request" routerLinkActive="active" class="sidebar-link">
+          <i class="pi pi-plus-circle"></i>
+          <span>{{ 'কাজের রিকোয়েস্ট' | t }}</span>
+        </a>
+
+        <a routerLink="/customer/bookings" routerLinkActive="active" class="sidebar-link">
+          <i class="pi pi-calendar"></i>
+          <span>{{ 'আমার বুকিং' | t }}</span>
+        </a>
+
+        <button type="button" class="sidebar-link" [class.active]="isOnTrackingPage()" (click)="navigateToTracking()">
+          <i class="pi pi-send"></i>
+          <span>{{ 'লাইভ ট্র্যাকিং' | t }}</span>
+          @if (activeJobsCount() > 0) {
+            <span class="sidebar-badge accent">{{ activeJobsCount() | bnNumber }}</span>
+          }
+        </button>
+
+        <button type="button" class="sidebar-link" (click)="openFavorites()">
+          <i class="pi pi-heart"></i>
+          <span>{{ 'প্রিয় কারিগর' | t }}</span>
+          @if (favoriteWorkers().length > 0) {
+            <span class="sidebar-badge">{{ favoriteWorkers().length | bnNumber }}</span>
+          }
+        </button>
+
+        <span class="sidebar-section-label">{{ 'অ্যাকাউন্ট' | t }}</span>
+
+        <a routerLink="/customer/profile" routerLinkActive="active" class="sidebar-link">
+          <i class="pi pi-user"></i>
+          <span>{{ 'আমার প্রোফাইল' | t }}</span>
+        </a>
+
+        <button type="button" class="sidebar-link" (click)="toggleRoleSwitcher()">
+          <i class="pi pi-sync"></i>
+          <span>{{ 'ভূমিকা পরিবর্তন করুন' | t }}</span>
+        </button>
+
+        @if (isAuthenticated()) {
+          <button type="button" class="sidebar-link logout" (click)="logout()">
+            <i class="pi pi-sign-out"></i>
+            <span>{{ 'লগআউট' | t }}</span>
+          </button>
+        } @else {
+          <a routerLink="/auth/login" class="sidebar-link">
+            <i class="pi pi-sign-in"></i>
+            <span>{{ 'লগইন' | t }}</span>
+          </a>
+        }
+      </nav>
+
+      <div class="sidebar-help">
+        <span class="help-title">{{ 'সাহায্য দরকার?' | t }}</span>
+        <a href="tel:01700000000" class="help-line">
+          <i class="pi pi-phone"></i> {{ '০১৭০০-০০০০০০' | bnNumber }}
+        </a>
+        <span class="help-sub">{{ '২৪/৭ হটলাইন' | t }}</span>
+      </div>
+    </aside>
+
+    <!-- Main Body Content (Router Outlet) -->
+    <main class="customer-main">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
 
   <!-- Mobile Bottom Navigation -->
   <nav class="customer-bottom-nav">

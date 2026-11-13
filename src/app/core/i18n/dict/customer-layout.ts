@@ -18,6 +18,16 @@ export const CUSTOMER_LAYOUT_EN: Record<string, string> = {
   'লগইন করুন': 'Log in',
   'লগআউট করুন': 'Log out',
 
+  // Desktop sidebar
+  'মেনু': 'Menu',
+  'সার্ভিস ম্যাপ': 'Service Map',
+  'আমার বুকিং': 'My Bookings',
+  'লাইভ ট্র্যাকিং': 'Live Tracking',
+  'অ্যাকাউন্ট': 'Account',
+  'আমার প্রোফাইল': 'My Profile',
+  'সাহায্য দরকার?': 'Need help?',
+  '২৪/৭ হটলাইন': '24/7 hotline',
+
   // Bottom nav
   'ম্যাপ': 'Map',
   'রিকোয়েস্ট': 'Request',

@@ -23,7 +23,8 @@ export const HOME_MAP_EN: Record<string, string> = {
 
   // Bottom sheet summary
   'নিকটবর্তী দক্ষ কারিগর তালিকা': 'Skilled workers nearby',
-  'সাভার এলাকায়': 'Around Savar:',
+  'আপনার': 'Within',
+  'কিমির মধ্যে': 'km of you:',
   'জন': 'people',
   'উপলব্ধ • গড় আগমন ১০-১৫ মিনিট': 'available • avg. arrival 10–15 min',
   'সংক্ষিপ্ত করুন': 'Show less',

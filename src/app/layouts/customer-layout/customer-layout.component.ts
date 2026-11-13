@@ -171,6 +171,10 @@ export class CustomerLayoutComponent {
     this.router.navigate(['/customer/tracking', newJob.id]);
   }
 
+  public isOnTrackingPage(): boolean {
+    return this.router.url.startsWith('/customer/tracking');
+  }
+
   public navigateToTracking(): void {
     const user = this.currentUser();
     const uid = user ? user.uid : 'user_customer_demo_1';

@@ -72,15 +72,6 @@
   <!-- Interactive MapLibre Vector Map -->
   <div #mapContainer class="vector-map-container"></div>
 
-  <!-- Map Floating Controls & Legend (Properly positioned below category bar without overlap) -->
-  <div class="map-floating-overlay">
-    <div class="map-legend">
-      <span class="legend-item"><span class="dot online"></span> {{ 'প্রস্তুত' | t }} ({{ onlineWorkersCount() | bnNumber }})</span>
-      <span class="legend-item"><span class="dot busy"></span> {{ 'ব্যস্ত' | t }}</span>
-      <span class="legend-item"><span class="dot offline"></span> {{ 'অফলাইন' | t }}</span>
-    </div>
-  </div>
-
   <!-- Floating My Location Button -->
   <button type="button" class="btn-floating-recenter" (click)="recenterToUser()" [title]="'আমার অবস্থানে ফিরে যান' | t">
     <span class="pi pi-compass"></span>
@@ -126,7 +117,7 @@
           <div class="live-pulse-dot"></div>
           <div class="summary-texts">
             <h3 class="summary-heading">{{ 'নিকটবর্তী দক্ষ কারিগর তালিকা' | t }}</h3>
-            <p class="summary-info">{{ 'সাভার এলাকায়' | t }} <strong>{{ nearbyWorkers().length | bnNumber }} {{ 'জন' | t }}</strong> {{ 'উপলব্ধ • গড় আগমন ১০-১৫ মিনিট' | t }}</p>
+            <p class="summary-info">{{ 'আপনার' | t }} {{ nearbyRadiusKm | bnNumber }} {{ 'কিমির মধ্যে' | t }} <strong>{{ nearbyWorkers().length | bnNumber }} {{ 'জন' | t }}</strong> {{ 'উপলব্ধ • গড় আগমন ১০-১৫ মিনিট' | t }}</p>
           </div>
         </div>
 
@@ -161,7 +152,7 @@
         } @else {
           <div class="peek-carousel-scroll">
             @for (worker of sortedWorkers(); track worker.uid) {
-              <div class="peek-worker-card" [class.busy]="worker.isBusy" (click)="flyToWorker(worker)">
+              <div class="peek-worker-card" [class.busy]="worker.isBusy" (click)="openWorkerProfile(worker)">
                 <div class="pwc-top">
                   <div class="pwc-avatar-wrap">
                     <img [src]="worker.photoURL" [alt]="worker.name" class="pwc-img" />
@@ -248,7 +239,7 @@
             </div>
           } @else {
             @for (worker of sortedWorkers(); track worker.uid) {
-              <div class="worker-card" [class.busy-card]="worker.isBusy" (click)="flyToWorker(worker)">
+              <div class="worker-card" [class.busy-card]="worker.isBusy" (click)="openWorkerProfile(worker)">
                 <!-- Left: Worker Avatar & Badges -->
                 <div class="wc-left">
                   <div class="worker-avatar-wrap">
