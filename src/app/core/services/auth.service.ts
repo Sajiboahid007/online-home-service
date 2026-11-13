@@ -54,62 +54,67 @@ export class AuthService {
     }
   }
 
-  public loginAsDemo(role: UserRole | 'worker_korim' | 'worker_kalam'): void {
-    if (role === 'superadmin') {
+  public loginAsDemo(identifier: string): void {
+    // 1. Check if identifier is an exact UID in defaultUsers
+    const userByUid = this.seedData.defaultUsers.find(u => u.uid === identifier);
+    if (userByUid) {
+      if (userByUid.role === 'worker') {
+        const workerProfile = this.seedData.defaultWorkers.find(w => w.uid === userByUid.uid) || this.seedData.defaultWorkers[0];
+        this.setUser(userByUid, workerProfile);
+      } else {
+        this.setUser(userByUid, null);
+      }
+      return;
+    }
+
+    // 2. Specific Worker aliases
+    if (identifier.startsWith('worker_') || identifier === 'worker') {
+      const workerProfile = this.seedData.defaultWorkers.find(w => w.uid === identifier)
+        || this.seedData.defaultWorkers.find(w => w.uid.startsWith(identifier))
+        || this.seedData.defaultWorkers[0];
+      const workerUser: User = this.seedData.defaultUsers.find(u => u.uid === workerProfile.uid) || {
+        uid: workerProfile.uid,
+        role: 'worker',
+        name: workerProfile.name,
+        phone: workerProfile.phone,
+        photoURL: workerProfile.photoURL,
+        status: 'active',
+        areaId: workerProfile.areaId,
+        rating: workerProfile.rating,
+        ratingCount: workerProfile.ratingCount,
+        createdAt: workerProfile.createdAt
+      };
+      this.setUser(workerUser, workerProfile);
+      return;
+    }
+
+    // 3. Specific Customer aliases
+    if (identifier.startsWith('customer_')) {
+      const targetSuffix = identifier.replace('customer_', '');
+      const foundCustomer = this.seedData.defaultUsers.find(u => 
+        u.role === 'customer' && (u.uid === 'user_customer_' + targetSuffix || u.uid.includes(targetSuffix) || u.name.toLowerCase().includes(targetSuffix))
+      );
+      if (foundCustomer) {
+        this.setUser(foundCustomer, null);
+        return;
+      }
+    }
+
+    // 4. Role-based fallback
+    if (identifier === 'superadmin') {
       const superAdmin = this.seedData.defaultUsers.find(u => u.role === 'superadmin')!;
       this.setUser(superAdmin, null);
-    } else if (role === 'admin') {
+    } else if (identifier === 'admin') {
       const admin = this.seedData.defaultUsers.find(u => u.role === 'admin')!;
       this.setUser(admin, null);
-    } else if (role === 'worker') {
-      const workerProfile = this.seedData.defaultWorkers[0]; // Rahim Plumber
-      const workerUser: User = {
-        uid: workerProfile.uid,
-        role: 'worker',
-        name: workerProfile.name,
-        phone: workerProfile.phone,
-        photoURL: workerProfile.photoURL,
-        status: 'active',
-        areaId: workerProfile.areaId,
-        rating: workerProfile.rating,
-        ratingCount: workerProfile.ratingCount,
-        createdAt: workerProfile.createdAt
-      };
-      this.setUser(workerUser, workerProfile);
-    } else if (role === 'worker_kalam') {
-      const workerProfile = this.seedData.defaultWorkers.find(w => w.uid === 'worker_kalam_5') || this.seedData.defaultWorkers[0]; // Kalam Plumber
-      const workerUser: User = {
-        uid: workerProfile.uid,
-        role: 'worker',
-        name: workerProfile.name,
-        phone: workerProfile.phone,
-        photoURL: workerProfile.photoURL,
-        status: 'active',
-        areaId: workerProfile.areaId,
-        rating: workerProfile.rating,
-        ratingCount: workerProfile.ratingCount,
-        createdAt: workerProfile.createdAt
-      };
-      this.setUser(workerUser, workerProfile);
-    } else if (role === 'worker_korim') {
-      const workerProfile = this.seedData.defaultWorkers[1]; // Korim Electrician
-      const workerUser: User = {
-        uid: workerProfile.uid,
-        role: 'worker',
-        name: workerProfile.name,
-        phone: workerProfile.phone,
-        photoURL: workerProfile.photoURL,
-        status: 'active',
-        areaId: workerProfile.areaId,
-        rating: workerProfile.rating,
-        ratingCount: workerProfile.ratingCount,
-        createdAt: workerProfile.createdAt
-      };
-      this.setUser(workerUser, workerProfile);
     } else {
       const customer = this.seedData.defaultUsers.find(u => u.role === 'customer')!;
       this.setUser(customer, null);
     }
+  }
+
+  public loginAsUser(user: User, worker: WorkerProfile | null = null): void {
+    this.setUser(user, worker);
   }
 
   public setUser(user: User, worker: WorkerProfile | null = null): void {

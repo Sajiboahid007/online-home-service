@@ -4,7 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { AreaService } from '../../../core/services/area.service';
+import { FirebaseService } from '../../../core/services/firebase.service';
 import { User } from '../../../core/models/user.model';
+import { doc, setDoc } from 'firebase/firestore';
 
 @Component({
   selector: 'app-register-customer',
@@ -16,6 +18,7 @@ import { User } from '../../../core/models/user.model';
 export class RegisterCustomerComponent {
   private authService = inject(AuthService);
   private areaService = inject(AreaService);
+  private firebaseService = inject(FirebaseService);
   private router = inject(Router);
 
   public areas = this.areaService.areas;
@@ -105,7 +108,7 @@ export class RegisterCustomerComponent {
 
     this.isLoading.set(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       const newUser: User = {
         uid: 'user_cust_' + Date.now(),
         role: 'customer',
@@ -119,11 +122,22 @@ export class RegisterCustomerComponent {
           phone: cleanEmergencyPhone,
           relation: this.emergencyRelation()
         },
+        savedAddresses: [
+          { id: 'addr_home', label: 'বাসা', address: trimmedAddress, lat: 23.8245, lng: 90.2689 }
+        ],
         rating: 5.0,
         ratingCount: 0,
         favoriteWorkers: [],
         createdAt: new Date().toISOString()
       };
+
+      try {
+        if (this.firebaseService?.db) {
+          await setDoc(doc(this.firebaseService.db, 'users', newUser.uid), newUser);
+        }
+      } catch (err) {
+        console.warn('Could not persist customer to Firestore:', err);
+      }
 
       this.authService.setUser(newUser, null);
       this.isLoading.set(false);

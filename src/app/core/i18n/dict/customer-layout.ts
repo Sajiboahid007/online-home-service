@@ -14,6 +14,9 @@ export const CUSTOMER_LAYOUT_EN: Record<string, string> = {
   'ভূমিকা পরিবর্তন করুন': 'Switch role',
   'কাস্টমার': 'Customer',
   'প্রোফাইল দেখুন': 'View profile',
+  'লগইন': 'Login',
+  'লগইন করুন': 'Log in',
+  'লগআউট করুন': 'Log out',
 
   // Bottom nav
   'ম্যাপ': 'Map',

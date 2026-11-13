@@ -2,21 +2,68 @@
   <!-- Top Demo Quick-Switch Bar -->
   <header class="demo-quick-bar">
     <div class="quick-bar-content">
-      <div class="quick-bar-title">
-        <span class="pulse-dot"></span>
-        <span class="title-text">⚡ ডেমো কুইক-লগইন (১-ক্লিক টেস্টিং):</span>
+      <div class="quick-bar-top-row">
+        <div class="quick-bar-title">
+          <span class="pulse-dot"></span>
+          <span class="title-text">⚡ ডেমো কুইক-লগইন (১-ক্লিক টেস্টিং • Firebase DB):</span>
+        </div>
+        <!-- Role Filter Tabs -->
+        <div class="role-filter-tabs">
+          <button
+            type="button"
+            class="tab-pill"
+            [class.active]="activeRoleTab() === 'customer'"
+            (click)="setRoleTab('customer')"
+          >
+            👤 কাস্টমার (১০)
+          </button>
+          <button
+            type="button"
+            class="tab-pill"
+            [class.active]="activeRoleTab() === 'worker'"
+            (click)="setRoleTab('worker')"
+          >
+            🔧 ওয়ার্কার (৮)
+          </button>
+          <button
+            type="button"
+            class="tab-pill"
+            [class.active]="activeRoleTab() === 'admin'"
+            (click)="setRoleTab('admin')"
+          >
+            👑 অ্যাডমিন (৪)
+          </button>
+          <button
+            type="button"
+            class="tab-pill"
+            [class.active]="activeRoleTab() === 'all'"
+            (click)="setRoleTab('all')"
+          >
+            ⚡ সকল (২২)
+          </button>
+          <button
+            type="button"
+            class="btn-open-directory"
+            (click)="openDirectoryModal()"
+            title="সকল কাস্টমার ও ইউজার তালিকা দেখুন"
+          >
+            📋 ইউজার ডিরেক্টরি
+          </button>
+        </div>
       </div>
+
       <div class="quick-switch-buttons">
-        @for (account of demoAccounts; track account.id) {
+        @for (account of filteredDemoAccounts(); track account.id) {
           <button
             type="button"
             class="demo-chip-btn"
-            [class.active]="currentUser()?.uid === account.id || (account.id === 'superadmin' && currentUser()?.role === 'superadmin') || (account.id === 'admin' && currentUser()?.role === 'admin')"
+            [class.active]="currentUser()?.uid === account.id || (account.id.includes('superadmin') && currentUser()?.role === 'superadmin') || (account.id.includes('admin') && currentUser()?.role === 'admin')"
             (click)="quickLogin(account)"
-            [title]="account.desc"
+            [title]="account.name + ' (' + account.phone + ') • ' + account.desc"
           >
             <span class="chip-icon">{{ account.icon }}</span>
             <span class="chip-label">{{ account.label }}</span>
+            <span class="chip-phone">{{ account.phone.slice(-4) }}</span>
           </button>
         }
       </div>
@@ -80,6 +127,38 @@
           <h2 class="form-heading">মোবাইল নম্বর দিয়ে প্রবেশ করুন</h2>
           <p class="form-subtext">আপনার ফোন নম্বরে একটি ৬-সংখ্যার ওটিপি কোড পাঠানো হবে।</p>
 
+          <!-- Quick Account Preset Selector Dropdown -->
+          <div class="form-group preset-group">
+            <label for="preset-select" class="form-label preset-label">
+              <span>⚡ ডেমো অ্যাকাউন্ট বেছে নিন (অটো-ফিল নম্বর):</span>
+              <button type="button" class="link-directory-btn" (click)="openDirectoryModal()">সবগুলো দেখুন</button>
+            </label>
+            <select id="preset-select" class="form-control preset-select-control" (change)="onPresetSelect($event)">
+              <option value="">-- ডেমো কাস্টমার বা ইউজার নির্বাচন করুন --</option>
+              <optgroup label="👤 নিবন্ধিত কাস্টমারবৃন্দ (Firebase DB)">
+                @for (acc of demoAccounts; track acc.id) {
+                  @if (acc.category === 'customer') {
+                    <option [value]="acc.phone">{{ acc.name }} — {{ acc.phone }} ({{ acc.area }})</option>
+                  }
+                }
+              </optgroup>
+              <optgroup label="🔧 নিবন্ধিত কারিগরবৃন্দ (Firebase DB)">
+                @for (acc of demoAccounts; track acc.id) {
+                  @if (acc.category === 'worker') {
+                    <option [value]="acc.phone">{{ acc.name }} — {{ acc.phone }} ({{ acc.area }})</option>
+                  }
+                }
+              </optgroup>
+              <optgroup label="👑 অ্যাডমিনবৃন্দ (Firebase DB)">
+                @for (acc of demoAccounts; track acc.id) {
+                  @if (acc.category === 'admin') {
+                    <option [value]="acc.phone">{{ acc.name }} — {{ acc.phone }}</option>
+                  }
+                }
+              </optgroup>
+            </select>
+          </div>
+
           <form (ngSubmit)="sendOtp()" class="auth-form">
             <div class="form-group">
               <label for="phone-input" class="form-label">মোবাইল নম্বর</label>
@@ -100,7 +179,7 @@
                   required
                 />
               </div>
-              <span class="field-hint">উদাহরণ: ০১৭১২৩৪৫৬৭৮</span>
+              <span class="field-hint">যেকোনো নিবন্ধিত নম্বর লিখুন (যেমন: তানভীর 01712345678, ফারহানা 01912345670, সাব্বির 01819876500)</span>
             </div>
 
             <button type="submit" class="btn-primary-action" [disabled]="isLoading()">
@@ -235,4 +314,67 @@
       </div>
     </div>
   </main>
+
+  <!-- Complete Demo Users Directory Modal -->
+  @if (showDirectoryModal()) {
+    <div class="modal-backdrop" (click)="closeDirectoryModal()">
+      <div class="directory-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div>
+            <h2 class="modal-title">📋 ফায়ারবেস ডেটাবেস ইউজার ও কাস্টমার ডিরেক্টরি</h2>
+            <p class="modal-subtitle">মোট ২২টি ডেমো অ্যাকাউন্ট • যেকোনো অ্যাকাউন্টে ১-ক্লিকে লগইন করুন বা নম্বর বসান</p>
+          </div>
+          <button type="button" class="btn-close-modal" (click)="closeDirectoryModal()">✕</button>
+        </div>
+
+        <div class="modal-search-box">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            class="modal-search-input"
+            placeholder="নাম, ফোন নম্বর, এলাকা দিয়ে খুঁজুন (যেমন: ফারহানা, ০১৭, সাভার)..."
+            [(ngModel)]="searchQuery"
+          />
+        </div>
+
+        <div class="modal-accounts-list">
+          @for (acc of modalFilteredAccounts(); track acc.id) {
+            <div class="modal-account-card" [class]="'cat-' + acc.category">
+              <div class="acc-avatar-col">
+                <span class="acc-icon">{{ acc.icon }}</span>
+              </div>
+              <div class="acc-details-col">
+                <div class="acc-name-row">
+                  <h4 class="acc-name">{{ acc.name }}</h4>
+                  <span class="acc-badge">{{ acc.category === 'customer' ? 'কাস্টমার' : acc.category === 'worker' ? 'ওয়ার্কার' : 'অ্যাডমিন' }}</span>
+                </div>
+                <div class="acc-meta-row">
+                  <span class="acc-phone">📞 {{ acc.phone }}</span>
+                  <span class="acc-dot">•</span>
+                  <span class="acc-area">📍 {{ acc.area }}</span>
+                </div>
+                <p class="acc-desc">{{ acc.desc }}</p>
+              </div>
+              <div class="acc-actions-col">
+                <button
+                  type="button"
+                  class="btn-quick-login-direct"
+                  (click)="quickLogin(acc); closeDirectoryModal()"
+                >
+                  ⚡ ১-ক্লিকে লগইন
+                </button>
+                <button
+                  type="button"
+                  class="btn-use-phone"
+                  (click)="selectAccountPhone(acc.phone)"
+                >
+                  ফোন নম্বর বসান
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
 </div>

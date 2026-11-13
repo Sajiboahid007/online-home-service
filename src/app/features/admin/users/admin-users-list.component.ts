@@ -1,14 +1,18 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WorkerService } from '../../../core/services/worker.service';
 import { PaymentService } from '../../../core/services/payment.service';
 import { ReportService } from '../../../core/services/report.service';
 import { AuditLogService } from '../../../core/services/audit-log.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { SeedDataService } from '../../../core/services/seed-data.service';
+import { FirebaseService } from '../../../core/services/firebase.service';
 import { exportToCsv } from '../../../core/utils/csv-exporter';
 import { WorkerProfile } from '../../../core/models/worker.model';
+import { User } from '../../../core/models/user.model';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
+import { collection, getDocs, query } from 'firebase/firestore';
 
 @Component({
   selector: 'app-admin-users-list',
@@ -17,14 +21,65 @@ import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
   templateUrl: './admin-users-list.component.html',
   styleUrl: './admin-users-list.component.scss'
 })
-export class AdminUsersListComponent {
+export class AdminUsersListComponent implements OnInit {
   private workerService = inject(WorkerService);
   private paymentService = inject(PaymentService);
   private reportService = inject(ReportService);
   private auditLog = inject(AuditLogService);
   private auth = inject(AuthService);
+  private seedData = inject(SeedDataService);
+  private firebaseService = inject(FirebaseService);
 
+  public activeTab = signal<'customers' | 'workers' | 'admins'>('customers');
   public workers = this.workerService.workers;
+  public customers = signal<User[]>([]);
+  public admins = signal<User[]>([]);
+
+  ngOnInit(): void {
+    this.loadUsers();
+  }
+
+  public async loadUsers(): Promise<void> {
+    // 1. Initial local load
+    this.customers.set(this.seedData.defaultUsers.filter(u => u.role === 'customer'));
+    this.admins.set(this.seedData.defaultUsers.filter(u => u.role === 'admin' || u.role === 'superadmin'));
+
+    // 2. Fetch from Firestore if live
+    try {
+      if (this.firebaseService?.db) {
+        const snap = await getDocs(collection(this.firebaseService.db, 'users'));
+        if (!snap.empty) {
+          const allUsers = snap.docs.map(d => d.data() as User);
+          const custs = allUsers.filter(u => u.role === 'customer');
+          const adms = allUsers.filter(u => u.role === 'admin' || u.role === 'superadmin');
+          if (custs.length > 0) this.customers.set(custs);
+          if (adms.length > 0) this.admins.set(adms);
+        }
+      }
+    } catch (e) {
+      console.warn('Firestore live users load fallback:', e);
+    }
+  }
+
+  public warnUser(user: User): void {
+    const msg = prompt(`গ্রাহক "${user.name}"-কে সতর্কবার্তা পাঠান:`, 'অনুগ্রহ করে প্ল্যাটফর্মের নির্দেশিকা মেনে চলুন।');
+    if (msg) {
+      alert(`গ্রাহক "${user.name}"-কে সফলভাবে সতর্কতা নোটিফিকেশন পাঠানো হয়েছে।`);
+    }
+  }
+
+  public banUser(user: User): void {
+    const reason = prompt(`গ্রাহক "${user.name}"-কে ব্যান করার কারণ লিখুন:`, 'নিয়ম লঙ্ঘন / অসদাচরণ');
+    if (reason) {
+      this.reportService.addToBlacklist({
+        type: 'phone',
+        value: user.phone,
+        reason: reason,
+        bannedBy: this.auth.currentUser()?.name || 'অ্যাডমিন'
+      });
+      alert(`গ্রাহক "${user.name}" (${user.phone}) সফলভাবে প্ল্যাটফর্ম থেকে নিষিদ্ধ (Banned) করা হয়েছে।`);
+    }
+  }
 
   public warnWorker(worker: WorkerProfile): void {
     const msg = prompt(`ওয়ার্কার "${worker.name}"-কে সতর্কবার্তা পাঠান:`, 'কাজের রেটিং আশঙ্কাজনকভাবে কমে যাচ্ছে, মনোযোগ দিন।');

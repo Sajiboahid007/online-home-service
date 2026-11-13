@@ -420,6 +420,120 @@ export class SeedDataService {
       ],
       createdAt: '2026-02-10T10:00:00Z',
       distanceKm: 0.7
+    },
+    {
+      uid: 'worker_tariq_6',
+      name: 'তারিকুল ইসলাম',
+      photoURL: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+      phone: '01844556677',
+      phoneMasked: '01844-XXX-677',
+      categoryIds: ['painter'],
+      skills: ['ওয়াল পুটিং ও পেইন্টিং', 'ড্যাম্প প্রটেকশন', 'রং ডিজাইন ও টেক্সচার'],
+      experienceYears: 9,
+      bio: 'হেমায়েতপুর ও সাভারের বিশ্বস্ত পেইন্টার। নিখুঁত রঙের কাজ।',
+      rate: 800,
+      rateUnit: 'day',
+      serviceRadiusKm: 8,
+      homeLocation: {
+        lat: 23.7932,
+        lng: 90.2691,
+        geohash: 'wh0r5z2',
+        address: 'হেমায়েতপুর বাসস্ট্যান্ড মোড়, সাভার'
+      },
+      areaId: 'hemayetpur',
+      isOnline: true,
+      isBusy: false,
+      verificationStatus: 'approved',
+      verified: true,
+      trustedBadge: true,
+      isPremium: true,
+      rating: 4.8,
+      ratingCount: 27,
+      totalJobs: 30,
+      completionRate: 0.98,
+      acceptRate: 0.95,
+      cancelRate: 0.01,
+      walletBalance: 2800,
+      commissionDue: 210,
+      portfolio: [],
+      createdAt: '2026-02-20T12:00:00Z',
+      distanceKm: 3.2
+    },
+    {
+      uid: 'worker_salim_7',
+      name: 'সেলিম রেজা',
+      photoURL: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150',
+      phone: '01933445566',
+      phoneMasked: '01933-XXX-566',
+      categoryIds: ['carpenter'],
+      skills: ['দরজা-জানালা ফিটিং', 'ফার্নিচার মেরামত', 'মডুলার কিচেন ক্যাবিনেট'],
+      experienceYears: 11,
+      bio: 'অভিজ্ঞ কাঠমিস্ত্রি। মিরপুর ও সংলগ্ন এলাকায় হোম সার্ভিস প্রদান করি।',
+      rate: 450,
+      rateUnit: 'job',
+      serviceRadiusKm: 9,
+      homeLocation: {
+        lat: 23.8071,
+        lng: 90.3686,
+        geohash: 'wh0r7z8',
+        address: 'মিরপুর ১০ গোলচত্বর, ঢাকা'
+      },
+      areaId: 'dhaka_mirpur',
+      isOnline: true,
+      isBusy: false,
+      verificationStatus: 'approved',
+      verified: true,
+      trustedBadge: true,
+      isPremium: true,
+      rating: 4.9,
+      ratingCount: 44,
+      totalJobs: 49,
+      completionRate: 0.97,
+      acceptRate: 0.93,
+      cancelRate: 0.02,
+      walletBalance: 3500,
+      commissionDue: 320,
+      portfolio: [],
+      createdAt: '2026-01-25T14:00:00Z',
+      distanceKm: 4.5
+    },
+    {
+      uid: 'worker_billal_8',
+      name: 'বিল্লাল হোসেন',
+      photoURL: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150',
+      phone: '01788990011',
+      phoneMasked: '01788-XXX-011',
+      categoryIds: ['mason'],
+      skills: ['দেওয়াল গাঁথুনি', 'প্লাস্টার কাজ', 'টাইলস ফিটিং'],
+      experienceYears: 6,
+      bio: 'আশুলিয়া ও ডিইপিজেড অঞ্চলের দক্ষ রাজমিস্ত্রি। নির্ভরযোগ্য কাজ।',
+      rate: 850,
+      rateUnit: 'day',
+      serviceRadiusKm: 8,
+      homeLocation: {
+        lat: 23.9318,
+        lng: 90.2917,
+        geohash: 'wh0rec1',
+        address: 'পল্লী বিদ্যুৎ, আশুলিয়া, সাভার'
+      },
+      areaId: 'ashulia_epz',
+      isOnline: true,
+      isBusy: false,
+      verificationStatus: 'approved',
+      verified: true,
+      trustedBadge: false,
+      isPremium: false,
+      rating: 4.6,
+      ratingCount: 18,
+      totalJobs: 20,
+      completionRate: 0.95,
+      acceptRate: 0.89,
+      cancelRate: 0.03,
+      walletBalance: 1600,
+      commissionDue: 150,
+      portfolio: [],
+      createdAt: '2026-03-05T09:00:00Z',
+      distanceKm: 5.1
     }
   ];
 
@@ -447,6 +561,28 @@ export class SeedDataService {
       createdAt: '2026-01-05T00:00:00Z'
     },
     {
+      uid: 'user_admin_mirpur_1',
+      role: 'admin',
+      name: 'মিরপুর জোন অ্যাডমিন',
+      phone: '01700000003',
+      email: 'admin.mirpur@kajkhoj.com',
+      photoURL: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150',
+      status: 'active',
+      areaId: 'dhaka_mirpur',
+      createdAt: '2026-01-06T00:00:00Z'
+    },
+    {
+      uid: 'user_admin_ashulia_1',
+      role: 'admin',
+      name: 'আশুলিয়া জোন অ্যাডমিন',
+      phone: '01700000004',
+      email: 'admin.ashulia@kajkhoj.com',
+      photoURL: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150',
+      status: 'active',
+      areaId: 'ashulia_epz',
+      createdAt: '2026-01-08T00:00:00Z'
+    },
+    {
       uid: 'user_customer_demo_1',
       role: 'customer',
       name: 'তানভীর আহমেদ',
@@ -463,7 +599,293 @@ export class SeedDataService {
       rating: 4.9,
       ratingCount: 12,
       favoriteWorkers: ['worker_rahim_1'],
+      savedAddresses: [
+        { id: 'addr_1', label: 'বাসা', address: 'বাড়ি #১২, রোড #৩, নিউ মার্কেট রোড, সাভার বাজার', lat: 23.8230, lng: 90.2660 }
+      ],
       createdAt: '2026-01-15T12:00:00Z'
+    },
+    {
+      uid: 'user_customer_demo_2',
+      role: 'customer',
+      name: 'সাব্বির হোসেন',
+      phone: '01819876500',
+      email: 'sabbir@gmail.com',
+      photoURL: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150',
+      status: 'active',
+      areaId: 'savar_bazar',
+      emergencyContact: {
+        name: 'সেলিনা হোসেন',
+        phone: '01812345678',
+        relation: 'মা'
+      },
+      rating: 4.8,
+      ratingCount: 8,
+      favoriteWorkers: ['worker_rahim_1', 'worker_korim_2'],
+      savedAddresses: [
+        { id: 'addr_2', label: 'বাসা', address: 'বাড়ি #৪৫, রোড #২, সাভার থানা রোড, সাভার বাজার', lat: 23.8245, lng: 90.2685 }
+      ],
+      createdAt: '2026-02-01T10:00:00Z'
+    },
+    {
+      uid: 'user_customer_demo_3',
+      role: 'customer',
+      name: 'ফারহানা রহমান',
+      phone: '01912345670',
+      email: 'farhana.rahman@gmail.com',
+      photoURL: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
+      status: 'active',
+      areaId: 'savar_bazar',
+      emergencyContact: {
+        name: 'রফিকুল ইসলাম',
+        phone: '01911223344',
+        relation: 'স্বামী'
+      },
+      rating: 5.0,
+      ratingCount: 15,
+      favoriteWorkers: ['worker_rahim_1'],
+      savedAddresses: [
+        { id: 'addr_3', label: 'বাসা', address: 'ফ্ল্যাট ৪বি, স্বপ্ননীল টাওয়ার, সাভার বাসস্ট্যান্ড মোড়', lat: 23.8260, lng: 90.2640 }
+      ],
+      createdAt: '2026-02-10T14:30:00Z'
+    },
+    {
+      uid: 'user_customer_demo_4',
+      role: 'customer',
+      name: 'ইকবাল মাহমুদ',
+      phone: '01799887766',
+      email: 'iqbal.mahmud@gmail.com',
+      photoURL: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+      status: 'active',
+      areaId: 'savar_bazar',
+      emergencyContact: {
+        name: 'নাসিমা আক্তার',
+        phone: '01711998877',
+        relation: 'স্ত্রী'
+      },
+      rating: 4.7,
+      ratingCount: 9,
+      favoriteWorkers: ['worker_kalam_5'],
+      savedAddresses: [
+        { id: 'addr_4', label: 'বাসা', address: 'হাউজ ১৭, ব্লক সি, শিমুলতলা, সাভার', lat: 23.8310, lng: 90.2710 }
+      ],
+      createdAt: '2026-02-18T09:15:00Z'
+    },
+    {
+      uid: 'user_customer_demo_5',
+      role: 'customer',
+      name: 'রোকেয়া বেগম',
+      phone: '01822334455',
+      email: 'rokeya.begum@gmail.com',
+      photoURL: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
+      status: 'active',
+      areaId: 'ashulia_epz',
+      emergencyContact: {
+        name: 'মো: কামাল হোসেন',
+        phone: '01822334400',
+        relation: 'ভাই'
+      },
+      rating: 4.9,
+      ratingCount: 14,
+      favoriteWorkers: ['worker_shakil_3'],
+      savedAddresses: [
+        { id: 'addr_5', label: 'বাসা', address: 'পল্লী বিদ্যুৎ রোড, আশুলিয়া, সাভার', lat: 23.9318, lng: 90.2917 }
+      ],
+      createdAt: '2026-02-25T11:20:00Z'
+    },
+    {
+      uid: 'user_customer_demo_6',
+      role: 'customer',
+      name: 'আরিফুল ইসলাম',
+      phone: '01733445566',
+      email: 'ariful.islam@gmail.com',
+      photoURL: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+      status: 'active',
+      areaId: 'hemayetpur',
+      emergencyContact: {
+        name: 'শামীমা নাসরিন',
+        phone: '01733445500',
+        relation: 'স্ত্রী'
+      },
+      rating: 4.8,
+      ratingCount: 11,
+      favoriteWorkers: ['worker_anwar_4'],
+      savedAddresses: [
+        { id: 'addr_6', label: 'বাসা', address: 'হেমায়েতপুর বাসস্ট্যান্ড সংলগ্ন, সাভার', lat: 23.7915, lng: 90.2741 }
+      ],
+      createdAt: '2026-03-01T15:00:00Z'
+    },
+    {
+      uid: 'user_customer_demo_7',
+      role: 'customer',
+      name: 'মেহজাবিন চৌধুরী',
+      phone: '01611223344',
+      email: 'mehzabin.chy@gmail.com',
+      photoURL: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150',
+      status: 'active',
+      areaId: 'dhaka_mirpur',
+      emergencyContact: {
+        name: 'তারেক মাহমুদ',
+        phone: '01611223300',
+        relation: 'পিতা'
+      },
+      rating: 5.0,
+      ratingCount: 20,
+      favoriteWorkers: ['worker_salim_7'],
+      savedAddresses: [
+        { id: 'addr_7', label: 'বাসা', address: 'রোড #৬, ব্লক #ডি, সেকশন #১০, মিরপুর, ঢাকা', lat: 23.8071, lng: 90.3686 }
+      ],
+      createdAt: '2026-03-05T16:45:00Z'
+    },
+    {
+      uid: 'user_customer_demo_8',
+      role: 'customer',
+      name: 'নাজমুল হাসান',
+      phone: '01555667788',
+      email: 'nazmul.hasan@gmail.com',
+      photoURL: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150',
+      status: 'active',
+      areaId: 'savar_bazar',
+      emergencyContact: {
+        name: 'ফাতেমা আক্তার',
+        phone: '01555667700',
+        relation: 'মা'
+      },
+      rating: 4.6,
+      ratingCount: 6,
+      savedAddresses: [
+        { id: 'addr_8', label: 'বাসা', address: 'নামাবাজার ঘাট রোড, সাভার', lat: 23.8188, lng: 90.2642 }
+      ],
+      createdAt: '2026-03-10T10:10:00Z'
+    },
+    {
+      uid: 'user_customer_demo_9',
+      role: 'customer',
+      name: 'নুসরাত জাহান',
+      phone: '01744556677',
+      email: 'nusrat.jahan@gmail.com',
+      photoURL: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=150',
+      status: 'active',
+      areaId: 'ashulia_epz',
+      emergencyContact: {
+        name: 'তারেকুল ইসলাম',
+        phone: '01744556600',
+        relation: 'স্বামী'
+      },
+      rating: 4.9,
+      ratingCount: 16,
+      savedAddresses: [
+        { id: 'addr_9', label: 'বাসা', address: 'ডিইপিজেড গেট #১ সংলগ্ন, আশুলিয়া', lat: 23.9318, lng: 90.2917 }
+      ],
+      createdAt: '2026-03-12T13:30:00Z'
+    },
+    {
+      uid: 'user_customer_demo_10',
+      role: 'customer',
+      name: 'কামরুল হাসান',
+      phone: '01866778899',
+      email: 'kamrul.hasan@gmail.com',
+      photoURL: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150',
+      status: 'active',
+      areaId: 'hemayetpur',
+      emergencyContact: {
+        name: 'তাসলিমা আক্তার',
+        phone: '01866778800',
+        relation: 'স্ত্রী'
+      },
+      rating: 4.8,
+      ratingCount: 7,
+      savedAddresses: [
+        { id: 'addr_10', label: 'বাসা', address: 'তেঁতুলঝোড়া রোড, হেমায়েতপুর', lat: 23.7915, lng: 90.2741 }
+      ],
+      createdAt: '2026-03-15T17:00:00Z'
+    },
+    {
+      uid: 'worker_rahim_1',
+      role: 'worker',
+      name: 'মো: রহিম উদ্দিন',
+      phone: '01711223344',
+      status: 'active',
+      areaId: 'savar_bazar',
+      rating: 4.8,
+      ratingCount: 38,
+      createdAt: '2026-01-10T10:00:00Z'
+    },
+    {
+      uid: 'worker_korim_2',
+      role: 'worker',
+      name: 'করিম মিয়া',
+      phone: '01819876543',
+      status: 'active',
+      areaId: 'savar_bazar',
+      rating: 4.9,
+      ratingCount: 52,
+      createdAt: '2026-02-01T09:30:00Z'
+    },
+    {
+      uid: 'worker_shakil_3',
+      role: 'worker',
+      name: 'শাকিল আহমেদ',
+      phone: '01912345678',
+      status: 'active',
+      areaId: 'savar_bazar',
+      rating: 4.6,
+      ratingCount: 22,
+      createdAt: '2026-02-15T14:10:00Z'
+    },
+    {
+      uid: 'worker_anwar_4',
+      role: 'worker',
+      name: 'আনোয়ার হোসেন',
+      phone: '01678123456',
+      status: 'active',
+      areaId: 'savar_bazar',
+      rating: 4.7,
+      ratingCount: 19,
+      createdAt: '2026-03-01T11:00:00Z'
+    },
+    {
+      uid: 'worker_kalam_5',
+      role: 'worker',
+      name: 'মো: কালাম হোসেন',
+      phone: '01755667788',
+      status: 'active',
+      areaId: 'savar_bazar',
+      rating: 4.7,
+      ratingCount: 31,
+      createdAt: '2026-02-10T10:00:00Z'
+    },
+    {
+      uid: 'worker_tariq_6',
+      role: 'worker',
+      name: 'তারিকুল ইসলাম',
+      phone: '01844556677',
+      status: 'active',
+      areaId: 'hemayetpur',
+      rating: 4.8,
+      ratingCount: 27,
+      createdAt: '2026-02-20T12:00:00Z'
+    },
+    {
+      uid: 'worker_salim_7',
+      role: 'worker',
+      name: 'সেলিম রেজা',
+      phone: '01933445566',
+      status: 'active',
+      areaId: 'dhaka_mirpur',
+      rating: 4.9,
+      ratingCount: 44,
+      createdAt: '2026-01-25T14:00:00Z'
+    },
+    {
+      uid: 'worker_billal_8',
+      role: 'worker',
+      name: 'বিল্লাল হোসেন',
+      phone: '01788990011',
+      status: 'active',
+      areaId: 'ashulia_epz',
+      rating: 4.6,
+      ratingCount: 18,
+      createdAt: '2026-03-05T09:00:00Z'
     }
   ];
 
@@ -472,7 +894,7 @@ export class SeedDataService {
       id: 'job_demo_102',
       customerId: 'user_customer_demo_2',
       customerName: 'সাব্বির হোসেন',
-      customerPhone: '01819876543',
+      customerPhone: '01819876500',
       customerRating: 4.8,
       workerId: 'worker_rahim_1',
       workerName: 'মো: রহিম উদ্দিন',
@@ -534,7 +956,7 @@ export class SeedDataService {
       id: 'job_board_202',
       customerId: 'user_customer_demo_4',
       customerName: 'ইকবাল মাহমুদ',
-      customerPhone: '01678123456',
+      customerPhone: '01799887766',
       customerRating: 4.7,
       categoryId: 'plumber',
       categoryName: 'প্লাম্বার (পাইপ ফিটিং)',
@@ -556,6 +978,88 @@ export class SeedDataService {
       startOtp: '5641',
       timeline: {
         createdAt: new Date(Date.now() - 40 * 60 * 1000).toISOString()
+      }
+    },
+    {
+      id: 'job_demo_103',
+      customerId: 'user_customer_demo_5',
+      customerName: 'রোকেয়া বেগম',
+      customerPhone: '01822334455',
+      customerRating: 4.9,
+      workerId: 'worker_shakil_3',
+      workerName: 'শাকিল আহমেদ',
+      workerPhone: '01912345678',
+      workerPhoto: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+      categoryId: 'ac_technician',
+      categoryName: 'এসি টেকনিশিয়ান',
+      areaId: 'ashulia_epz',
+      type: 'instant',
+      description: '১.৫ টন ইনভার্টার এসির গ্যাস রিফিল এবং ইনডোর ইউনিটের মাস্টার ওয়াশ করাতে হবে।',
+      photos: [
+        'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500'
+      ],
+      location: {
+        lat: 23.9318,
+        lng: 90.2917,
+        address: 'পল্লী বিদ্যুৎ রোড, আশুলিয়া, সাভার'
+      },
+      status: 'completed',
+      estimatedPrice: 1200,
+      finalPrice: 1200,
+      materialCost: 300,
+      commission: 180,
+      platformFee: 30,
+      workerEarning: 1020,
+      paymentMethod: 'bkash',
+      paymentStatus: 'paid',
+      startOtp: '8152',
+      timeline: {
+        createdAt: '2026-11-11T10:00:00Z',
+        acceptedAt: '2026-11-11T10:02:00Z',
+        arrivedAt: '2026-11-11T10:20:00Z',
+        startedAt: '2026-11-11T10:22:00Z',
+        completedAt: '2026-11-11T11:45:00Z'
+      }
+    },
+    {
+      id: 'job_demo_104',
+      customerId: 'user_customer_demo_7',
+      customerName: 'মেহজাবিন চৌধুরী',
+      customerPhone: '01611223344',
+      customerRating: 5.0,
+      workerId: 'worker_salim_7',
+      workerName: 'সেলিম রেজা',
+      workerPhone: '01933445566',
+      workerPhoto: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150',
+      categoryId: 'carpenter',
+      categoryName: 'কার্পেন্টার (কাঠমিস্ত্রি)',
+      areaId: 'dhaka_mirpur',
+      type: 'instant',
+      description: 'মাস্টার বেডরুমের আলমারির ড্রয়ার লক মেরামত ও কবজা পরিবর্তন করতে হবে।',
+      photos: [
+        'https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=500'
+      ],
+      location: {
+        lat: 23.8071,
+        lng: 90.3686,
+        address: 'রোড #৬, ব্লক #ডি, সেকশন #১০, মিরপুর, ঢাকা'
+      },
+      status: 'completed',
+      estimatedPrice: 450,
+      finalPrice: 500,
+      materialCost: 80,
+      commission: 75,
+      platformFee: 20,
+      workerEarning: 425,
+      paymentMethod: 'cash',
+      paymentStatus: 'paid',
+      startOtp: '3349',
+      timeline: {
+        createdAt: '2026-11-09T14:00:00Z',
+        acceptedAt: '2026-11-09T14:05:00Z',
+        arrivedAt: '2026-11-09T14:25:00Z',
+        startedAt: '2026-11-09T14:30:00Z',
+        completedAt: '2026-11-09T15:30:00Z'
       }
     },
     {

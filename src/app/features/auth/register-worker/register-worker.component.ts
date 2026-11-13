@@ -12,6 +12,8 @@ import { TakaPipe } from '../../../shared/pipes/taka.pipe';
 import { MaskPhonePipe } from '../../../shared/pipes/mask-phone.pipe';
 import { WorkerProfile, WorkerPrivate, RateUnit, GeoPoint } from '../../../core/models/worker.model';
 import { User } from '../../../core/models/user.model';
+import { FirebaseService } from '../../../core/services/firebase.service';
+import { doc, setDoc } from 'firebase/firestore';
 
 @Component({
   selector: 'app-register-worker',
@@ -26,6 +28,7 @@ export class RegisterWorkerComponent {
   private categoryService = inject(CategoryService);
   private areaService = inject(AreaService);
   private locationService = inject(LocationService);
+  private firebaseService = inject(FirebaseService);
   private router = inject(Router);
 
   public categories = this.categoryService.categories;
@@ -299,7 +302,7 @@ export class RegisterWorkerComponent {
 
     this.isLoading.set(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       const uid = 'worker_onboard_' + Date.now();
       const cleanPhone = this.phone().replace(/[^0-9]/g, '');
 
@@ -373,6 +376,17 @@ export class RegisterWorkerComponent {
         ratingCount: 0,
         createdAt: workerProfile.createdAt
       };
+
+      // Persist to Firebase Firestore if connected
+      try {
+        if (this.firebaseService?.db) {
+          await setDoc(doc(this.firebaseService.db, 'users', uid), workerUser);
+          await setDoc(doc(this.firebaseService.db, 'workers', uid), workerProfile);
+          await setDoc(doc(this.firebaseService.db, 'workerPrivate', uid), workerPrivate);
+        }
+      } catch (err) {
+        console.warn('Failed to persist registered worker to Firestore:', err);
+      }
 
       this.authService.setUser(workerUser, workerProfile);
 

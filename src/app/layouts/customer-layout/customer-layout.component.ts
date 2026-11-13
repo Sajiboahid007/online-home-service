@@ -35,6 +35,7 @@ export class CustomerLayoutComponent {
   private router = inject(Router);
 
   public currentUser = this.authService.currentUser;
+  public isAuthenticated = this.authService.isAuthenticated;
   public userLocation = this.locationService.userLocation;
 
   // Favorite workers list
@@ -60,6 +61,10 @@ export class CustomerLayoutComponent {
   public showRoleSwitcher = signal<boolean>(false);
   public showProfileModal = signal<boolean>(false);
   public isRefreshingLocation = signal<boolean>(false);
+
+  public logout(): void {
+    this.authService.logout();
+  }
 
   public openSOS(): void {
     this.sosSent.set(false);

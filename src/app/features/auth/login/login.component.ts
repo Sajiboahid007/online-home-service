@@ -1,12 +1,28 @@
-import { Component, signal, inject, OnDestroy } from '@angular/core';
+import { Component, signal, computed, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { WorkerService } from '../../../core/services/worker.service';
 import { SeedDataService } from '../../../core/services/seed-data.service';
+import { FirebaseService } from '../../../core/services/firebase.service';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { User, UserRole } from '../../../core/models/user.model';
+import { collection, doc, getDocs, query, setDoc, where } from 'firebase/firestore';
+
+export interface DemoAccount {
+  id: string;
+  label: string;
+  name: string;
+  badge: string;
+  icon: string;
+  desc: string;
+  category: 'customer' | 'worker' | 'admin';
+  role: string;
+  phone: string;
+  area: string;
+  route: string;
+}
 
 @Component({
   selector: 'app-login',
@@ -19,6 +35,7 @@ export class LoginComponent implements OnDestroy {
   public authService = inject(AuthService);
   private workerService = inject(WorkerService);
   private seedData = inject(SeedDataService);
+  private firebaseService = inject(FirebaseService);
   private router = inject(Router);
 
   // Form states
@@ -34,54 +51,352 @@ export class LoginComponent implements OnDestroy {
 
   public currentUser = this.authService.currentUser;
 
-  // 1-Click Demo accounts configuration
-  public demoAccounts = [
+  // Tabs & directory modal
+  public activeRoleTab = signal<'all' | 'customer' | 'worker' | 'admin'>('customer');
+  public showDirectoryModal = signal<boolean>(false);
+  public searchQuery = signal<string>('');
+
+  // Complete List of Demo Accounts (Customers, Workers, Admins)
+  public demoAccounts: DemoAccount[] = [
+    // --- Customers (10 profiles across Savar, Mirpur, Ashulia, Hemayetpur) ---
     {
-      id: 'superadmin',
+      id: 'user_customer_demo_1',
+      label: 'তানভীর আহমেদ',
+      name: 'তানভীর আহমেদ',
+      badge: '👤 তানভীর (সাভার)',
+      icon: '👤',
+      desc: 'সাভার বাজার • রেটিং ৪.৯ • বুকিং ও সার্ভিস গ্রহীতা',
+      category: 'customer',
+      role: 'user_customer_demo_1',
+      phone: '01712345678',
+      area: 'সাভার বাজার',
+      route: '/customer'
+    },
+    {
+      id: 'user_customer_demo_2',
+      label: 'সাব্বির হোসেন',
+      name: 'সাব্বির হোসেন',
+      badge: '👤 সাব্বির (সাভার)',
+      icon: '👤',
+      desc: 'সাভার থানা রোড • রেটিং ৪.৮ • নিয়মিত গ্রাহক',
+      category: 'customer',
+      role: 'user_customer_demo_2',
+      phone: '01819876500',
+      area: 'সাভার থানা রোড',
+      route: '/customer'
+    },
+    {
+      id: 'user_customer_demo_3',
+      label: 'ফারহানা রহমান',
+      name: 'ফারহানা রহমান',
+      badge: '👤 ফারহানা (বাসস্ট্যান্ড)',
+      icon: '👤',
+      desc: 'স্বপ্ননীল টাওয়ার, সাভার • রেটিং ৫.০ • ফিক্সড জব বুকিং',
+      category: 'customer',
+      role: 'user_customer_demo_3',
+      phone: '01912345670',
+      area: 'সাভার বাসস্ট্যান্ড',
+      route: '/customer'
+    },
+    {
+      id: 'user_customer_demo_4',
+      label: 'ইকবাল মাহমুদ',
+      name: 'ইকবাল মাহমুদ',
+      badge: '👤 ইকবাল (শিমুলতলা)',
+      icon: '👤',
+      desc: 'শিমুলতলা, সাভার • রেটিং ৪.৭ • বিডিং জব পোস্টকারী',
+      category: 'customer',
+      role: 'user_customer_demo_4',
+      phone: '01799887766',
+      area: 'শিমুলতলা, সাভার',
+      route: '/customer'
+    },
+    {
+      id: 'user_customer_demo_5',
+      label: 'রোকেয়া বেগম',
+      name: 'রোকেয়া বেগম',
+      badge: '👤 রোকেয়া (আশুলিয়া)',
+      icon: '👤',
+      desc: 'পল্লী বিদ্যুৎ, আশুলিয়া • রেটিং ৪.৯ • এসি সার্ভিস গ্রাহক',
+      category: 'customer',
+      role: 'user_customer_demo_5',
+      phone: '01822334455',
+      area: 'আশুলিয়া ইপিজেড',
+      route: '/customer'
+    },
+    {
+      id: 'user_customer_demo_6',
+      label: 'আরিফুল ইসলাম',
+      name: 'আরিফুল ইসলাম',
+      badge: '👤 আরিফুল (হেমায়েতপুর)',
+      icon: '👤',
+      desc: 'হেমায়েতপুর বাসস্ট্যান্ড • রেটিং ৪.৮ • ক্লিনিং সার্ভিস গ্রহীতা',
+      category: 'customer',
+      role: 'user_customer_demo_6',
+      phone: '01733445566',
+      area: 'হেমায়েতপুর',
+      route: '/customer'
+    },
+    {
+      id: 'user_customer_demo_7',
+      label: 'মেহজাবিন চৌধুরী',
+      name: 'মেহজাবিন চৌধুরী',
+      badge: '👤 মেহজাবিন (মিরপুর)',
+      icon: '👤',
+      desc: 'মিরপুর ১০, ঢাকা • রেটিং ৫.০ • কাঠমিস্ত্রি সার্ভিস গ্রহীতা',
+      category: 'customer',
+      role: 'user_customer_demo_7',
+      phone: '01611223344',
+      area: 'মিরপুর ১০, ঢাকা',
+      route: '/customer'
+    },
+    {
+      id: 'user_customer_demo_8',
+      label: 'নাজমুল হাসান',
+      name: 'নাজমুল হাসান',
+      badge: '👤 নাজমুল (নামাবাজার)',
+      icon: '👤',
+      desc: 'নামাবাজার ঘাট রোড, সাভার • রেটিং ৪.৬ • সাধারণ গ্রাহক',
+      category: 'customer',
+      role: 'user_customer_demo_8',
+      phone: '01555667788',
+      area: 'নামাবাজার, সাভার',
+      route: '/customer'
+    },
+    {
+      id: 'user_customer_demo_9',
+      label: 'নুসরাত জাহান',
+      name: 'নুসরাত জাহান',
+      badge: '👤 নুসরাত (ডিইপিজেড)',
+      icon: '👤',
+      desc: 'ডিইপিজেড গেট #১, আশুলিয়া • রেটিং ৪.৯ • রাজমিস্ত্রি গ্রাহক',
+      category: 'customer',
+      role: 'user_customer_demo_9',
+      phone: '01744556677',
+      area: 'আশুলিয়া',
+      route: '/customer'
+    },
+    {
+      id: 'user_customer_demo_10',
+      label: 'কামরুল হাসান',
+      name: 'কামরুল হাসান',
+      badge: '👤 কামরুল (তেঁতুলঝোড়া)',
+      icon: '👤',
+      desc: 'তেঁতুলঝোড়া, হেমায়েতপুর • রেটিং ৪.৮ • ইলেকট্রিশিয়ান সার্ভিস',
+      category: 'customer',
+      role: 'user_customer_demo_10',
+      phone: '01866778899',
+      area: 'হেমায়েতপুর',
+      route: '/customer'
+    },
+
+    // --- Workers (8 skilled professionals) ---
+    {
+      id: 'worker_rahim_1',
+      label: 'প্লাম্বার রহিম',
+      name: 'মো: রহিম উদ্দিন',
+      badge: '🔧 রহিম (প্লাম্বার)',
+      icon: '🔧',
+      desc: 'সাভার বাজার • রেটিং ৪.৮ • প্লাম্বার • ৪২টি সম্পন্ন কাজ',
+      category: 'worker',
+      role: 'worker_rahim_1',
+      phone: '01711223344',
+      area: 'সাভার বাজার',
+      route: '/worker'
+    },
+    {
+      id: 'worker_korim_2',
+      label: 'ইলেকট্রিশিয়ান করিম',
+      name: 'করিম মিয়া',
+      badge: '⚡ করিম (ইলেকট্রিশিয়ান)',
+      icon: '⚡',
+      desc: 'নামাবাজার • রেটিং ৪.৯ • ইলেকট্রিশিয়ান • ৫৮টি কাজ',
+      category: 'worker',
+      role: 'worker_korim_2',
+      phone: '01819876543',
+      area: 'নামাবাজার, সাভার',
+      route: '/worker'
+    },
+    {
+      id: 'worker_shakil_3',
+      label: 'এসি টেক শাকিল',
+      name: 'শাকিল আহমেদ',
+      badge: '❄️ শাকিল (এসি টেক)',
+      icon: '❄️',
+      desc: 'ব্যাংক কলোনি • রেটিং ৪.৬ • এসি টেকনিশিয়ান',
+      category: 'worker',
+      role: 'worker_shakil_3',
+      phone: '01912345678',
+      area: 'ব্যাংক কলোনি',
+      route: '/worker'
+    },
+    {
+      id: 'worker_anwar_4',
+      label: 'ক্লিনার আনোয়ার',
+      name: 'আনোয়ার হোসেন',
+      badge: '🧹 আনোয়ার (ক্লিনার)',
+      icon: '🧹',
+      desc: 'থানা রোড, সাভার • রেটিং ৪.৭ • ডিপ ক্লিনিং বিশেষজ্ঞ',
+      category: 'worker',
+      role: 'worker_anwar_4',
+      phone: '01678123456',
+      area: 'থানা রোড, সাভার',
+      route: '/worker'
+    },
+    {
+      id: 'worker_kalam_5',
+      label: 'প্লাম্বার কালাম',
+      name: 'মো: কালাম হোসেন',
+      badge: '🔧 কালাম (প্লাম্বার)',
+      icon: '🔧',
+      desc: 'ব্যাংক টাউন • রেটিং ৪.৭ • স্যানিটারি ও পাইপলাইন',
+      category: 'worker',
+      role: 'worker_kalam_5',
+      phone: '01755667788',
+      area: 'ব্যাংক টাউন',
+      route: '/worker'
+    },
+    {
+      id: 'worker_tariq_6',
+      label: 'পেইন্টার তারিকুল',
+      name: 'তারিকুল ইসলাম',
+      badge: '🎨 তারিকুল (পেইন্টার)',
+      icon: '🎨',
+      desc: 'হেমায়েতপুর • রেটিং ৪.৮ • ওয়াল পুটিং ও পেইন্টিং',
+      category: 'worker',
+      role: 'worker_tariq_6',
+      phone: '01844556677',
+      area: 'হেমায়েতপুর',
+      route: '/worker'
+    },
+    {
+      id: 'worker_salim_7',
+      label: 'কার্পেন্টার সেলিম',
+      name: 'সেলিম রেজা',
+      badge: '🪚 সেলিম (কাঠমিস্ত্রি)',
+      icon: '🪚',
+      desc: 'মিরপুর ১০, ঢাকা • রেটিং ৪.৯ • ফার্নিচার ও কাঠের কাজ',
+      category: 'worker',
+      role: 'worker_salim_7',
+      phone: '01933445566',
+      area: 'মিরপুর ১০, ঢাকা',
+      route: '/worker'
+    },
+    {
+      id: 'worker_billal_8',
+      label: 'রাজমিস্ত্রি বিল্লাল',
+      name: 'বিল্লাল হোসেন',
+      badge: '🧱 বিল্লাল (রাজমিস্ত্রি)',
+      icon: '🧱',
+      desc: 'আশুলিয়া ইপিজেড • রেটিং ৪.৬ • দেওয়াল ও টাইলস কাজ',
+      category: 'worker',
+      role: 'worker_billal_8',
+      phone: '01788990011',
+      area: 'আশুলিয়া ইপিজেড',
+      route: '/worker'
+    },
+
+    // --- Admins (4 Zone & Platform Admins) ---
+    {
+      id: 'user_superadmin_1',
       label: 'সুপার অ্যাডমিন',
+      name: 'সুপার অ্যাডমিন',
       badge: '👑 সুপার অ্যাডমিন',
       icon: '👑',
-      desc: 'কেন্দ্রীয় নিয়ন্ত্রণ ও আয় রিপোর্ট',
-      role: 'superadmin' as UserRole,
+      desc: 'কেন্দ্রীয় নিয়ন্ত্রণ, আয় রিপোর্ট ও গ্লোবাল পলিসি',
+      category: 'admin',
+      role: 'superadmin',
+      phone: '01700000001',
+      area: 'কেন্দ্রীয় হেডকোয়ার্টার্স',
       route: '/admin'
     },
     {
-      id: 'admin',
+      id: 'user_admin_savar_1',
       label: 'সাভার অ্যাডমিন',
+      name: 'সাভার জোন অ্যাডমিন',
       badge: '🛡️ সাভার অ্যাডমিন',
       icon: '🛡️',
-      desc: 'সাভার জোন ব্যবস্থাপনা ও ভেরিফিকেশন',
-      role: 'admin' as UserRole,
+      desc: 'সাভার জোন ব্যবস্থাপনা, ভেরিফিকেশন ও ডিসপ্যাচ নিয়ন্ত্রণ',
+      category: 'admin',
+      role: 'admin',
+      phone: '01700000002',
+      area: 'সাভার জোন',
       route: '/admin'
     },
     {
-      id: 'worker_rahim',
-      label: 'প্লাম্বার রহিম',
-      badge: '🔧 প্লাম্বার রহিম',
-      icon: '🔧',
-      desc: 'সাভার বাজার • রেটিং ৪.৮',
-      role: 'worker' as const,
-      route: '/worker'
+      id: 'user_admin_mirpur_1',
+      label: 'মিরপুর অ্যাডমিন',
+      name: 'মিরপুর জোন অ্যাডমিন',
+      badge: '🛡️ মিরপুর অ্যাডমিন',
+      icon: '🛡️',
+      desc: 'মিরপুর ১০-১ জোন পর্যবেক্ষণ ও অনুমোদন',
+      category: 'admin',
+      role: 'user_admin_mirpur_1',
+      phone: '01700000003',
+      area: 'মিরপুর জোন',
+      route: '/admin'
     },
     {
-      id: 'worker_korim',
-      label: 'ইলেকট্রিশিয়ান করিম',
-      badge: '⚡ ইলেকট্রিশিয়ান করিম',
-      icon: '⚡',
-      desc: 'নামাবাজার • রেটিং ৪.৯',
-      role: 'worker_korim' as const,
-      route: '/worker'
-    },
-    {
-      id: 'customer',
-      label: 'কাস্টমার তানভীর',
-      badge: '👤 কাস্টমার তানভীর',
-      icon: '👤',
-      desc: 'সাভার বাজার • বুকিং ও সার্ভিস গ্রহীতা',
-      role: 'customer' as UserRole,
-      route: '/customer'
+      id: 'user_admin_ashulia_1',
+      label: 'আশুলিয়া অ্যাডমিন',
+      name: 'আশুলিয়া জোন অ্যাডমিন',
+      badge: '🛡️ আশুলিয়া অ্যাডমিন',
+      icon: '🛡️',
+      desc: 'আশুলিয়া ও ডিইপিজেড জোন কারিগর ভেরিফিকেশন',
+      category: 'admin',
+      role: 'user_admin_ashulia_1',
+      phone: '01700000004',
+      area: 'আশুলিয়া জোন',
+      route: '/admin'
     }
   ];
+
+  // Filtered accounts for horizontal quick bar
+  public filteredDemoAccounts = computed(() => {
+    const tab = this.activeRoleTab();
+    if (tab === 'all') return this.demoAccounts;
+    return this.demoAccounts.filter(a => a.category === tab);
+  });
+
+  // Filtered accounts for directory modal
+  public modalFilteredAccounts = computed(() => {
+    const q = this.searchQuery().trim().toLowerCase();
+    if (!q) return this.demoAccounts;
+    return this.demoAccounts.filter(a =>
+      a.name.toLowerCase().includes(q) ||
+      a.phone.includes(q) ||
+      a.area.toLowerCase().includes(q) ||
+      a.desc.toLowerCase().includes(q) ||
+      a.label.toLowerCase().includes(q)
+    );
+  });
+
+  public setRoleTab(tab: 'all' | 'customer' | 'worker' | 'admin'): void {
+    this.activeRoleTab.set(tab);
+  }
+
+  public openDirectoryModal(): void {
+    this.searchQuery.set('');
+    this.showDirectoryModal.set(true);
+  }
+
+  public closeDirectoryModal(): void {
+    this.showDirectoryModal.set(false);
+  }
+
+  public selectAccountPhone(phone: string): void {
+    this.phone.set(phone);
+    this.successMessage.set(`মোবাইল নম্বর ${phone} ফর্মটিতে বসানো হয়েছে।`);
+    this.closeDirectoryModal();
+  }
+
+  public onPresetSelect(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    if (target && target.value) {
+      this.phone.set(target.value);
+      this.successMessage.set(`নির্বাচিত নম্বর ${target.value} ফর্মটিতে বসানো হয়েছে।`);
+    }
+  }
 
   public sendOtp(): void {
     this.errorMessage.set('');
@@ -109,10 +424,10 @@ export class LoginComponent implements OnDestroy {
       this.otpDigits.set(['', '', '', '', '', '']);
       this.successMessage.set(`+৮৮০ ${cleanPhone}-এ ৬ ডিজিটের ওটিপি পাঠানো হয়েছে।`);
       this.startCountdown();
-    }, 700);
+    }, 500);
   }
 
-  public verifyOtp(): void {
+  public async verifyOtp(): Promise<void> {
     this.errorMessage.set('');
     const enteredOtp = this.otpString().trim();
 
@@ -123,14 +438,32 @@ export class LoginComponent implements OnDestroy {
 
     this.isLoading.set(true);
 
-    setTimeout(() => {
-      this.isLoading.set(false);
+    try {
       const cleanPhone = this.phone().replace(/[^0-9]/g, '');
 
-      // Check if user matches worker
-      const matchingWorker = this.workerService.workers().find(w => w.phone === cleanPhone);
+      // 1. Try Firestore lookup from live Firebase database
+      let firestoreUser: User | null = null;
+      try {
+        if (this.firebaseService?.db) {
+          const q = query(
+            collection(this.firebaseService.db, 'users'),
+            where('phone', '==', cleanPhone)
+          );
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+            firestoreUser = snap.docs[0].data() as User;
+          }
+        }
+      } catch (err) {
+        console.warn('Firestore live lookup skipped or offline:', err);
+      }
+
+      // 2. Check if phone matches any registered Worker
+      const matchingWorker = this.workerService.workers().find(w => w.phone === cleanPhone)
+        || this.seedData.defaultWorkers.find(w => w.phone === cleanPhone);
+
       if (matchingWorker) {
-        const workerUser: User = {
+        const workerUser: User = firestoreUser || this.seedData.defaultUsers.find(u => u.uid === matchingWorker.uid) || {
           uid: matchingWorker.uid,
           role: 'worker',
           name: matchingWorker.name,
@@ -142,42 +475,84 @@ export class LoginComponent implements OnDestroy {
           ratingCount: matchingWorker.ratingCount,
           createdAt: matchingWorker.createdAt
         };
+
         this.authService.setUser(workerUser, matchingWorker);
+        this.isLoading.set(false);
         this.router.navigate(['/worker']);
         return;
       }
 
-      // Check if matches admin
-      if (cleanPhone === '01700000001') {
-        this.authService.loginAsDemo('superadmin');
-        this.router.navigate(['/admin']);
-        return;
-      }
-      if (cleanPhone === '01700000002') {
-        this.authService.loginAsDemo('admin');
-        this.router.navigate(['/admin']);
-        return;
-      }
-
-      // Default or customer
-      const existingUser = this.seedData.defaultUsers.find(u => u.phone === cleanPhone);
-      if (existingUser) {
-        this.authService.setUser(existingUser, null);
-      } else {
-        const newUser: User = {
-          uid: 'user_' + Date.now(),
-          role: 'customer',
-          name: 'কাস্টমার (' + cleanPhone.slice(-4) + ')',
-          phone: cleanPhone,
-          status: 'active',
-          areaId: 'savar_bazar',
-          createdAt: new Date().toISOString()
-        };
-        this.authService.setUser(newUser, null);
+      // 3. User found in Firestore
+      if (firestoreUser) {
+        if (firestoreUser.role === 'superadmin' || firestoreUser.role === 'admin') {
+          this.authService.setUser(firestoreUser, null);
+          this.isLoading.set(false);
+          this.router.navigate(['/admin']);
+          return;
+        } else if (firestoreUser.role === 'worker') {
+          const workerMatch = this.workerService.workers().find(w => w.uid === firestoreUser!.uid) || null;
+          this.authService.setUser(firestoreUser, workerMatch);
+          this.isLoading.set(false);
+          this.router.navigate(['/worker']);
+          return;
+        } else {
+          this.authService.setUser(firestoreUser, null);
+          this.isLoading.set(false);
+          this.router.navigate(['/customer']);
+          return;
+        }
       }
 
+      // 4. User found in local SeedData defaultUsers
+      const localUser = this.seedData.defaultUsers.find(u => u.phone === cleanPhone);
+      if (localUser) {
+        if (localUser.role === 'superadmin' || localUser.role === 'admin') {
+          this.authService.setUser(localUser, null);
+          this.isLoading.set(false);
+          this.router.navigate(['/admin']);
+          return;
+        } else if (localUser.role === 'worker') {
+          const workerMatch = this.seedData.defaultWorkers.find(w => w.uid === localUser.uid) || null;
+          this.authService.setUser(localUser, workerMatch);
+          this.isLoading.set(false);
+          this.router.navigate(['/worker']);
+          return;
+        } else {
+          this.authService.setUser(localUser, null);
+          this.isLoading.set(false);
+          this.router.navigate(['/customer']);
+          return;
+        }
+      }
+
+      // 5. Dynamic New Customer registration (persisted to Firestore)
+      const newUser: User = {
+        uid: 'user_cust_' + Date.now(),
+        role: 'customer',
+        name: 'কাস্টমার (' + cleanPhone.slice(-4) + ')',
+        phone: cleanPhone,
+        status: 'active',
+        areaId: 'savar_bazar',
+        rating: 5.0,
+        ratingCount: 0,
+        createdAt: new Date().toISOString()
+      };
+
+      try {
+        if (this.firebaseService?.db) {
+          await setDoc(doc(this.firebaseService.db, 'users', newUser.uid), newUser);
+        }
+      } catch (saveErr) {
+        console.warn('Could not save dynamic user to Firestore:', saveErr);
+      }
+
+      this.authService.setUser(newUser, null);
+      this.isLoading.set(false);
       this.router.navigate(['/customer']);
-    }, 600);
+    } catch (e: any) {
+      this.isLoading.set(false);
+      this.errorMessage.set(e?.message || 'লগইন করতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।');
+    }
   }
 
   public autoFillOtp(): void {
@@ -199,11 +574,11 @@ export class LoginComponent implements OnDestroy {
     this.stopCountdown();
   }
 
-  public quickLogin(account: any): void {
+  public quickLogin(account: DemoAccount): void {
     this.isLoading.set(true);
     setTimeout(() => {
       this.isLoading.set(false);
-      this.authService.loginAsDemo(account.role);
+      this.authService.loginAsDemo(account.id);
       this.router.navigate([account.route]);
     }, 200);
   }

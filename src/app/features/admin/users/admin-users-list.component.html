@@ -1,101 +1,277 @@
 <div class="users-page">
   <div class="page-header">
     <div>
-      <h2>ইউজার ও ওয়ার্কার নিয়ন্ত্রণ তালিকা</h2>
-      <p>গ্রাহক ও কর্মীদের রেটিং, স্ট্যাটাস পর্যবেক্ষণ এবং ব্যাজ/মওকুফ/ব্যান ব্যবস্থা</p>
+      <h2>ইউজার ও ওয়ার্কার নিয়ন্ত্রণ তালিকা (Firebase DB)</h2>
+      <p>গ্রাহক, কর্মী ও অ্যাডমিনদের পর্যবেক্ষণ, জরুরি যোগাযোগ এবং নিয়ন্ত্রণ ব্যবস্থা</p>
     </div>
-    <button class="btn-outline-sm" (click)="exportCsv()">
-      <i class="pi pi-download"></i> CSV ডাউনলোড
+    <div style="display: flex; gap: 8px;">
+      <button class="btn-outline-sm" (click)="loadUsers()">
+        <i class="pi pi-refresh"></i> রিফ্রেশ
+      </button>
+      <button class="btn-outline-sm" (click)="exportCsv()">
+        <i class="pi pi-download"></i> CSV ডাউনলোড
+      </button>
+    </div>
+  </div>
+
+  <!-- Role Navigation Tabs -->
+  <div class="tabs-bar" style="display: flex; gap: 8px; margin-bottom: 20px;">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'customers'"
+      (click)="activeTab.set('customers')"
+      style="padding: 10px 18px; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; background: #fff;"
+      [style.background]="activeTab() === 'customers' ? '#0f766e' : '#fff'"
+      [style.color]="activeTab() === 'customers' ? '#fff' : '#475569'"
+    >
+      <span>👤 নিবন্ধিত কাস্টমারবৃন্দ</span>
+      <span style="font-size: 11px; padding: 2px 7px; border-radius: 9999px; background: rgba(255,255,255,0.25);" [style.background]="activeTab() === 'customers' ? 'rgba(255,255,255,0.25)' : '#e2e8f0'">
+        {{ customers().length | bnNumber }}
+      </span>
+    </button>
+
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'workers'"
+      (click)="activeTab.set('workers')"
+      style="padding: 10px 18px; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;"
+      [style.background]="activeTab() === 'workers' ? '#0f766e' : '#fff'"
+      [style.color]="activeTab() === 'workers' ? '#fff' : '#475569'"
+    >
+      <span>👷 নিবন্ধিত ওয়ার্কারবৃন্দ</span>
+      <span style="font-size: 11px; padding: 2px 7px; border-radius: 9999px;" [style.background]="activeTab() === 'workers' ? 'rgba(255,255,255,0.25)' : '#e2e8f0'">
+        {{ workers().length | bnNumber }}
+      </span>
+    </button>
+
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'admins'"
+      (click)="activeTab.set('admins')"
+      style="padding: 10px 18px; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;"
+      [style.background]="activeTab() === 'admins' ? '#0f766e' : '#fff'"
+      [style.color]="activeTab() === 'admins' ? '#fff' : '#475569'"
+    >
+      <span>👑 অ্যাডমিনবৃন্দ</span>
+      <span style="font-size: 11px; padding: 2px 7px; border-radius: 9999px;" [style.background]="activeTab() === 'admins' ? 'rgba(255,255,255,0.25)' : '#e2e8f0'">
+        {{ admins().length | bnNumber }}
+      </span>
     </button>
   </div>
 
-  <!-- Workers List Section -->
-  <div class="card section-box">
-    <h3>👷 নিবন্ধিত ওয়ার্কারবৃন্দ (সাভার জোন)</h3>
-    <div class="table-container">
-      <table class="kajkhoj-table">
-        <thead>
-          <tr>
-            <th>ওয়ার্কার</th>
-            <th>ক্যাটাগরি</th>
-            <th>রেটিং ও কাজ</th>
-            <th>ব্যাজসমূহ</th>
-            <th>কমিশন বকেয়া</th>
-            <th>স্ট্যাটাস</th>
-            <th>পদক্ষেপ</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (worker of workers(); track worker.uid) {
+  <!-- 1. Customers List Section -->
+  @if (activeTab() === 'customers') {
+    <div class="card section-box">
+      <h3>👤 নিবন্ধিত গ্রাহক ও কাস্টমারবৃন্দ (Firebase Firestore: users)</h3>
+      <div class="table-container">
+        <table class="kajkhoj-table">
+          <thead>
             <tr>
-              <td>
-                <div class="worker-col">
-                  <img [src]="worker.photoURL" [alt]="worker.name" class="avatar" />
-                  <div>
-                    <strong>{{ worker.name }}</strong>
-                    <small>{{ worker.phone }}</small>
-                  </div>
-                </div>
-              </td>
-              <td>
-                <span class="cat-pill">{{ worker.categoryIds.join(', ') }}</span>
-              </td>
-              <td>
-                <div class="rate-col">
-                  <span>⭐ {{ worker.rating.toFixed(1) | bnNumber }} ({{ worker.totalJobs | bnNumber }} কাজ)</span>
-                  <small>সম্পন্নতা: {{ (worker.completionRate * 100).toFixed(0) | bnNumber }}%</small>
-                </div>
-              </td>
-              <td>
-                <div class="badge-toggles-row" style="display: flex; gap: 4px; flex-wrap: wrap;">
-                  <button type="button" class="btn-xs-badge" [class.active]="worker.verified" (click)="toggleBadge(worker, 'verified')" title="ভেরিফাইড টগল">
-                    <i class="pi pi-check-circle"></i>
-                  </button>
-                  <button type="button" class="btn-xs-badge" [class.active]="worker.trustedBadge" (click)="toggleBadge(worker, 'trustedBadge')" title="বিশ্বস্ত টগল">
-                    <i class="pi pi-shield"></i>
-                  </button>
-                  <button type="button" class="btn-xs-badge" [class.active]="worker.isPremium" (click)="toggleBadge(worker, 'isPremium')" title="প্রো টগল">
-                    <i class="pi pi-star-fill"></i>
-                  </button>
-                </div>
-              </td>
-              <td>
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <strong [class.text-danger]="worker.commissionDue >= 500">
-                    {{ worker.commissionDue | taka }}
-                  </strong>
-                  @if (worker.commissionDue > 0) {
-                    <button type="button" class="btn-xs-waive" (click)="waiveDue(worker)" title="কমিশন মওকুফ করুন" style="background: none; border: 1px solid var(--border-color); border-radius: 4px; font-size: 10px; padding: 2px 5px; cursor: pointer;">
-                      মওকুফ
-                    </button>
-                  }
-                </div>
-                @if (worker.commissionDue >= 500) {
-                  <span class="badge badge-danger">সীমা অতিক্রান্ত</span>
-                }
-              </td>
-              <td>
-                <span class="badge"
-                  [class.badge-success]="worker.verified && worker.verificationStatus === 'approved'"
-                  [class.badge-warning]="worker.verificationStatus === 'pending'"
-                  [class.badge-danger]="worker.verificationStatus === 'rejected'">
-                  {{ worker.verified ? 'অনুমোদিত' : worker.verificationStatus === 'pending' ? 'পেন্ডিং' : 'বাতিল' }}
-                </span>
-              </td>
-              <td>
-                <div class="actions">
-                  <button (click)="warnWorker(worker)" class="btn-action warn" title="সতর্কবার্তা পাঠান">
-                    <i class="pi pi-exclamation-circle"></i>
-                  </button>
-                  <button (click)="banWorker(worker)" class="btn-action ban" title="সাসপেন্ড / ব্যান করুন">
-                    <i class="pi pi-ban"></i>
-                  </button>
-                </div>
-              </td>
+              <th>গ্রাহক</th>
+              <th>মোবাইল নম্বর</th>
+              <th>এলাকা</th>
+              <th>জরুরি যোগাযোগ</th>
+              <th>রেটিং</th>
+              <th>স্ট্যাটাস</th>
+              <th>পদক্ষেপ</th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (cust of customers(); track cust.uid) {
+              <tr>
+                <td>
+                  <div class="worker-col">
+                    <img [src]="cust.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'" [alt]="cust.name" class="avatar" />
+                    <div>
+                      <strong>{{ cust.name }}</strong>
+                      <small>{{ cust.email || 'ইমেইল নেই' }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <strong style="color: #0f766e;">{{ cust.phone }}</strong>
+                </td>
+                <td>
+                  <span class="cat-pill">{{ cust.areaId || 'সাভার' }}</span>
+                </td>
+                <td>
+                  @if (cust.emergencyContact) {
+                    <div style="font-size: 12px;">
+                      <strong>{{ cust.emergencyContact.name }}</strong> ({{ cust.emergencyContact.relation }})<br/>
+                      <small style="color: #64748b;">{{ cust.emergencyContact.phone }}</small>
+                    </div>
+                  } @else {
+                    <span style="color: #94a3b8; font-size: 12px;">দেওয়া নেই</span>
+                  }
+                </td>
+                <td>
+                  <div class="rate-col">
+                    <span>⭐ {{ (cust.rating || 5.0).toFixed(1) | bnNumber }}</span>
+                    <small>{{ (cust.ratingCount || 0) | bnNumber }} রিভিউ</small>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge badge-success">সক্রিয়</span>
+                </td>
+                <td>
+                  <div class="actions">
+                    <button (click)="warnUser(cust)" class="btn-action warn" title="সতর্কবার্তা পাঠান">
+                      <i class="pi pi-exclamation-circle"></i>
+                    </button>
+                    <button (click)="banUser(cust)" class="btn-action ban" title="ব্যান করুন">
+                      <i class="pi pi-ban"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
+  }
+
+  <!-- 2. Workers List Section -->
+  @if (activeTab() === 'workers') {
+    <div class="card section-box">
+      <h3>👷 নিবন্ধিত ওয়ার্কারবৃন্দ (Firebase Firestore: workers)</h3>
+      <div class="table-container">
+        <table class="kajkhoj-table">
+          <thead>
+            <tr>
+              <th>ওয়ার্কার</th>
+              <th>ক্যাটাগরি</th>
+              <th>রেটিং ও কাজ</th>
+              <th>ব্যাজসমূহ</th>
+              <th>কমিশন বকেয়া</th>
+              <th>স্ট্যাটাস</th>
+              <th>পদক্ষেপ</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (worker of workers(); track worker.uid) {
+              <tr>
+                <td>
+                  <div class="worker-col">
+                    <img [src]="worker.photoURL" [alt]="worker.name" class="avatar" />
+                    <div>
+                      <strong>{{ worker.name }}</strong>
+                      <small>{{ worker.phone }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="cat-pill">{{ worker.categoryIds.join(', ') }}</span>
+                </td>
+                <td>
+                  <div class="rate-col">
+                    <span>⭐ {{ worker.rating.toFixed(1) | bnNumber }} ({{ worker.totalJobs | bnNumber }} কাজ)</span>
+                    <small>সম্পন্নতা: {{ (worker.completionRate * 100).toFixed(0) | bnNumber }}%</small>
+                  </div>
+                </td>
+                <td>
+                  <div class="badge-toggles-row" style="display: flex; gap: 4px; flex-wrap: wrap;">
+                    <button type="button" class="btn-xs-badge" [class.active]="worker.verified" (click)="toggleBadge(worker, 'verified')" title="ভেরিফাইড টগল">
+                      <i class="pi pi-check-circle"></i>
+                    </button>
+                    <button type="button" class="btn-xs-badge" [class.active]="worker.trustedBadge" (click)="toggleBadge(worker, 'trustedBadge')" title="বিশ্বস্ত টগল">
+                      <i class="pi pi-shield"></i>
+                    </button>
+                    <button type="button" class="btn-xs-badge" [class.active]="worker.isPremium" (click)="toggleBadge(worker, 'isPremium')" title="প্রো টগল">
+                      <i class="pi pi-star-fill"></i>
+                    </button>
+                  </div>
+                </td>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <strong [class.text-danger]="worker.commissionDue >= 500">
+                      {{ worker.commissionDue | taka }}
+                    </strong>
+                    @if (worker.commissionDue > 0) {
+                      <button type="button" class="btn-xs-waive" (click)="waiveDue(worker)" title="কমিশন মওকুফ করুন" style="background: none; border: 1px solid var(--border-color); border-radius: 4px; font-size: 10px; padding: 2px 5px; cursor: pointer;">
+                        মওকুফ
+                      </button>
+                    }
+                  </div>
+                  @if (worker.commissionDue >= 500) {
+                    <span class="badge badge-danger">সীমা অতিক্রান্ত</span>
+                  }
+                </td>
+                <td>
+                  <span class="badge"
+                    [class.badge-success]="worker.verified && worker.verificationStatus === 'approved'"
+                    [class.badge-warning]="worker.verificationStatus === 'pending'"
+                    [class.badge-danger]="worker.verificationStatus === 'rejected'">
+                    {{ worker.verified ? 'অনুমোদিত' : worker.verificationStatus === 'pending' ? 'পেন্ডিং' : 'বাতিল' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="actions">
+                    <button (click)="warnWorker(worker)" class="btn-action warn" title="সতর্কবার্তা পাঠান">
+                      <i class="pi pi-exclamation-circle"></i>
+                    </button>
+                    <button (click)="banWorker(worker)" class="btn-action ban" title="সাসপেন্ড / ব্যান করুন">
+                      <i class="pi pi-ban"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- 3. Admins List Section -->
+  @if (activeTab() === 'admins') {
+    <div class="card section-box">
+      <h3>👑 প্ল্যাটফর্ম ও জোন অ্যাডমিনবৃন্দ (Firebase Firestore: users)</h3>
+      <div class="table-container">
+        <table class="kajkhoj-table">
+          <thead>
+            <tr>
+              <th>অ্যাডমিন</th>
+              <th>মোবাইল নম্বর</th>
+              <th>দায়িত্বপ্রাপ্ত এলাকা</th>
+              <th>ভূমিকা (Role)</th>
+              <th>স্ট্যাটাস</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (adm of admins(); track adm.uid) {
+              <tr>
+                <td>
+                  <div class="worker-col">
+                    <img [src]="adm.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'" [alt]="adm.name" class="avatar" />
+                    <div>
+                      <strong>{{ adm.name }}</strong>
+                      <small>{{ adm.email }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <strong style="color: #0f766e;">{{ adm.phone }}</strong>
+                </td>
+                <td>
+                  <span class="cat-pill">{{ adm.areaId || 'কেন্দ্রীয় হেডকোয়ার্টার্স' }}</span>
+                </td>
+                <td>
+                  <span class="badge" [class.badge-success]="adm.role === 'superadmin'" [class.badge-info]="adm.role === 'admin'">
+                    {{ adm.role === 'superadmin' ? '👑 সুপার অ্যাডমিন' : '🛡️ জোন অ্যাডমিন' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge badge-success">সক্রিয়</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
 </div>
