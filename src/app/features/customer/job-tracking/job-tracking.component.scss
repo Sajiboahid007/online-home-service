@@ -1068,3 +1068,47 @@
   0% { transform: scale(0.6); opacity: 0.9; }
   100% { transform: scale(1.6); opacity: 0; }
 }
+
+/* Doorstep pin confirmation (what the technician sees after acceptance) */
+.doorstep-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0 8px;
+  padding: 10px 12px;
+  background: #fffbeb;
+  border-left: 4px solid #f59e0b;
+  border-radius: 8px;
+  font-size: 13px;
+
+  .doorstep-confirm-title {
+    font-weight: 600;
+    color: #92400e;
+  }
+
+  .doorstep-confirm-badge {
+    margin-left: 6px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: #dcfce7;
+    color: #15803d;
+    font-size: 11px;
+  }
+
+  .doorstep-confirm-landmark {
+    color: #78350f;
+    font-weight: 600;
+  }
+
+  .doorstep-confirm-photo {
+    width: 96px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+
+  .doorstep-confirm-hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+}

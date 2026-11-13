@@ -1,4 +1,4 @@
-import { Component, computed, signal, inject } from '@angular/core';
+import { Component, computed, signal, inject, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -25,8 +25,11 @@ export class WorkerLayoutComponent {
   public jobService = inject(JobService);
   public themeService = inject(ThemeService);
   private router = inject(Router);
+  private elementRef = inject(ElementRef);
 
   public mobileMenuOpen = signal<boolean>(false);
+  public showRoleSwitcher = signal<boolean>(false);
+  public showProfileDropdown = signal<boolean>(false);
 
   // Fallback to first default worker if session hasn't explicitly selected one
   public currentWorker = computed<WorkerProfile | null>(() => {
@@ -58,12 +61,42 @@ export class WorkerLayoutComponent {
 
   constructor() {}
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.showProfileDropdown()) {
+      const target = event.target as HTMLElement;
+      const dropdownEl = this.elementRef.nativeElement.querySelector('.worker-profile-dropdown');
+      if (dropdownEl && !dropdownEl.contains(target)) {
+        this.showProfileDropdown.set(false);
+      }
+    }
+  }
+
   public toggleMobileMenu(): void {
     this.mobileMenuOpen.update(v => !v);
   }
 
   public closeMobileMenu(): void {
     this.mobileMenuOpen.set(false);
+  }
+
+  public toggleRoleSwitcher(): void {
+    this.showRoleSwitcher.update(v => !v);
+    if (this.showRoleSwitcher()) {
+      this.showProfileDropdown.set(false);
+    }
+  }
+
+  public closeRoleSwitcher(): void {
+    this.showRoleSwitcher.set(false);
+  }
+
+  public toggleProfileDropdown(): void {
+    this.showProfileDropdown.update(v => !v);
+  }
+
+  public closeProfileDropdown(): void {
+    this.showProfileDropdown.set(false);
   }
 
   public toggleOnline(): void {
@@ -74,17 +107,28 @@ export class WorkerLayoutComponent {
     this.workerService.toggleOnlineStatus(worker.uid, newOnline);
   }
 
-  public switchRole(role: 'customer' | 'admin'): void {
+  public switchRole(role: string): void {
     this.authService.loginAsDemo(role);
-    this.router.navigate([role === 'admin' ? '/admin/dashboard' : '/customer/home']);
+    this.showRoleSwitcher.set(false);
+    this.showProfileDropdown.set(false);
+    if (role === 'admin' || role === 'superadmin') {
+      this.router.navigate(['/admin/dashboard']);
+    } else if (role.startsWith('worker')) {
+      this.router.navigate(['/worker/dashboard']);
+    } else {
+      this.router.navigate(['/customer/home']);
+    }
   }
 
   public switchWorker(workerKey: 'worker' | 'worker_kalam'): void {
     this.authService.loginAsDemo(workerKey);
+    this.showProfileDropdown.set(false);
+    this.showRoleSwitcher.set(false);
     this.router.navigate(['/worker/dashboard']);
   }
 
   public logout(): void {
+    this.showProfileDropdown.set(false);
     this.authService.logout();
   }
 }

@@ -11,6 +11,7 @@ import { WorkerProfile } from '../../../core/models/worker.model';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
 import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 interface EnrichedBoardJob extends Job {
   distanceKm: number;
@@ -19,7 +20,7 @@ interface EnrichedBoardJob extends Job {
 @Component({
   selector: 'app-worker-job-board',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, BnNumberPipe, TakaPipe, TimeAgoPipe],
+  imports: [CommonModule, RouterModule, FormsModule, BnNumberPipe, TakaPipe, TimeAgoPipe, TranslatePipe],
   templateUrl: './worker-job-board.component.html',
   styleUrl: './worker-job-board.component.scss'
 })
@@ -185,9 +186,9 @@ export class WorkerJobBoardComponent {
   public seedDemoJob(): void {
     const worker = this.currentWorker();
     const sampleDescriptions = [
-      'কিচেনের বেসিনের পাইপ লিক করছে এবং দ্রুত বদলানো প্রয়োজন।',
-      'টয়লেটের কমোড ফ্লাশ ট্যাংক ঠিকভাবে কাজ করছে না, নতুন হ্যান্ডল লাগানো দরকার।',
-      'পানির মোটর পাম্পে বিদ্যুৎ সংযোগ আছে কিন্তু পানি তুলছে না, পরীক্ষা করুন।'
+      'কিচেনের আন্ডার-কাউন্টার ড্রেনেজ পাইপ ও স্যানিটারি ট্র্যাপ পরিবর্তন করতে হবে।',
+      'কমোডের ফ্লাশ ট্যাঙ্ক স্বয়ংক্রিয়ভাবে পানি ফিল করছে না, মেকানিজম মেরামত প্রয়োজন।',
+      '১০০০ লিটার ওভারহেড রিজার্ভার ট্যাংকের আউটলেট ভালভ ও মোটর পাম্প কানেকশন চেক করতে হবে।'
     ];
     const randomIndex = Math.floor(Math.random() * sampleDescriptions.length);
 

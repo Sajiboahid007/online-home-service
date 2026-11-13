@@ -995,6 +995,14 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Direct booking step 2: doorstep pin */
+.doorstep-step-title {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
 /* Worker Detail Profile Modal */
 .worker-profile-modal {
   max-width: 520px;

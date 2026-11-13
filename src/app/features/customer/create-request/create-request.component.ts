@@ -10,6 +10,7 @@ import { WorkerService } from '../../../core/services/worker.service';
 import { PaymentMethod } from '../../../core/models/job.model';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
+import { DoorstepPin, DoorstepPinPickerComponent } from '../../../shared/components/doorstep-pin-picker/doorstep-pin-picker.component';
 
 interface ServicePreset {
   label: string;
@@ -23,7 +24,7 @@ interface ServicePreset {
 @Component({
   selector: 'app-create-request',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, BnNumberPipe, TakaPipe],
+  imports: [CommonModule, FormsModule, RouterModule, BnNumberPipe, TakaPipe, DoorstepPinPickerComponent],
   templateUrl: './create-request.component.html',
   styleUrl: './create-request.component.scss'
 })
@@ -48,7 +49,8 @@ export class CreateRequestComponent {
   public estimatedBudget = signal<number>(400);
   public urgencyLevel = signal<'instant_grab' | 'scheduled'>('instant_grab');
   public paymentMethod = signal<PaymentMethod>('cash');
-  public customAddress = signal<string>('সাভার বাজার বাসস্ট্যান্ড সংলগ্ন রোড, সাভার, ঢাকা');
+  /** Exact doorstep pin + landmark chosen by the customer. */
+  public doorstepPin = signal<DoorstepPin | null>(null);
   public isSubmitting = signal<boolean>(false);
   public selectedPhoto = signal<string>(
     'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600'
@@ -175,7 +177,8 @@ export class CreateRequestComponent {
     const cat = this.categoryService.getCategoryById(catId);
     const categoryName = cat ? cat.nameBn : 'প্লাম্বার (পাইপ ফিটিং)';
 
-    const address = this.customAddress().trim() || loc.address || 'সাভার বাজার, সাভার, ঢাকা';
+    const pin = this.doorstepPin();
+    const pinLoc = pin?.location ?? loc;
 
     const newJob = this.jobService.createJob({
       customerId: user?.uid || 'user_customer_demo_1',
@@ -190,10 +193,13 @@ export class CreateRequestComponent {
       description: `${this.requestTitle()}: ${this.requestDescription()}`,
       estimatedPrice: this.estimatedBudget(),
       location: {
-        lat: loc.lat,
-        lng: loc.lng,
-        address: address
+        lat: pinLoc.lat,
+        lng: pinLoc.lng,
+        address: pinLoc.address || 'সাভার বাজার, সাভার, ঢাকা'
       },
+      locationPinned: pin?.pinned ?? false,
+      landmark: pin?.landmark || undefined,
+      doorPhotoURL: pin?.doorPhotoURL,
       photos: this.selectedPhoto() ? [this.selectedPhoto()] : [],
       paymentMethod: this.paymentMethod()
     });

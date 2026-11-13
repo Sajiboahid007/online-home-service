@@ -11,14 +11,57 @@
     </div>
 
     <div class="header-right">
-      <button 
-        type="button" 
-        class="btn-demo-trigger" 
-        (click)="simulateIncomingOffer()"
-        title="নতুন কাজের কল পরীক্ষা করুন">
-        <i class="pi pi-bell"></i>
-        <span>টেস্ট জব রিকোয়েস্ট কল</span>
-      </button>
+      <div class="job-request-simulator">
+        <div class="simulator-label">
+          <span class="sim-badge">💼 পেশাদার জব রিকোয়েস্ট সিমুলেটর:</span>
+        </div>
+        <div class="simulator-input-row">
+          <p-select
+            [options]="professionalScenarios"
+            [(ngModel)]="selectedScenario"
+            optionLabel="label"
+            placeholder="কাজের রিকোয়েস্ট নির্বাচন করুন..."
+            class="job-sim-pselect"
+            [filter]="true"
+            filterBy="label,categoryName,customerName"
+            filterPlaceholder="কাজের ধরন বা শিরোনাম লিখুন..."
+          >
+            <ng-template #selectedItem let-selected>
+              @if (selected) {
+                <div class="pselect-selected-row">
+                  <span class="pselect-icon">{{ selected.icon }}</span>
+                  <span class="pselect-label-text">{{ selected.label }}</span>
+                  <span class="pselect-price">৳{{ selected.estimatedPrice }}</span>
+                </div>
+              }
+            </ng-template>
+            <ng-template #item let-item>
+              <div class="pselect-dropdown-item">
+                <div class="pdi-top">
+                  <span class="pdi-icon">{{ item.icon }}</span>
+                  <strong class="pdi-title">{{ item.label }}</strong>
+                  <span class="pdi-cat-badge">{{ item.categoryName }}</span>
+                </div>
+                <p class="pdi-desc">{{ item.description }}</p>
+                <div class="pdi-meta">
+                  <span>👤 {{ item.customerName }}</span>
+                  <span>📍 {{ item.address }}</span>
+                  <span class="pdi-budget">বাজেট: ৳{{ item.estimatedPrice }}</span>
+                </div>
+              </div>
+            </ng-template>
+          </p-select>
+
+          <button 
+            type="button" 
+            class="btn-demo-trigger" 
+            (click)="triggerSelectedJobOffer()"
+            title="নির্বাচিত কাজের কল পাঠান">
+            <i class="pi pi-phone-incoming"></i>
+            <span>কল পাঠান</span>
+          </button>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -385,6 +428,7 @@
             </div>
           </div>
         </div>
+        <p class="exact-location-lock">🔒 {{ 'সঠিক বাড়ির পিন, ল্যান্ডমার্ক ও গেটের ছবি কাজ গ্রহণের পর দেখা যাবে।' | t }}</p>
 
         @if (offer.job.photos.length > 0) {
           <div class="job-photos-preview">

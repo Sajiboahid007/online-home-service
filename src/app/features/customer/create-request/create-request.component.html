@@ -157,18 +157,8 @@
 
         <!-- Service Location -->
         <div class="form-group mb-3">
-          <label class="form-label" for="reqAddress">সার্ভিস ঠিকানা / কাজের স্থান</label>
-          <div class="address-input-box">
-            <span class="addr-icon">📍</span>
-            <input
-              id="reqAddress"
-              type="text"
-              class="form-input addr-input"
-              placeholder="বাড়ি নম্বর, রোড, এলাকা..."
-              [ngModel]="customAddress()"
-              (ngModelChange)="customAddress.set($event)"
-            />
-          </div>
+          <label class="form-label">সার্ভিস ঠিকানা / কাজের স্থান</label>
+          <app-doorstep-pin-picker [initial]="userLocation()" (pinChange)="doorstepPin.set($event)"></app-doorstep-pin-picker>
         </div>
 
         <!-- Payment Method -->

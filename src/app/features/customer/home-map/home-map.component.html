@@ -328,6 +328,7 @@
           </div>
         </div>
 
+        @if (!directBookingStep()) {
         <div class="profile-modal-content">
           <div class="name-section">
             <h3 class="profile-name">{{ w.name }}</h3>
@@ -410,15 +411,33 @@
             <span>{{ (isFavorite(w.uid) ? '❤️ প্রিয় কারিগর' : '🤍 প্রিয়তে রাখুন') | t }}</span>
           </button>
           <button type="button" class="btn-outline" (click)="closeWorkerProfile()">{{ 'ফিরে যান' | t }}</button>
-          <button 
-            type="button" 
-            class="btn-primary" 
+          <button
+            type="button"
+            class="btn-primary"
             [disabled]="w.isBusy || !w.isOnline"
-            (click)="startDirectBooking(w)"
+            (click)="directBookingStep.set(true)"
           >
             {{ (w.isBusy ? 'কর্মী বর্তমানে অন্য কাজে ব্যস্ত' : 'সরাসরি বুকিং নিশ্চিত করুন') | t }}
           </button>
         </div>
+        } @else {
+          <!-- Step 2: confirm exact doorstep before direct booking -->
+          <div class="profile-modal-content">
+            <h4 class="doorstep-step-title">📍 {{ 'আপনার দরজার সঠিক লোকেশন' | t }}</h4>
+            <app-doorstep-pin-picker [initial]="userLocation()" (pinChange)="doorstepPin.set($event)"></app-doorstep-pin-picker>
+          </div>
+          <div class="profile-modal-footer">
+            <button type="button" class="btn-outline" (click)="directBookingStep.set(false)">{{ 'পেছনে যান' | t }}</button>
+            <button
+              type="button"
+              class="btn-primary"
+              [disabled]="isSubmittingJob() || w.isBusy || !w.isOnline"
+              (click)="startDirectBooking(w)"
+            >
+              {{ 'বুকিং নিশ্চিত করুন' | t }}
+            </button>
+          </div>
+        }
       </div>
     </div>
   }
@@ -558,10 +577,7 @@
           <!-- Address -->
           <div class="form-group">
             <label class="form-label">{{ 'সার্ভিস লোকেশন' | t }}</label>
-            <div class="location-preview-box">
-              <span class="lpb-icon">📍</span>
-              <span class="lpb-address">{{ userLocation().address || 'সাভার বাজার রোড, সাভার, ঢাকা' }}</span>
-            </div>
+            <app-doorstep-pin-picker [initial]="userLocation()" (pinChange)="doorstepPin.set($event)"></app-doorstep-pin-picker>
           </div>
 
           <!-- Payment method -->

@@ -13,6 +13,7 @@ import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
 import { MaskPhonePipe } from '../../../shared/pipes/mask-phone.pipe';
 import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 interface TimelineStep {
   key: JobStatus;
@@ -24,7 +25,7 @@ interface TimelineStep {
 @Component({
   selector: 'app-job-tracking',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, BnNumberPipe, TakaPipe, MaskPhonePipe, TimeAgoPipe, JobChatComponent],
+  imports: [CommonModule, RouterModule, FormsModule, BnNumberPipe, TakaPipe, MaskPhonePipe, TimeAgoPipe, TranslatePipe, JobChatComponent],
   templateUrl: './job-tracking.component.html',
   styleUrl: './job-tracking.component.scss'
 })

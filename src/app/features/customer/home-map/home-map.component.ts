@@ -13,6 +13,7 @@ import { Category } from '../../../core/models/category.model';
 import { Job, PaymentMethod } from '../../../core/models/job.model';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
+import { DoorstepPin, DoorstepPinPickerComponent } from '../../../shared/components/doorstep-pin-picker/doorstep-pin-picker.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ThemeService } from '../../../core/services/theme.service';
 import { Map as MapLibreMap, Marker } from 'maplibre-gl';
@@ -22,7 +23,7 @@ const NEARBY_RADIUS_KM = 30;
 @Component({
   selector: 'app-home-map',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, BnNumberPipe, TakaPipe, TranslatePipe],
+  imports: [CommonModule, FormsModule, RouterModule, BnNumberPipe, TakaPipe, TranslatePipe, DoorstepPinPickerComponent],
   templateUrl: './home-map.component.html',
   styleUrl: './home-map.component.scss'
 })
@@ -64,6 +65,10 @@ export class HomeMapComponent implements AfterViewInit, OnDestroy {
   public scheduledTimeSlot = signal<string>('সকাল ৯:০০ - দুপুর ১২:০০');
   public bulkLaborCount = signal<number>(3);
   public isSubmittingJob = signal<boolean>(false);
+
+  // Exact doorstep pin chosen in the booking flows (instant modal / direct booking step 2)
+  public doorstepPin = signal<DoorstepPin | null>(null);
+  public directBookingStep = signal<boolean>(false);
 
   // MapLibre references
   private map?: MapLibreMap;
@@ -177,11 +182,14 @@ export class HomeMapComponent implements AfterViewInit, OnDestroy {
   }
 
   public openWorkerProfile(worker: WorkerProfile): void {
+    this.directBookingStep.set(false);
+    this.doorstepPin.set(null);
     this.selectedWorker.set(worker);
   }
 
   public closeWorkerProfile(): void {
     this.selectedWorker.set(null);
+    this.directBookingStep.set(false);
   }
 
   public toggleSheet(): void {
@@ -189,6 +197,7 @@ export class HomeMapComponent implements AfterViewInit, OnDestroy {
   }
 
   public openInstantBooking(): void {
+    this.doorstepPin.set(null);
     const activeCat = this.selectedCategoryId() === 'all' ? 'plumber' : this.selectedCategoryId();
     this.bookingCategory.set(activeCat);
     this.showInstantBookingModal.set(true);
@@ -210,7 +219,6 @@ export class HomeMapComponent implements AfterViewInit, OnDestroy {
 
   public startDirectBooking(worker: WorkerProfile): void {
     const user = this.currentUser();
-    const loc = this.userLocation();
     const cat = this.categoryService.getCategoryById(worker.categoryIds[0]) || { nameBn: 'সার্ভিস' };
 
     this.isSubmittingJob.set(true);
@@ -230,13 +238,27 @@ export class HomeMapComponent implements AfterViewInit, OnDestroy {
       status: 'accepted',
       description: `সরাসরি বুকিং: ${worker.name}-এর নিকট সেবা চাওয়া হয়েছে`,
       estimatedPrice: worker.rate,
-      location: loc,
+      ...this.doorstepJobFields(),
       paymentMethod: 'cash'
     });
 
     this.closeWorkerProfile();
     this.isSubmittingJob.set(false);
     this.router.navigate(['/customer/tracking', newJob.id]);
+  }
+
+  /** Location fields for a new job: the customer's confirmed doorstep pin, or their current location. */
+  private doorstepJobFields(): Pick<Job, 'location' | 'locationPinned' | 'landmark' | 'doorPhotoURL'> {
+    const pin = this.doorstepPin();
+    if (!pin) {
+      return { location: this.userLocation() };
+    }
+    return {
+      location: pin.location,
+      locationPinned: pin.pinned,
+      landmark: pin.landmark || undefined,
+      doorPhotoURL: pin.doorPhotoURL
+    };
   }
 
   public isFavorite(workerId: string): boolean {
@@ -265,7 +287,6 @@ export class HomeMapComponent implements AfterViewInit, OnDestroy {
 
   public submitInstantBooking(): void {
     const user = this.currentUser();
-    const loc = this.userLocation();
     const catId = this.bookingCategory();
     const cat = this.categoryService.getCategoryById(catId) || { nameBn: 'সার্ভিস' };
     const mode = this.bookingMode();
@@ -302,7 +323,7 @@ export class HomeMapComponent implements AfterViewInit, OnDestroy {
       description: this.bookingDescription(),
       scheduledAt: scheduledTimestamp,
       estimatedPrice: estPrice,
-      location: loc,
+      ...this.doorstepJobFields(),
       paymentMethod: this.bookingPaymentMethod()
     });
 

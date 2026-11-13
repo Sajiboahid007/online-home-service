@@ -124,6 +124,153 @@
           </div>
         </div>
 
+        <!-- Customer Doorstep Card (exact pin, only after acceptance) -->
+        @if (showDoorstep()) {
+          <div class="card doorstep-card" [class.nav-mode-active]="isNavigating()">
+            <div class="doorstep-header">
+              <div class="dh-title-wrap">
+                <h3 class="doorstep-title">📍 {{ 'কাস্টমারের দরজা' | t }}</h3>
+                @if (isNavigating()) {
+                  <span class="live-nav-indicator">
+                    <span class="pulse-dot"></span>
+                    <span>ইন-অ্যাপ নেভিগেশন সক্রিয়</span>
+                  </span>
+                }
+              </div>
+
+              <div class="dh-right-controls">
+                @if (currentJob.locationPinned) {
+                  <span class="pin-badge exact">✓ {{ 'সঠিক পিন' | t }}</span>
+                } @else {
+                  <span class="pin-badge approx">{{ 'আনুমানিক লোকেশন' | t }}</span>
+                }
+                <button 
+                  type="button" 
+                  class="btn-map-expand-toggle" 
+                  (click)="toggleMapExpanded()"
+                  [title]="isMapExpanded() ? 'ম্যাপ ছোট করুন' : 'ম্যাপ বড় করুন'">
+                  <i class="pi" [class.pi-window-maximize]="!isMapExpanded()" [class.pi-window-minimize]="isMapExpanded()"></i>
+                  <span class="btn-expand-text">{{ isMapExpanded() ? 'ছোট করুন' : 'বড় ম্যাপ' }}</span>
+                </button>
+              </div>
+            </div>
+
+            <div 
+              #doorstepMap 
+              class="doorstep-map"
+              [class.expanded]="isMapExpanded()"
+              [class.nav-active]="isNavigating()"
+            ></div>
+
+            <!-- In-App Turn-by-Turn Navigation HUD (On this map) -->
+            @if (isNavigating()) {
+              <div class="in-app-nav-hud">
+                <div class="hud-metrics-bar">
+                  <div class="hud-metric-pill">
+                    <span class="hud-m-icon">⏱️</span>
+                    <div>
+                      <span class="hud-m-lbl">সময় বাকি</span>
+                      <strong class="hud-m-val">{{ navDuration() }}</strong>
+                    </div>
+                  </div>
+
+                  <div class="hud-metric-pill">
+                    <span class="hud-m-icon">📏</span>
+                    <div>
+                      <span class="hud-m-lbl">দূরত্ব</span>
+                      <strong class="hud-m-val">{{ navDistance() }}</strong>
+                    </div>
+                  </div>
+
+                  <div class="hud-metric-pill">
+                    <span class="hud-m-icon">🗺️</span>
+                    <div>
+                      <span class="hud-m-lbl">নেভিগেশন</span>
+                      <strong class="hud-m-val text-teal">সরাসরি ম্যাপ</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Turn Instruction Row -->
+                <div class="hud-instruction-row" (click)="nextNavStep()" title="পরবর্তী ধাপ দেখতে ক্লিক করুন">
+                  <div class="hud-dir-icon">
+                    <i class="pi pi-compass"></i>
+                  </div>
+                  <div class="hud-dir-content">
+                    <span class="hud-step-title">{{ navInstructions()[navStepIndex()] }}</span>
+                    <span class="hud-step-sub">গন্তব্য: {{ currentJob.location.address }}</span>
+                  </div>
+                  <span class="hud-step-counter">{{ navStepIndex() + 1 }}/{{ navInstructions().length }}</span>
+                </div>
+
+                <!-- Live Map HUD Tools -->
+                <div class="hud-tools-bar">
+                  <button type="button" class="btn-hud-action" (click)="zoomToDoorstep()" title="কাস্টমারের দরজায় জুম করুন">
+                    <i class="pi pi-map-marker"></i>
+                    <span>দরজায় জুম</span>
+                  </button>
+                  <button type="button" class="btn-hud-action" (click)="zoomToRoute()" title="সম্পূর্ণ রুট দেখুন">
+                    <i class="pi pi-arrows-alt"></i>
+                    <span>পুরো রুট</span>
+                  </button>
+                  <button type="button" class="btn-hud-action btn-hud-close" (click)="stopInAppNavigation()" title="নেভিগেশন বন্ধ করুন">
+                    <i class="pi pi-times"></i>
+                    <span>বন্ধ করুন</span>
+                  </button>
+                </div>
+              </div>
+            }
+
+            @if (!currentJob.locationPinned) {
+              <p class="approx-note">
+                <i class="pi pi-info-circle"></i>
+                <span>{{ 'কাস্টমার সঠিক পিন দেননি — লোকেশনটি আনুমানিক। প্রয়োজনে কল করে নিশ্চিত হোন।' | t }}</span>
+              </p>
+            }
+
+            @if (currentJob.location.address) {
+              <div class="doorstep-address">
+                <span class="doorstep-label">{{ 'ঠিকানা' | t }}</span>
+                <strong>{{ currentJob.location.address }}</strong>
+              </div>
+            }
+
+            @if (currentJob.landmark) {
+              <div class="landmark-callout">
+                <span class="doorstep-label">🏷️ {{ 'ল্যান্ডমার্ক / চেনার উপায়' | t }}</span>
+                <strong>{{ currentJob.landmark }}</strong>
+              </div>
+            }
+
+            @if (currentJob.doorPhotoURL) {
+              <div class="door-photo-row">
+                <span class="doorstep-label">{{ 'গেটের ছবি' | t }}</span>
+                <button type="button" class="door-photo-thumb" (click)="openDoorPhoto()" [title]="'বড় করে দেখুন' | t">
+                  <img [src]="currentJob.doorPhotoURL" [alt]="'গেটের ছবি' | t" />
+                  <i class="pi pi-search-plus"></i>
+                </button>
+              </div>
+            }
+
+            <div class="doorstep-actions">
+              <button 
+                type="button" 
+                class="btn-navigate" 
+                (click)="startInAppNavigation()"
+                [class.btn-nav-active]="isNavigating()"
+              >
+                <i class="pi" [class.pi-compass]="!isNavigating()" [class.pi-refresh]="isNavigating()"></i>
+                <span>{{ (isNavigating() ? 'ম্যাপে নেভিগেশন রিফ্রেশ' : 'নেভিগেট করুন (Navigate)') | t }}</span>
+              </button>
+
+              <a [href]="directionsUrl()" target="_blank" rel="noopener" class="btn-maps-fallback" title="প্রয়োজনে গুগল ম্যাপসে খুলুন">
+                <i class="pi pi-external-link"></i>
+                <span>গুগল ম্যাপস (বিকল্প)</span>
+              </a>
+            </div>
+          </div>
+        }
+
         <!-- Job Problem Description Card -->
         <div class="card problem-card">
           <div class="problem-header">
@@ -440,6 +587,16 @@
           <button type="button" class="btn-danger" (click)="confirmCancelJob()">বাতিল নিশ্চিত করুন</button>
         </div>
       </div>
+    </div>
+  }
+
+  <!-- Gate Photo Viewer -->
+  @if (showDoorPhotoViewer() && showDoorstep() && job()?.doorPhotoURL) {
+    <div class="door-photo-overlay" (click)="closeDoorPhoto()">
+      <button type="button" class="btn-close-photo" (click)="closeDoorPhoto()" [title]="'বন্ধ করুন' | t">
+        <i class="pi pi-times"></i>
+      </button>
+      <img [src]="job()?.doorPhotoURL" [alt]="'গেটের ছবি' | t" (click)="$event.stopPropagation()" />
     </div>
   }
 

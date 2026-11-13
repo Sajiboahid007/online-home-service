@@ -1,0 +1,65 @@
+<div class="doorstep-picker">
+  <div class="dp-map-wrap">
+    <div #mapEl class="dp-map"></div>
+
+    <button type="button" class="dp-gps-btn" (click)="useMyGps()" [disabled]="isLocating()" [title]="'আমার GPS লোকেশন' | t">
+      <i class="pi" [class.pi-spin]="isLocating()" [class.pi-spinner]="isLocating()" [class.pi-compass]="!isLocating()"></i>
+      <span>{{ 'আমার GPS লোকেশন' | t }}</span>
+    </button>
+  </div>
+
+  <div class="dp-status" [class.pinned]="pinned()">
+    @if (pinned()) {
+      <i class="pi pi-check-circle"></i>
+      <span>{{ 'সঠিক পিন সেট হয়েছে' | t }}</span>
+    } @else {
+      <i class="pi pi-arrows-alt"></i>
+      <span>{{ 'পিনটি টেনে বা ম্যাপে ট্যাপ করে আপনার বাড়ির গেটে রাখুন' | t }}</span>
+    }
+  </div>
+
+  <div class="dp-address">
+    <span class="dp-address-icon">📍</span>
+    <span class="dp-address-text">
+      {{ location().address || ('ঠিকানা খোঁজা হচ্ছে...' | t) }}
+      @if (isResolvingAddress()) {
+        <i class="pi pi-spin pi-spinner dp-mini-spinner"></i>
+      }
+    </span>
+  </div>
+
+  <label class="dp-label" for="dpLandmark">{{ 'ল্যান্ডমার্ক / দিকনির্দেশনা' | t }}</label>
+  <textarea
+    id="dpLandmark"
+    class="dp-landmark"
+    rows="2"
+    [maxLength]="landmarkMaxLength"
+    [value]="landmark()"
+    (input)="onLandmarkInput($any($event.target).value)"
+    [placeholder]="'যেমন: নীল গেট, রহিম ফার্মেসির পাশে, ৩য় তলা' | t"
+  ></textarea>
+  <span class="dp-counter">{{ landmark().length }}/{{ landmarkMaxLength }}</span>
+
+  <div class="dp-photo-row">
+    @if (doorPhotoURL(); as photo) {
+      <div class="dp-photo-preview">
+        <img [src]="photo" [alt]="'গেটের ছবি' | t" />
+        <button type="button" class="dp-photo-remove" (click)="removePhoto()" [title]="'ছবি সরান' | t">✕</button>
+      </div>
+    } @else {
+      <label class="dp-photo-btn">
+        <input type="file" accept="image/*" capture="environment" (change)="onPhotoSelected($event)" hidden />
+        <i class="pi pi-camera"></i>
+        <span>{{ 'গেটের ছবি যোগ করুন (ঐচ্ছিক)' | t }}</span>
+      </label>
+    }
+    @if (photoError()) {
+      <span class="dp-photo-error">{{ photoError()! | t }}</span>
+    }
+  </div>
+
+  <p class="dp-privacy">
+    <i class="pi pi-lock"></i>
+    {{ 'সঠিক পিন শুধুমাত্র কাজ গ্রহণকারী কারিগর দেখতে পাবেন।' | t }}
+  </p>
+</div>

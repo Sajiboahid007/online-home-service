@@ -1,4 +1,4 @@
-import { Component, computed, signal, OnInit } from '@angular/core';
+import { Component, computed, signal, OnInit, OnDestroy, ElementRef, effect, inject, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -7,18 +7,23 @@ import { WorkerService } from '../../../core/services/worker.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { JobChatComponent } from '../../../shared/components/job-chat/job-chat.component';
 import { Job, JobStatus } from '../../../core/models/job.model';
+import { WorkerProfile } from '../../../core/models/worker.model';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
 import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { MapService } from '../../../core/services/map.service';
+import { canSeeExactLocation, googleMapsDirectionsUrl } from '../../../core/utils/navigation';
+import { Map as MapLibreMap, Marker } from 'maplibre-gl';
 
 @Component({
   selector: 'app-worker-active-job',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, BnNumberPipe, TakaPipe, TimeAgoPipe, JobChatComponent],
+  imports: [CommonModule, RouterModule, FormsModule, BnNumberPipe, TakaPipe, TimeAgoPipe, TranslatePipe, JobChatComponent],
   templateUrl: './worker-active-job.component.html',
   styleUrl: './worker-active-job.component.scss'
 })
-export class WorkerActiveJobComponent implements OnInit {
+export class WorkerActiveJobComponent implements OnInit, OnDestroy {
   public jobId = signal<string>('');
   public showChatModal = signal<boolean>(false);
   
@@ -51,6 +56,45 @@ export class WorkerActiveJobComponent implements OnInit {
     if (!id) return null;
     return this.jobService.jobs().find(j => j.id === id) || null;
   });
+
+  // Current active worker computed reactively
+  public currentWorker = computed<WorkerProfile | null>(() => {
+    const authWorker = this.authService.currentWorker();
+    const uid = authWorker?.uid || 'worker_rahim_1';
+    return this.workerService.getWorkerById(uid) || authWorker || this.workerService.workers()[0] || null;
+  });
+
+  // Exact doorstep pin: only shown while the technician is actively serving the job
+  public showDoorstep = computed<boolean>(() => {
+    const j = this.job();
+    return !!j && !!j.location && canSeeExactLocation(j.status);
+  });
+
+  public directionsUrl = computed<string>(() => {
+    const j = this.job();
+    return j?.location ? googleMapsDirectionsUrl(j.location) : '';
+  });
+
+  public showDoorPhotoViewer = signal<boolean>(false);
+
+  // In-App Navigation State (Navigates directly on THIS map, not Google Maps)
+  public isNavigating = signal<boolean>(false);
+  public isMapExpanded = signal<boolean>(false);
+  public navDistance = signal<string>('১.২ কিমি');
+  public navDuration = signal<string>('৭ মিনিট');
+  public navStepIndex = signal<number>(0);
+  public navInstructions = signal<string[]>([
+    'সাভার বাজার মেইন রোড ধরে উত্তর দিকে ২৫০ মিটার এগিয়ে যান।',
+    'থানা মোড়ে ডানদিকে ঘুরে সাভার থানা রোডে প্রবেশ করুন।',
+    'সোজা ৫০০ মিটার গিয়ে বামদিকের লেনে প্রবেশ করুন।',
+    'গন্তব্য ডানপাশে: কাস্টমারের দরজার সঠিক পিন।'
+  ]);
+
+  private mapService = inject(MapService);
+  private doorstepMapEl = viewChild<ElementRef<HTMLElement>>('doorstepMap');
+  private doorstepMap: MapLibreMap | null = null;
+  private doorstepMarker: Marker | null = null;
+  private workerNavMarker: Marker | null = null;
 
   // Progressive Step number (1: accepted, 2: on_the_way, 3: arrived, 4: in_progress, 5: completed)
   public currentStep = computed<number>(() => {
@@ -87,7 +131,172 @@ export class WorkerActiveJobComponent implements OnInit {
     public workerService: WorkerService,
     public authService: AuthService,
     private router: Router
-  ) {}
+  ) {
+    // Create/refresh the doorstep map when its container appears or the job location changes
+    effect(() => {
+      const el = this.doorstepMapEl()?.nativeElement;
+      const j = this.job();
+      if (!el || !j?.location || !this.showDoorstep()) {
+        this.destroyDoorstepMap();
+        return;
+      }
+      const lngLat: [number, number] = [j.location.lng, j.location.lat];
+      if (!this.doorstepMap || this.doorstepMap.getContainer() !== el) {
+        this.destroyDoorstepMap();
+        this.doorstepMap = this.mapService.createMap(el, j.location, 17);
+        this.doorstepMarker = new Marker({ color: '#dc2626' }).setLngLat(lngLat).addTo(this.doorstepMap);
+      } else if (this.doorstepMarker) {
+        const cur = this.doorstepMarker.getLngLat();
+        if (cur.lng === lngLat[0] && cur.lat === lngLat[1]) return;
+        this.doorstepMarker.setLngLat(lngLat);
+        this.doorstepMap.setCenter(lngLat);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroyDoorstepMap();
+  }
+
+  private destroyDoorstepMap(): void {
+    this.workerNavMarker?.remove();
+    this.workerNavMarker = null;
+    this.doorstepMarker?.remove();
+    this.doorstepMarker = null;
+    this.doorstepMap?.remove();
+    this.doorstepMap = null;
+  }
+
+  // --- In-App Navigation (Navigates directly on THIS map) ---
+  public async startInAppNavigation(): Promise<void> {
+    const j = this.job();
+    if (!j?.location || !this.doorstepMap) return;
+
+    this.isNavigating.set(true);
+
+    const worker = this.currentWorker();
+    const destLoc = j.location;
+    // Determine worker origin coordinates
+    const workerLoc = worker?.homeLocation ? {
+      lat: worker.homeLocation.lat,
+      lng: worker.homeLocation.lng
+    } : {
+      lat: destLoc.lat - 0.006,
+      lng: destLoc.lng - 0.005
+    };
+
+    // Add or update worker vehicle marker on THIS map
+    if (!this.workerNavMarker) {
+      const el = document.createElement('div');
+      el.className = 'worker-vehicle-marker';
+      el.innerHTML = `
+        <div class="vehicle-pulse-ring"></div>
+        <div class="vehicle-pin-box">🛵</div>
+      `;
+      this.workerNavMarker = new Marker({ element: el })
+        .setLngLat([workerLoc.lng, workerLoc.lat])
+        .addTo(this.doorstepMap);
+    } else {
+      this.workerNavMarker.setLngLat([workerLoc.lng, workerLoc.lat]);
+    }
+
+    // Draw route line on THIS map
+    try {
+      const routeInfo = await this.mapService.drawRouteLine(
+        this.doorstepMap,
+        workerLoc,
+        destLoc,
+        'doorstep-live-nav-route'
+      );
+      if (routeInfo) {
+        this.navDistance.set(`${routeInfo.distanceKm} কিমি`);
+        this.navDuration.set(`${routeInfo.durationMin} মিনিট`);
+      }
+    } catch (err) {
+      console.warn('In-app routing error:', err);
+    }
+
+    // Set practical turn guidance with real address
+    this.navInstructions.set([
+      `সাভার বাজার রোড ধরে গন্তব্যের দিকে রওনা দিন (দূরত্ব ${this.navDistance()})`,
+      'সাভার থানা মোড়ে সাবধানে ডানদিকে টার্ন নিন',
+      `গন্তব্যে পৌঁছান: ${destLoc.address || 'কাস্টমারের বাসা'}${j.landmark ? ' (' + j.landmark + ')' : ''}`
+    ]);
+    this.navStepIndex.set(0);
+
+    // Smoothly fit bounds to show both worker and customer on this map
+    const minLng = Math.min(workerLoc.lng, destLoc.lng);
+    const maxLng = Math.max(workerLoc.lng, destLoc.lng);
+    const minLat = Math.min(workerLoc.lat, destLoc.lat);
+    const maxLat = Math.max(workerLoc.lat, destLoc.lat);
+    this.doorstepMap.fitBounds(
+      [[minLng, minLat], [maxLng, maxLat]],
+      { padding: 60, maxZoom: 17, duration: 1500 }
+    );
+  }
+
+  public zoomToDoorstep(): void {
+    const j = this.job();
+    if (this.doorstepMap && j?.location) {
+      this.doorstepMap.flyTo({
+        center: [j.location.lng, j.location.lat],
+        zoom: 18,
+        duration: 1000
+      });
+    }
+  }
+
+  public zoomToRoute(): void {
+    const j = this.job();
+    const worker = this.currentWorker();
+    if (!this.doorstepMap || !j?.location) return;
+
+    const destLoc = j.location;
+    const workerLoc = worker?.homeLocation || {
+      lat: destLoc.lat - 0.006,
+      lng: destLoc.lng - 0.005
+    };
+    const minLng = Math.min(workerLoc.lng, destLoc.lng);
+    const maxLng = Math.max(workerLoc.lng, destLoc.lng);
+    const minLat = Math.min(workerLoc.lat, destLoc.lat);
+    const maxLat = Math.max(workerLoc.lat, destLoc.lat);
+    this.doorstepMap.fitBounds(
+      [[minLng, minLat], [maxLng, maxLat]],
+      { padding: 60, maxZoom: 17, duration: 1200 }
+    );
+  }
+
+  public toggleMapExpanded(): void {
+    this.isMapExpanded.update(v => !v);
+    setTimeout(() => {
+      this.doorstepMap?.resize();
+    }, 250);
+  }
+
+  public nextNavStep(): void {
+    const next = (this.navStepIndex() + 1) % this.navInstructions().length;
+    this.navStepIndex.set(next);
+  }
+
+  public stopInAppNavigation(): void {
+    this.isNavigating.set(false);
+    const j = this.job();
+    if (this.doorstepMap && j?.location) {
+      this.doorstepMap.flyTo({
+        center: [j.location.lng, j.location.lat],
+        zoom: 17,
+        duration: 1000
+      });
+    }
+  }
+
+  public openDoorPhoto(): void {
+    this.showDoorPhotoViewer.set(true);
+  }
+
+  public closeDoorPhoto(): void {
+    this.showDoorPhotoViewer.set(false);
+  }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {

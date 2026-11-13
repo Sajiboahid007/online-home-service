@@ -2,12 +2,13 @@
   <!-- Topbar -->
   <header class="worker-topbar">
     <div class="topbar-inner">
-      <!-- Left: Brand & Mobile Menu Toggle -->
+      <!-- Left: Brand, Status & Online Switch -->
       <div class="topbar-left">
         <button class="mobile-menu-btn" (click)="toggleMobileMenu()" [attr.aria-label]="'মেনু খুলুন' | t">
           <i class="pi" [class.pi-bars]="!mobileMenuOpen()" [class.pi-times]="mobileMenuOpen()"></i>
         </button>
-        <a routerLink="/worker/dashboard" class="worker-brand">
+
+        <a routerLink="/worker/dashboard" class="worker-brand" [title]="'কাজখোঁজ ওয়ার্কার হাব' | t">
           <div class="brand-logo-badge">
             <i class="pi pi-wrench"></i>
           </div>
@@ -16,10 +17,9 @@
             <span class="brand-tag">{{ 'ওয়ার্কার হাব' | t }}</span>
           </div>
         </a>
-      </div>
 
-      <!-- Center: Live Status, Online Switch, Wallet & Due -->
-      <div class="topbar-center">
+        <div class="topbar-divider"></div>
+
         <!-- Live Online/Offline Switch -->
         <div class="online-switch-container" [class.is-online]="currentWorker()?.isOnline">
           <button 
@@ -46,147 +46,328 @@
         <div class="busy-status-badge">
           @if (!currentWorker()?.isOnline) {
             <span class="badge badge-offline">
-              <i class="pi pi-moon"></i> {{ 'বিশ্রামে আছেন' | t }}
+              <i class="pi pi-moon"></i>
+              <span>{{ 'বিশ্রামে আছেন' | t }}</span>
             </span>
           } @else if (currentWorker()?.isBusy) {
             <span class="badge badge-busy">
-              <i class="pi pi-clock"></i> {{ 'কাজে ব্যস্ত' | t }}
+              <i class="pi pi-clock"></i>
+              <span>{{ 'কাজে ব্যস্ত' | t }}</span>
             </span>
           } @else {
             <span class="badge badge-ready">
-              <i class="pi pi-check-circle"></i> {{ 'নতুন কাজের অপেক্ষায়' | t }}
+              <i class="pi pi-check-circle"></i>
+              <span>{{ 'নতুন কাজের অপেক্ষায়' | t }}</span>
             </span>
           }
         </div>
-
-        <!-- Wallet Balance Chip -->
-        <a routerLink="/worker/wallet" class="stat-chip wallet-chip" [title]="'ওয়ালেট ব্যালেন্স দেখুন' | t">
-          <i class="pi pi-wallet stat-icon"></i>
-          <span class="stat-label">{{ 'ব্যালেন্স:' | t }}</span>
-          <span class="stat-value">{{ (currentWorker()?.walletBalance || 0) | taka }}</span>
-        </a>
-
-        <!-- Commission Due Badge -->
-        <a 
-          routerLink="/worker/wallet" 
-          class="stat-chip due-chip" 
-          [class.due-danger]="(currentWorker()?.commissionDue || 0) >= 400"
-          [title]="'বকেয়া কমিশন ট্র্যাকার' | t">
-          <i class="pi pi-exclamation-circle stat-icon"></i>
-          <span class="stat-label">{{ 'বকেয়া কমিশন:' | t }}</span>
-          <span class="stat-value">{{ (currentWorker()?.commissionDue || 0) | taka }}</span>
-          @if ((currentWorker()?.commissionDue || 0) >= 400) {
-            <span class="due-warning-tag">⚠️ {{ 'সীমা' | t }} {{ 500 | bnNumber }}</span>
-          }
-        </a>
-
-        <!-- Active Job Quick Indicator -->
-        @if (activeJob(); as job) {
-          <a [routerLink]="['/worker/active', job.id]" class="active-job-indicator" [title]="'চলমান কাজ দেখুন' | t">
-            <span class="active-pulse"></span>
-            <i class="pi pi-spin pi-cog"></i>
-            <span>{{ 1 | bnNumber }} {{ 'টি কাজ চলমান' | t }}</span>
-          </a>
-        }
       </div>
 
-      <!-- Right: Worker Profile & Switcher -->
+      <!-- Right: System Controls, Role Switcher & Worker Profile -->
       <div class="topbar-right">
-        <!-- Notification Center & Dark mode -->
+        <!-- Notification Center -->
         <app-notification-center></app-notification-center>
 
+        <!-- Language Toggle -->
         <app-lang-toggle></app-lang-toggle>
-        <button type="button" class="icon-toggle-btn" (click)="themeService.toggleDarkMode()" [title]="(themeService.isDarkMode() ? 'লাইট মোড' : 'ডার্ক মোড') | t" style="background:none; border:none; cursor:pointer; font-size:16px; padding:6px; color:inherit;">
+
+        <!-- Dark Mode Toggle -->
+        <button 
+          type="button" 
+          class="icon-toggle-btn" 
+          (click)="themeService.toggleDarkMode()" 
+          [title]="(themeService.isDarkMode() ? 'লাইট মোড' : 'ডার্ক মোড') | t"
+          [attr.aria-label]="(themeService.isDarkMode() ? 'লাইট মোড' : 'ডার্ক মোড') | t">
           <i class="pi" [ngClass]="themeService.isDarkMode() ? 'pi-sun' : 'pi-moon'"></i>
         </button>
 
-        <!-- Desktop Role Switcher -->
-        <div class="quick-role-switch">
-          @if (currentWorker()?.uid === 'worker_rahim_1') {
-            <button (click)="switchWorker('worker_kalam')" class="role-btn plumber-switch-btn" [title]="'কালাম প্লাম্বার অ্যাকাউন্টে সুইচ করুন' | t">
-              <span>{{ '🚰 প্লাম্বার কালামে যান' | t }}</span>
-            </button>
-          } @else {
-            <button (click)="switchWorker('worker')" class="role-btn plumber-switch-btn" [title]="'রহিম প্লাম্বার অ্যাকাউন্টে সুইচ করুন' | t">
-              <span>{{ '🔧 প্লাম্বার রহিমে যান' | t }}</span>
-            </button>
-          }
-          <button (click)="switchRole('customer')" class="role-btn" [title]="'কাস্টমার মোডে যান' | t">
-            <i class="pi pi-user"></i>
-            <span>{{ 'কাস্টমার অ্যাপ' | t }}</span>
-          </button>
-          <button (click)="switchRole('admin')" class="role-btn" [title]="'অ্যাডমিন প্যানেলে যান' | t">
-            <i class="pi pi-shield"></i>
-            <span>{{ 'অ্যাডমিন' | t }}</span>
-          </button>
-        </div>
+        <div class="topbar-divider"></div>
 
-        <!-- Worker Mini Profile -->
-        <div class="worker-profile-pill">
-          <img 
-            [src]="currentWorker()?.photoURL || 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=100'" 
-            [alt]="currentWorker()?.name" 
-            class="profile-avatar" />
-          <div class="profile-meta">
-            <span class="profile-name">{{ currentWorker()?.name }}</span>
-            <div class="profile-sub">
-              <span class="rating">⭐ {{ (currentWorker()?.rating || 5.0) | bnNumber }}</span>
-              @if (currentWorker()?.verified) {
-                <span class="verified-icon" [title]="'ভেরিফায়েড কারিগর' | t">✔</span>
-              }
+        <!-- Role Switcher Trigger Button -->
+        <button 
+          type="button" 
+          class="role-badge-btn" 
+          (click)="toggleRoleSwitcher()" 
+          [title]="'ভূমিকা পরিবর্তন করুন (Role Switcher)' | t">
+          <span class="role-icon">🔄</span>
+          <span class="role-text">{{ 'রোল সুইচ' | t }}</span>
+        </button>
+
+        <!-- Worker Profile Dropdown Menu -->
+        <div class="worker-profile-dropdown" [class.is-open]="showProfileDropdown()">
+          <button 
+            type="button" 
+            class="profile-trigger-btn" 
+            (click)="toggleProfileDropdown(); $event.stopPropagation()"
+            [attr.aria-expanded]="showProfileDropdown()">
+            <div class="avatar-wrapper">
+              <img 
+                [src]="currentWorker()?.photoURL || 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=100'" 
+                [alt]="currentWorker()?.name" 
+                class="profile-avatar" />
+              <span class="status-indicator-dot" [class.online]="currentWorker()?.isOnline"></span>
             </div>
-          </div>
-          <button (click)="logout()" class="logout-icon-btn" [title]="'লগআউট করুন' | t">
-            <i class="pi pi-sign-out"></i>
+            <div class="profile-meta">
+              <span class="profile-name">{{ currentWorker()?.name }}</span>
+              <div class="profile-sub">
+                <span class="rating">⭐ {{ (currentWorker()?.rating || 5.0) | bnNumber }}</span>
+                @if (currentWorker()?.verified) {
+                  <span class="verified-icon" [title]="'ভেরিফায়েড কারিগর' | t">✔</span>
+                }
+              </div>
+            </div>
+            <i class="pi pi-chevron-down dropdown-arrow" [class.rotated]="showProfileDropdown()"></i>
           </button>
+
+          <!-- Dropdown Popover Menu -->
+          @if (showProfileDropdown()) {
+            <div class="profile-dropdown-menu" (click)="$event.stopPropagation()">
+              <div class="menu-user-header">
+                <img 
+                  [src]="currentWorker()?.photoURL || 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=100'" 
+                  [alt]="currentWorker()?.name" 
+                  class="menu-avatar" />
+                <div class="menu-user-details">
+                  <div class="name-line">
+                    <strong class="user-fullname">{{ currentWorker()?.name }}</strong>
+                    @if (currentWorker()?.verified) {
+                      <span class="badge-verified" [title]="'ভেরিফায়েড কারিগর' | t">✔</span>
+                    }
+                  </div>
+                  <span class="menu-skill">{{ currentWorker()?.skills?.[0] || ('দক্ষ কারিগর' | t) }}</span>
+                  <span class="menu-phone">{{ currentWorker()?.phone }}</span>
+                </div>
+              </div>
+
+              <div class="menu-divider"></div>
+
+              <!-- Switch Worker Shortcut (Rahim <-> Kalam) -->
+              <div class="menu-section-label">{{ 'ওয়ার্কার অ্যাকাউন্ট বদল' | t }}</div>
+              @if (currentWorker()?.uid === 'worker_rahim_1') {
+                <button type="button" class="menu-item switch-item" (click)="switchWorker('worker_kalam')">
+                  <span class="menu-item-icon">🚰</span>
+                  <div class="menu-item-text">
+                    <span class="item-title">{{ 'প্লাম্বার কালাম হোসেন' | t }}</span>
+                    <span class="item-sub">{{ 'বিকল্প প্লাম্বার অ্যাকাউন্টে সুইচ করুন' | t }}</span>
+                  </div>
+                </button>
+              } @else {
+                <button type="button" class="menu-item switch-item" (click)="switchWorker('worker')">
+                  <span class="menu-item-icon">🔧</span>
+                  <div class="menu-item-text">
+                    <span class="item-title">{{ 'প্লাম্বার রহিম মিয়া' | t }}</span>
+                    <span class="item-sub">{{ 'মূল প্লাম্বার অ্যাকাউন্টে সুইচ করুন' | t }}</span>
+                  </div>
+                </button>
+              }
+
+              <div class="menu-divider"></div>
+
+              <!-- Quick Links -->
+              <div class="menu-section-label">{{ 'প্রোফাইল নেভিগেশন' | t }}</div>
+              <a routerLink="/worker/edit-profile" (click)="closeProfileDropdown()" class="menu-item">
+                <i class="pi pi-user-edit menu-icon"></i>
+                <span>{{ 'প্রোফাইল ও স্কিল এডিট' | t }}</span>
+              </a>
+
+              <a routerLink="/worker/reviews" (click)="closeProfileDropdown()" class="menu-item">
+                <i class="pi pi-star menu-icon"></i>
+                <span>{{ 'রিভিউ ও গ্রাহক রেটিং' | t }}</span>
+              </a>
+
+              <a routerLink="/worker/earnings" (click)="closeProfileDropdown()" class="menu-item">
+                <i class="pi pi-chart-line menu-icon"></i>
+                <span>{{ 'উপার্জন ও আয় বিশ্লেষণ' | t }}</span>
+              </a>
+
+              <a routerLink="/worker/premium" (click)="closeProfileDropdown()" class="menu-item menu-item-pro">
+                <i class="pi pi-star-fill menu-icon pro-gold"></i>
+                <span>{{ 'কাজখোঁজ প্রো (Pro)' | t }}</span>
+                <span class="pro-tag">PRO</span>
+              </a>
+
+              <div class="menu-divider"></div>
+
+              <!-- Logout -->
+              <button type="button" class="menu-item logout-item" (click)="logout()">
+                <i class="pi pi-sign-out menu-icon text-danger"></i>
+                <span class="text-danger">{{ 'লগআউট' | t }}</span>
+              </button>
+            </div>
+          }
         </div>
       </div>
     </div>
 
-    <!-- Secondary Nav Bar (Desktop Navigation) -->
+    <!-- Secondary Nav Bar (Desktop Navigation & Live Worker Metrics) -->
     <nav class="worker-desktop-nav">
-      <div class="nav-links">
-        <a 
-          routerLink="/worker/dashboard" 
-          routerLinkActive="active" 
-          [routerLinkActiveOptions]="{ exact: true }"
-          class="nav-tab">
-          <i class="pi pi-home"></i>
-          <span>{{ 'ড্যাশবোর্ড' | t }}</span>
-        </a>
-
-        @if (activeJob(); as job) {
+      <div class="nav-inner">
+        <!-- Navigation Tabs (Left) -->
+        <div class="nav-links">
           <a 
-            [routerLink]="['/worker/active', job.id]" 
+            routerLink="/worker/dashboard" 
             routerLinkActive="active" 
-            class="nav-tab nav-tab-active-job">
-            <i class="pi pi-bolt"></i>
-            <span>{{ 'সক্রিয় কাজ' | t }}</span>
-            <span class="tab-badge-pulse">{{ 'চলমান' | t }}</span>
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="nav-tab">
+            <i class="pi pi-home"></i>
+            <span>{{ 'ড্যাশবোর্ড' | t }}</span>
           </a>
-        }
 
-        <a 
-          routerLink="/worker/job-board" 
-          routerLinkActive="active" 
-          class="nav-tab">
-          <i class="pi pi-briefcase"></i>
-          <span>{{ 'জব বোর্ড' | t }}</span>
-          @if (openJobsCount() > 0) {
-            <span class="tab-badge">{{ openJobsCount() | bnNumber }}</span>
+          @if (activeJob(); as job) {
+            <a 
+              [routerLink]="['/worker/active', job.id]" 
+              routerLinkActive="active" 
+              class="nav-tab nav-tab-active-job">
+              <i class="pi pi-bolt"></i>
+              <span>{{ 'সক্রিয় কাজ' | t }}</span>
+              <span class="tab-badge-pulse">{{ 'চলমান' | t }}</span>
+            </a>
           }
-        </a>
 
-        <a 
-          routerLink="/worker/wallet" 
-          routerLinkActive="active" 
-          class="nav-tab">
-          <i class="pi pi-wallet"></i>
-          <span>{{ 'ওয়ালেট ও হিসাব' | t }}</span>
-        </a>
+          <a 
+            routerLink="/worker/job-board" 
+            routerLinkActive="active" 
+            class="nav-tab">
+            <i class="pi pi-briefcase"></i>
+            <span>{{ 'জব বোর্ড' | t }}</span>
+            @if (openJobsCount() > 0) {
+              <span class="tab-badge">{{ openJobsCount() | bnNumber }}</span>
+            }
+          </a>
+
+          <a 
+            routerLink="/worker/wallet" 
+            routerLinkActive="active" 
+            class="nav-tab">
+            <i class="pi pi-wallet"></i>
+            <span>{{ 'ওয়ালেট ও হিসাব' | t }}</span>
+          </a>
+
+          <a 
+            routerLink="/worker/job-history" 
+            routerLinkActive="active" 
+            class="nav-tab">
+            <i class="pi pi-history"></i>
+            <span>{{ 'কাজের ইতিহাস' | t }}</span>
+          </a>
+        </div>
+
+        <!-- Live Worker Financial & Status Metrics (Right) -->
+        <div class="nav-stats">
+          <!-- Active Job Quick Indicator (if ongoing) -->
+          @if (activeJob(); as job) {
+            <a [routerLink]="['/worker/active', job.id]" class="stat-pill active-stat" [title]="'চলমান কাজে যান' | t">
+              <span class="pulse-dot"></span>
+              <i class="pi pi-spin pi-cog"></i>
+              <span>{{ '১টি কাজ চলমান' | t }}</span>
+            </a>
+          }
+
+          <!-- Wallet Balance -->
+          <a routerLink="/worker/wallet" class="stat-pill wallet-stat" [title]="'ওয়ালেট ব্যালেন্স দেখুন' | t">
+            <i class="pi pi-wallet"></i>
+            <span class="pill-label">{{ 'ব্যালেন্স:' | t }}</span>
+            <strong class="pill-value">{{ (currentWorker()?.walletBalance || 0) | taka }}</strong>
+          </a>
+
+          <!-- Commission Due -->
+          <a 
+            routerLink="/worker/wallet" 
+            class="stat-pill due-stat" 
+            [class.due-danger]="(currentWorker()?.commissionDue || 0) >= 400"
+            [title]="'বকেয়া কমিশন ট্র্যাকার' | t">
+            <i class="pi pi-exclamation-circle"></i>
+            <span class="pill-label">{{ 'বকেয়া কমিশন:' | t }}</span>
+            <strong class="pill-value">{{ (currentWorker()?.commissionDue || 0) | taka }}</strong>
+            @if ((currentWorker()?.commissionDue || 0) >= 400) {
+              <span class="due-warning-tag">⚠️ {{ 'সীমা' | t }} {{ 500 | bnNumber }}</span>
+            }
+          </a>
+        </div>
       </div>
     </nav>
   </header>
+
+  <!-- Role Switcher Modal -->
+  @if (showRoleSwitcher()) {
+    <div class="modal-backdrop" (click)="closeRoleSwitcher()">
+      <div class="modal-card role-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-icon">🔄</span>
+            <h3 class="modal-title">{{ 'ভূমিকা পরিবর্তন করুন (Role Switcher)' | t }}</h3>
+          </div>
+          <button type="button" class="close-btn" (click)="closeRoleSwitcher()" [attr.aria-label]="'বন্ধ করুন' | t">✕</button>
+        </div>
+
+        <p class="role-desc">{{ 'প্ল্যাটফর্মের ভিন্ন ভিন্ন রোল ও ইন্টারফেস টেস্ট করতে নিচের যেকোনো প্রোফাইল বেছে নিন:' | t }}</p>
+
+        <div class="role-cards-grid">
+          <div class="role-card" (click)="switchRole('customer')">
+            <div class="rc-badge customer">{{ 'কাস্টমার' | t }}</div>
+            <div class="rc-avatar">👤</div>
+            <div class="rc-info">
+              <h4>{{ 'কাস্টমার ডেমো' | t }}</h4>
+              <p>{{ 'তানভীর আহমেদ (সাভার বাজার)' | t }}</p>
+              <span class="rc-hint">{{ 'সার্ভিস বুকিং ও লাইভ ম্যাপ ট্র্যাকিং' | t }}</span>
+            </div>
+          </div>
+
+          <div class="role-card" [class.active-role]="currentWorker()?.uid === 'worker_rahim_1'" (click)="switchRole('worker')">
+            @if (currentWorker()?.uid === 'worker_rahim_1') {
+              <div class="rc-badge active">{{ 'বর্তমান' | t }}</div>
+            } @else {
+              <div class="rc-badge worker">{{ 'প্লাম্বার ১' | t }}</div>
+            }
+            <div class="rc-avatar">🔧</div>
+            <div class="rc-info">
+              <h4>{{ 'রহিম প্লাম্বার (ভেরিফায়েড)' | t }}</h4>
+              <p>{{ 'সাভার বাসস্ট্যান্ড (অনলাইন 🟢)' | t }}</p>
+              <span class="rc-hint">{{ 'ওয়ার্কার ড্যাশবোর্ড, রিকোয়েস্ট ও ওয়ালেট' | t }}</span>
+            </div>
+          </div>
+
+          <div class="role-card" [class.active-role]="currentWorker()?.uid === 'worker_kalam'" (click)="switchRole('worker_kalam')">
+            @if (currentWorker()?.uid === 'worker_kalam') {
+              <div class="rc-badge active">{{ 'বর্তমান' | t }}</div>
+            } @else {
+              <div class="rc-badge worker">{{ 'প্লাম্বার ২' | t }}</div>
+            }
+            <div class="rc-avatar">🚰</div>
+            <div class="rc-info">
+              <h4>{{ 'কালাম হোসেন (প্লাম্বার)' | t }}</h4>
+              <p>{{ 'ব্যাংক টাউন (অনলাইন 🟢)' | t }}</p>
+              <span class="rc-hint">{{ 'দ্বিতীয় প্লাম্বার — ফার্স্ট গ্র্যাব যাচাই করুন' | t }}</span>
+            </div>
+          </div>
+
+          <div class="role-card" [class.active-role]="currentWorker()?.uid === 'worker_korim'" (click)="switchRole('worker_korim')">
+            <div class="rc-badge worker">{{ 'ওয়ার্কার' | t }}</div>
+            <div class="rc-avatar">⚡</div>
+            <div class="rc-info">
+              <h4>{{ 'করিম মিয়া (ইলেকট্রিশিয়ান)' | t }}</h4>
+              <p>{{ 'রেডিও কলোনি (অনলাইন 🟢)' | t }}</p>
+              <span class="rc-hint">{{ 'জব বোর্ড ও কাজের আবেদন' | t }}</span>
+            </div>
+          </div>
+
+          <div class="role-card" (click)="switchRole('admin')">
+            <div class="rc-badge admin">{{ 'অ্যাডমিন' | t }}</div>
+            <div class="rc-avatar">🛡️</div>
+            <div class="rc-info">
+              <h4>{{ 'সাভার এরিয়া অ্যাডমিন' | t }}</h4>
+              <p>{{ 'সাভার উপজেলা কন্ট্রোল রুম' | t }}</p>
+              <span class="rc-hint">{{ 'ভেরিফিকেশন, এরিয়া নিয়ন্ত্রণ ও লাইভ মনিটর' | t }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeRoleSwitcher()">{{ 'বন্ধ করুন' | t }}</button>
+        </div>
+      </div>
+    </div>
+  }
 
   <!-- Mobile Drawer Menu (Overlay) -->
   @if (mobileMenuOpen()) {
@@ -194,13 +375,13 @@
     <aside class="mobile-drawer">
       <div class="drawer-header">
         <div class="drawer-user">
-          <img [src]="currentWorker()?.photoURL" class="drawer-avatar" alt="User Avatar" />
+          <img [src]="currentWorker()?.photoURL || 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=100'" class="drawer-avatar" alt="User Avatar" />
           <div>
             <h4>{{ currentWorker()?.name }}</h4>
             <span class="worker-category">{{ currentWorker()?.skills?.[0] || ('কারিগর' | t) }}</span>
           </div>
         </div>
-        <button class="drawer-close-btn" (click)="closeMobileMenu()">
+        <button type="button" class="drawer-close-btn" (click)="closeMobileMenu()" [attr.aria-label]="'বন্ধ করুন' | t">
           <i class="pi pi-times"></i>
         </button>
       </div>
@@ -211,9 +392,21 @@
           <span>{{ 'ওয়ার্ক স্ট্যাটাস:' | t }}</span>
           <strong>{{ (currentWorker()?.isOnline ? '🟢 অনলাইন (কাজ চালু)' : '⚪ অফলাইন (বিশ্রাম)') | t }}</strong>
         </div>
-        <button class="btn-primary drawer-toggle-btn" (click)="toggleOnline()">
+        <button type="button" class="btn-primary drawer-toggle-btn" (click)="toggleOnline()">
           {{ (currentWorker()?.isOnline ? 'অফলাইন করুন' : 'অনলাইন চালু করুন') | t }}
         </button>
+      </div>
+
+      <!-- Quick stats in mobile drawer -->
+      <div class="drawer-stats-row">
+        <a routerLink="/worker/wallet" (click)="closeMobileMenu()" class="drawer-stat-card">
+          <span class="stat-lbl">{{ 'ওয়ালেট ব্যালেন্স' | t }}</span>
+          <strong class="stat-val text-success">{{ (currentWorker()?.walletBalance || 0) | taka }}</strong>
+        </a>
+        <a routerLink="/worker/wallet" (click)="closeMobileMenu()" class="drawer-stat-card">
+          <span class="stat-lbl">{{ 'বকেয়া কমিশন' | t }}</span>
+          <strong class="stat-val text-amber">{{ (currentWorker()?.commissionDue || 0) | taka }}</strong>
+        </a>
       </div>
 
       <nav class="drawer-nav">
@@ -262,34 +455,20 @@
           <span>{{ 'প্রোফাইল ও স্কিল এডিট' | t }}</span>
         </a>
 
-        <a routerLink="/worker/premium" (click)="closeMobileMenu()" class="drawer-nav-item" style="color: #f59e0b; font-weight: 700;">
+        <a routerLink="/worker/premium" (click)="closeMobileMenu()" class="drawer-nav-item pro-link">
           <i class="pi pi-star-fill"></i>
           <span>{{ 'কাজখোঁজ প্রো (Pro)' | t }}</span>
         </a>
 
         <div class="drawer-divider"></div>
 
-        @if (currentWorker()?.uid === 'worker_rahim_1') {
-          <button (click)="switchWorker('worker_kalam'); closeMobileMenu()" class="drawer-nav-item secondary">
-            <span>{{ '🚰 প্লাম্বার কালামে সুইচ করুন' | t }}</span>
-          </button>
-        } @else {
-          <button (click)="switchWorker('worker'); closeMobileMenu()" class="drawer-nav-item secondary">
-            <span>{{ '🔧 প্লাম্বার রহিমে সুইচ করুন' | t }}</span>
-          </button>
-        }
-
-        <button (click)="switchRole('customer'); closeMobileMenu()" class="drawer-nav-item secondary">
-          <i class="pi pi-user"></i>
-          <span>{{ 'কাস্টমার ভিউতে যান' | t }}</span>
+        <!-- Role switch trigger from drawer -->
+        <button type="button" (click)="closeMobileMenu(); toggleRoleSwitcher()" class="drawer-nav-item secondary">
+          <i class="pi pi-sync"></i>
+          <span>{{ 'রোল ও একাউন্ট পরিবর্তন...' | t }}</span>
         </button>
 
-        <button (click)="switchRole('admin'); closeMobileMenu()" class="drawer-nav-item secondary">
-          <i class="pi pi-shield"></i>
-          <span>{{ 'অ্যাডমিন প্যানেল' | t }}</span>
-        </button>
-
-        <button (click)="logout()" class="drawer-nav-item text-danger">
+        <button type="button" (click)="logout(); closeMobileMenu()" class="drawer-nav-item text-danger">
           <i class="pi pi-sign-out"></i>
           <span>{{ 'লগআউট' | t }}</span>
         </button>

@@ -259,6 +259,19 @@
               <span class="b-value text-right">{{ job.location.address || 'সাভার বাজার, সাভার, ঢাকা' }}</span>
             </div>
 
+            @if (job.locationPinned) {
+              <div class="doorstep-confirm">
+                <span class="doorstep-confirm-title">📍 {{ 'আপনার দরজার পিন + ল্যান্ডমার্ক' | t }} <span class="doorstep-confirm-badge">✓ {{ 'সঠিক পিন' | t }}</span></span>
+                @if (job.landmark) {
+                  <span class="doorstep-confirm-landmark">{{ job.landmark }}</span>
+                }
+                @if (job.doorPhotoURL) {
+                  <img [src]="job.doorPhotoURL" [alt]="'গেটের ছবি' | t" class="doorstep-confirm-photo" />
+                }
+                <span class="doorstep-confirm-hint">{{ 'কাজ গ্রহণের পর টেকনিশিয়ান এই পিন দেখে সরাসরি আপনার গেটে আসবেন।' | t }}</span>
+              </div>
+            }
+
             <div class="bill-row">
               <span class="b-label">অর্ডার সময়:</span>
               <span class="b-value">{{ job.timeline.createdAt | timeAgo }}</span>

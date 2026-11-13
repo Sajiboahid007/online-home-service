@@ -76,7 +76,14 @@ export interface Job {
   type: JobType;
   description: string;
   photos: string[];
+  /** Service location. When `locationPinned` is true this is the customer's exact doorstep pin. */
   location: GeoPoint;
+  /** Customer dragged the pin onto their exact building/gate. */
+  locationPinned?: boolean;
+  /** Short directions for the technician, e.g. "blue gate beside Rahim Pharmacy, 3rd floor". */
+  landmark?: string;
+  /** Optional small photo of the gate/building entrance (JPEG data URL). */
+  doorPhotoURL?: string;
   scheduledAt?: string;
   status: JobStatus;
   estimatedPrice: number;
