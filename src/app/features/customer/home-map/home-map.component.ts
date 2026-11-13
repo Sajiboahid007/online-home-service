@@ -13,13 +13,12 @@ import { Category } from '../../../core/models/category.model';
 import { Job, PaymentMethod } from '../../../core/models/job.model';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
-import { MaskPhonePipe } from '../../../shared/pipes/mask-phone.pipe';
 import { Map as MapLibreMap, Marker } from 'maplibre-gl';
 
 @Component({
   selector: 'app-home-map',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, BnNumberPipe, TakaPipe, MaskPhonePipe],
+  imports: [CommonModule, FormsModule, RouterModule, BnNumberPipe, TakaPipe],
   templateUrl: './home-map.component.html',
   styleUrl: './home-map.component.scss'
 })
@@ -73,6 +72,32 @@ export class HomeMapComponent implements AfterViewInit, OnDestroy {
     }
     return workers;
   });
+
+  public sortBy = signal<'distance' | 'rating' | 'rate'>('distance');
+
+  public sortedWorkers = computed(() => {
+    const list = [...this.nearbyWorkers()];
+    const sort = this.sortBy();
+    if (sort === 'rating') {
+      return list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else if (sort === 'rate') {
+      return list.sort((a, b) => a.rate - b.rate);
+    }
+    return list.sort((a, b) => (a.distanceKm || 0) - (b.distanceKm || 0));
+  });
+
+  public avatarPreviewWorkers = computed(() => {
+    return this.nearbyWorkers().slice(0, 3);
+  });
+
+  public setSort(mode: 'distance' | 'rating' | 'rate'): void {
+    this.sortBy.set(mode);
+  }
+
+  public getEtaMinutes(worker: WorkerProfile): number {
+    const dist = worker.distanceKm || 1;
+    return Math.max(5, Math.round(dist * 6));
+  }
 
   public toggleTrustedFilter(): void {
     this.onlyTrustedOrFemale.update(v => !v);

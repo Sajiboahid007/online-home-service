@@ -31,7 +31,7 @@
   </div>
 
   <!-- Top Floating Category Bar -->
-  <div class="category-chips-container" style="top: 60px;">
+  <div class="category-chips-container">
     <div class="category-chips-scroll">
       <button 
         type="button" 
@@ -49,7 +49,6 @@
         class="cat-chip safety-chip" 
         [class.active]="onlyTrustedOrFemale()"
         (click)="toggleTrustedFilter()"
-        style="border-color: #0f766e;"
         title="শুধুমাত্র বিশ্বস্ত ও ভেরিফাইড কারিগর ফিল্টার"
       >
         <span class="cat-chip-icon">🛡️</span>
@@ -73,132 +72,254 @@
   <!-- Interactive MapLibre Vector Map -->
   <div #mapContainer class="vector-map-container"></div>
 
-  <!-- Map Floating Controls & Legend -->
+  <!-- Map Floating Controls & Legend (Properly positioned below category bar without overlap) -->
   <div class="map-floating-overlay">
     <div class="map-legend">
       <span class="legend-item"><span class="dot online"></span> প্রস্তুত ({{ onlineWorkersCount() | bnNumber }})</span>
       <span class="legend-item"><span class="dot busy"></span> ব্যস্ত</span>
       <span class="legend-item"><span class="dot offline"></span> অফলাইন</span>
     </div>
-
-    <button type="button" class="btn-recenter" (click)="recenterToUser()" title="আমার অবস্থানে ফিরে যান">
-      <span class="pi pi-compass"></span>
-      <span class="recenter-text">আমার লোকেশন</span>
-    </button>
   </div>
 
-  <!-- Instant Request & Work Request Sticky CTA Banner -->
-  <div class="instant-call-banner">
-    <a routerLink="/customer/create-request" class="btn-post-work-request" title="নতুন কাজের চাহিদা পোস্ট করুন">
-      <span class="btn-icon">📝</span>
-      <div class="btn-col">
-        <span class="btn-text">কাজের রিকোয়েস্ট পোস্ট করুন</span>
-        <span class="btn-subtext">যে প্লাম্বার আগে গ্রহণ করবেন তিনিই কাজ পাবেন</span>
-      </div>
-    </a>
-    <button type="button" class="btn-instant-request" (click)="openInstantBooking()">
-      <span class="lightning-pulse">⚡</span>
-      <div class="btn-col">
-        <span class="btn-text">তাৎক্ষণিক বুকিং</span>
-        <span class="btn-subtext">নিকটস্থ সেরা টেকনিশিয়ান ৩ মিনিটে</span>
-      </div>
-    </button>
-  </div>
+  <!-- Floating My Location Button -->
+  <button type="button" class="btn-floating-recenter" (click)="recenterToUser()" title="আমার অবস্থানে ফিরে যান">
+    <span class="pi pi-compass"></span>
+    <span class="recenter-text">আমার লোকেশন</span>
+  </button>
 
-  <!-- Slide-up Bottom Sheet: Nearby Workers -->
-  <div class="bottom-sheet" [class.expanded]="isSheetExpanded()">
-    <!-- Sheet Drag Handle / Header -->
-    <div class="sheet-handle-bar" (click)="toggleSheet()">
+  <!-- Advanced Slide-up Bottom Sheet: Nearby Workers & Unified Actions -->
+  <div class="modern-bottom-sheet" [class.expanded]="isSheetExpanded()">
+    <!-- Drag Pill & Header -->
+    <div class="sheet-drag-zone" (click)="toggleSheet()">
       <div class="handle-pill"></div>
-      <div class="sheet-title-row">
-        <div class="sheet-title-text">
-          <span class="sheet-title">নিকটবর্তী ওয়ার্কার তালিকা</span>
-          <span class="sheet-counter badge badge-neutral">{{ nearbyWorkers().length | bnNumber }} জন উপলব্ধ</span>
-        </div>
-        <button type="button" class="sheet-toggle-btn">
-          <span class="pi" [class.pi-chevron-up]="!isSheetExpanded()" [class.pi-chevron-down]="isSheetExpanded()"></span>
+
+      <!-- Quick Action Row Embedded into Sheet -->
+      <div class="sheet-actions-row" (click)="$event.stopPropagation()">
+        <a routerLink="/customer/create-request" class="action-card request-card" title="কাজের চাহিদা পোস্ট করুন">
+          <div class="ac-icon-badge">📢</div>
+          <div class="ac-body">
+            <div class="ac-title-line">
+              <span class="ac-title">কাজের রিকোয়েস্ট পোস্ট</span>
+              <span class="badge-grab">⚡ First Grab</span>
+            </div>
+            <span class="ac-sub">যে প্লাম্বার আগে গ্রহণ করবেন তিনিই পাবেন</span>
+          </div>
+          <span class="ac-arrow">➔</span>
+        </a>
+
+        <button type="button" class="action-card instant-card" (click)="openInstantBooking()">
+          <div class="ac-icon-badge orange">⚡</div>
+          <div class="ac-body">
+            <div class="ac-title-line">
+              <span class="ac-title">তাৎক্ষণিক বুকিং</span>
+              <span class="badge-fast">৩ মিনিটে</span>
+            </div>
+            <span class="ac-sub">নিকটস্থ সেরা টেকনিশিয়ান কল</span>
+          </div>
+          <span class="ac-arrow">➔</span>
         </button>
+      </div>
+
+      <!-- Live Summary Bar -->
+      <div class="sheet-summary-bar">
+        <div class="summary-meta">
+          <div class="live-pulse-dot"></div>
+          <div class="summary-texts">
+            <h3 class="summary-heading">নিকটবর্তী দক্ষ কারিগর তালিকা</h3>
+            <p class="summary-info">সাভার এলাকায় <strong>{{ nearbyWorkers().length | bnNumber }} জন</strong> উপলব্ধ • গড় আগমন ১০-১৫ মিনিট</p>
+          </div>
+        </div>
+
+        <div class="summary-controls">
+          <!-- Stacked Avatars Preview -->
+          <div class="avatar-stack-preview">
+            @for (w of avatarPreviewWorkers(); track w.uid) {
+              <img [src]="w.photoURL" [alt]="w.name" class="stacked-avatar" />
+            }
+            @if (nearbyWorkers().length > 3) {
+              <span class="stack-badge">+{{ (nearbyWorkers().length - 3) | bnNumber }}</span>
+            }
+          </div>
+
+          <button type="button" class="btn-toggle-expand" [attr.aria-expanded]="isSheetExpanded()">
+            <span class="toggle-label">{{ isSheetExpanded() ? 'সংক্ষিপ্ত করুন' : 'বিস্তারিত দেখুন' }}</span>
+            <span class="pi" [class.pi-chevron-up]="!isSheetExpanded()" [class.pi-chevron-down]="isSheetExpanded()"></span>
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Workers List Content -->
-    <div class="sheet-content">
-      @if (nearbyWorkers().length === 0) {
-        <div class="empty-workers-state">
-          <span class="empty-icon">🔍</span>
-          <p class="empty-title">এই ক্যাটাগরিতে কোনো কর্মী পাওয়া যায়নি</p>
-          <p class="empty-sub">অন্য ক্যাটাগরি বেছে নিন অথবা একটু পরে আবার চেষ্টা করুন।</p>
-          <button class="btn-outline btn-sm" (click)="selectCategory('all')">সব ক্যাটাগরি দেখুন</button>
-        </div>
-      } @else {
-        <div class="worker-cards-grid">
-          @for (worker of nearbyWorkers(); track worker.uid) {
-            <div class="worker-card" [class.busy-card]="worker.isBusy" (click)="flyToWorker(worker)">
-              <!-- Worker Photo & Status -->
-              <div class="worker-avatar-wrap">
-                <img [src]="worker.photoURL" [alt]="worker.name" class="worker-img" />
-                <span class="status-indicator" [class.online]="worker.isOnline && !worker.isBusy" [class.busy]="worker.isBusy" [class.offline]="!worker.isOnline"></span>
-              </div>
-
-              <!-- Worker Info -->
-              <div class="worker-main-info">
-                <div class="worker-name-line">
-                  <h4 class="worker-name">{{ worker.name }}</h4>
-                  @if (worker.verified) {
-                    <span class="verified-pill" title="এনআইডি ও ব্যাকগ্রাউন্ড ভেরিফায়েড">✓ ভেরিফায়েড</span>
-                  }
-                  @if (worker.trustedBadge) {
-                    <span class="trusted-pill" title="বিশেষভাবে বিশ্বস্ত কারিগর">⭐ ট্রাস্টেড</span>
-                  }
+    <!-- Peek Mode: Horizontal Mini-Cards Carousel (when collapsed) -->
+    @if (!isSheetExpanded()) {
+      <div class="peek-carousel-container">
+        @if (sortedWorkers().length === 0) {
+          <div class="peek-empty-state">
+            <span class="empty-emoji">🔍</span>
+            <span class="empty-msg">এই ফিল্টারে কাছাকাছি কোনো কর্মী নেই</span>
+            <button type="button" class="btn-peek-reset" (click)="selectCategory('all')">সব দেখুন</button>
+          </div>
+        } @else {
+          <div class="peek-carousel-scroll">
+            @for (worker of sortedWorkers(); track worker.uid) {
+              <div class="peek-worker-card" [class.busy]="worker.isBusy" (click)="flyToWorker(worker)">
+                <div class="pwc-top">
+                  <div class="pwc-avatar-wrap">
+                    <img [src]="worker.photoURL" [alt]="worker.name" class="pwc-img" />
+                    <span class="pwc-status-dot" [class.online]="worker.isOnline && !worker.isBusy" [class.busy]="worker.isBusy"></span>
+                  </div>
+                  <div class="pwc-title-col">
+                    <h4 class="pwc-name">{{ worker.name }}</h4>
+                    <div class="pwc-meta-line">
+                      <span class="pwc-rating">⭐ {{ worker.rating | bnNumber }}</span>
+                      <span>•</span>
+                      <span class="pwc-dist">📍 {{ worker.distanceKm | bnNumber }} কিমি</span>
+                      <span>•</span>
+                      <span class="pwc-eta">⏱️ {{ getEtaMinutes(worker) | bnNumber }} মি</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div class="worker-metrics">
-                  <span class="rating-badge">
-                    ⭐ {{ worker.rating | bnNumber }} <small>({{ worker.ratingCount | bnNumber }})</small>
-                  </span>
-                  <span class="divider-dot">•</span>
-                  <span class="experience-text">{{ worker.experienceYears | bnNumber }} বছর অভিজ্ঞতা</span>
-                  @if (worker.distanceKm !== undefined) {
-                    <span class="divider-dot">•</span>
-                    <span class="distance-text">📍 {{ worker.distanceKm | bnNumber }} কিমি</span>
-                  }
-                  <span class="divider-dot">•</span>
-                  <span class="phone-text">📞 {{ worker.phone | maskPhone }}</span>
-                </div>
-
-                <div class="worker-skills-tags">
-                  @for (skill of worker.skills.slice(0, 3); track skill) {
-                    <span class="skill-tag">{{ skill }}</span>
-                  }
-                </div>
-              </div>
-
-              <!-- Price & Booking CTA -->
-              <div class="worker-cta-box" (click)="$event.stopPropagation()">
-                <div class="price-rate">
-                  <span class="rate-amount">{{ worker.rate | taka }}</span>
-                  <span class="rate-unit">/ {{ worker.rateUnit === 'job' ? 'কাজ' : worker.rateUnit === 'hour' ? 'ঘণ্টা' : 'দিন' }}</span>
-                </div>
-
-                <div class="card-buttons">
-                  <button type="button" class="btn-card-profile" (click)="openWorkerProfile(worker)">
-                    প্রোফাইল
-                  </button>
+                <div class="pwc-footer">
+                  <div class="pwc-price">
+                    <strong>{{ worker.rate | taka }}</strong>
+                    <small>/ {{ worker.rateUnit === 'job' ? 'কাজ' : 'ঘণ্টা' }}</small>
+                  </div>
                   <button 
                     type="button" 
-                    class="btn-card-book" 
+                    class="btn-pwc-book" 
                     [disabled]="worker.isBusy || !worker.isOnline"
-                    (click)="startDirectBooking(worker)"
+                    (click)="$event.stopPropagation(); startDirectBooking(worker)"
                   >
                     {{ worker.isBusy ? 'ব্যস্ত' : 'বুক করুন' }}
                   </button>
                 </div>
               </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Expanded Mode: Full Rich List with Filtering & Sorting -->
+    @if (isSheetExpanded()) {
+      <div class="expanded-sheet-body">
+        <!-- Filter & Sorting Bar -->
+        <div class="sheet-toolbar">
+          <div class="sort-pills">
+            <button 
+              type="button" 
+              class="sort-pill" 
+              [class.active]="sortBy() === 'distance'" 
+              (click)="setSort('distance')">
+              <span class="pi pi-compass"></span>
+              <span>নিকটবর্তী</span>
+            </button>
+            <button 
+              type="button" 
+              class="sort-pill" 
+              [class.active]="sortBy() === 'rating'" 
+              (click)="setSort('rating')">
+              <span class="pi pi-star"></span>
+              <span>সেরা রেটিং</span>
+            </button>
+            <button 
+              type="button" 
+              class="sort-pill" 
+              [class.active]="sortBy() === 'rate'" 
+              (click)="setSort('rate')">
+              <span class="pi pi-tag"></span>
+              <span>সাশ্রয়ী মূল্য</span>
+            </button>
+          </div>
+
+          <div class="sheet-stats-chip">
+            <span>{{ sortedWorkers().length | bnNumber }} জন কারিগর ফিল্টার্ড</span>
+          </div>
+        </div>
+
+        <!-- Worker Cards Grid -->
+        <div class="worker-cards-grid">
+          @if (sortedWorkers().length === 0) {
+            <div class="empty-workers-state">
+              <span class="empty-icon">🔍</span>
+              <p class="empty-title">এই ক্যাটাগরিতে কোনো কর্মী পাওয়া যায়নি</p>
+              <p class="empty-sub">অন্য ক্যাটাগরি বেছে নিন অথবা একটু পরে আবার চেষ্টা করুন।</p>
+              <button class="btn-outline btn-sm" (click)="selectCategory('all')">সব ক্যাটাগরি দেখুন</button>
             </div>
+          } @else {
+            @for (worker of sortedWorkers(); track worker.uid) {
+              <div class="worker-card" [class.busy-card]="worker.isBusy" (click)="flyToWorker(worker)">
+                <!-- Left: Worker Avatar & Badges -->
+                <div class="wc-left">
+                  <div class="worker-avatar-wrap">
+                    <img [src]="worker.photoURL" [alt]="worker.name" class="worker-img" />
+                    <span class="status-indicator" [class.online]="worker.isOnline && !worker.isBusy" [class.busy]="worker.isBusy" [class.offline]="!worker.isOnline"></span>
+                  </div>
+                  <span class="status-text-pill" [class.online]="worker.isOnline && !worker.isBusy">
+                    {{ worker.isOnline ? (worker.isBusy ? 'ব্যস্ত' : 'অনলাইন') : 'অফলাইন' }}
+                  </span>
+                </div>
+
+                <!-- Center: Worker Details -->
+                <div class="wc-center">
+                  <div class="worker-name-line">
+                    <h4 class="worker-name">{{ worker.name }}</h4>
+                    @if (worker.verified) {
+                      <span class="verified-pill" title="এনআইডি ও ব্যাকগ্রাউন্ড ভেরিফায়েড">✓ ভেরিফায়েড</span>
+                    }
+                    @if (worker.trustedBadge) {
+                      <span class="trusted-pill" title="বিশেষভাবে বিশ্বস্ত কারিগর">⭐ ট্রাস্টেড</span>
+                    }
+                  </div>
+
+                  <div class="worker-metrics">
+                    <span class="rating-badge">
+                      ⭐ {{ worker.rating | bnNumber }} <small>({{ worker.ratingCount | bnNumber }})</small>
+                    </span>
+                    <span class="divider-dot">•</span>
+                    <span class="experience-text">{{ worker.experienceYears | bnNumber }} বছর অভিজ্ঞতা</span>
+                    @if (worker.distanceKm !== undefined) {
+                      <span class="divider-dot">•</span>
+                      <span class="distance-text">📍 {{ worker.distanceKm | bnNumber }} কিমি</span>
+                    }
+                    <span class="divider-dot">•</span>
+                    <span class="eta-text">⏱️ প্রায় {{ getEtaMinutes(worker) | bnNumber }} মিনিট</span>
+                  </div>
+
+                  <div class="worker-skills-tags">
+                    @for (skill of worker.skills.slice(0, 3); track skill) {
+                      <span class="skill-tag">{{ skill }}</span>
+                    }
+                  </div>
+                </div>
+
+                <!-- Right: Price & CTA Actions -->
+                <div class="wc-right" (click)="$event.stopPropagation()">
+                  <div class="price-rate">
+                    <span class="rate-amount">{{ worker.rate | taka }}</span>
+                    <span class="rate-unit">/ {{ worker.rateUnit === 'job' ? 'কাজ' : worker.rateUnit === 'hour' ? 'ঘণ্টা' : 'দিন' }}</span>
+                  </div>
+
+                  <div class="card-buttons">
+                    <button type="button" class="btn-card-profile" (click)="openWorkerProfile(worker)">
+                      প্রোফাইল
+                    </button>
+                    <button 
+                      type="button" 
+                      class="btn-card-book" 
+                      [disabled]="worker.isBusy || !worker.isOnline"
+                      (click)="startDirectBooking(worker)"
+                    >
+                      {{ worker.isBusy ? 'ব্যস্ত' : 'বুক করুন' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
           }
         </div>
-      }
-    </div>
+      </div>
+    }
   </div>
 
   <!-- Worker Detail Profile Modal -->
