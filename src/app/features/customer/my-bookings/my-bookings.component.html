@@ -14,9 +14,9 @@
   <!-- Filter Tabs -->
   <div class="tabs-container">
     <div class="tabs-scroll">
-      <button 
-        type="button" 
-        class="tab-btn" 
+      <button
+        type="button"
+        class="tab-btn"
         [class.active]="activeTab() === 'all'"
         (click)="activeTab.set('all')"
       >
@@ -24,27 +24,27 @@
         <span class="tab-count badge badge-neutral">{{ customerJobs().length | bnNumber }}</span>
       </button>
 
-      <button 
-        type="button" 
-        class="tab-btn" 
+      <button
+        type="button"
+        class="tab-btn"
         [class.active]="activeTab() === 'active'"
         (click)="activeTab.set('active')"
       >
         <span>চলমান কাজ</span>
       </button>
 
-      <button 
-        type="button" 
-        class="tab-btn" 
+      <button
+        type="button"
+        class="tab-btn"
         [class.active]="activeTab() === 'completed'"
         (click)="activeTab.set('completed')"
       >
         <span>সম্পন্ন কাজ</span>
       </button>
 
-      <button 
-        type="button" 
-        class="tab-btn" 
+      <button
+        type="button"
+        class="tab-btn"
         [class.active]="activeTab() === 'cancelled'"
         (click)="activeTab.set('cancelled')"
       >
@@ -59,12 +59,49 @@
       <div class="empty-bookings card">
         <span class="empty-icon">📂</span>
         <h3>এই তালিকায় কোনো বুকিং নেই</h3>
-        <p>আপনার কোনো বুকিং রেকর্ড এই ফিল্টারের সাথে মেলেনি। প্রয়োজনমতো যেকোনো দক্ষ কারিগর অবিলম্বে ডেকে নিন।</p>
-        <a routerLink="/customer/home" class="btn-primary">ম্যাপ থেকে বুক করুন</a>
+        <p>
+          আপনার কোনো বুকিং রেকর্ড এই ফিল্টারের সাথে মেলেনি। প্রয়োজনমতো যেকোনো দক্ষ কারিগর অবিলম্বে ডেকে
+          নিন।
+        </p>
+        <div
+          style="
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+          "
+        >
+          <button
+            type="button"
+            class="btn-tab-switch"
+            (click)="activeTab.set('all')"
+            style="
+              background: #f1f5f9;
+              border: 1px solid #cbd5e1;
+              padding: 8px 16px;
+              border-radius: 8px;
+              font-weight: 600;
+              cursor: pointer;
+            "
+          >
+            সব বুকিং দেখুন
+          </button>
+          <a
+            routerLink="/customer/create-request"
+            class="btn-primary"
+            style="padding: 8px 16px; border-radius: 8px; text-decoration: none"
+            >নতুন রিকোয়েস্ট তৈরি করুন</a
+          >
+        </div>
       </div>
     } @else {
       @for (job of filteredJobs(); track job.id) {
-        <div class="booking-card card" (click)="viewTracking(job)">
+        <div
+          class="booking-card card"
+          [class.is-inactive]="!isJobActive(job)"
+          (click)="isJobActive(job) ? viewTracking(job) : null"
+        >
           <!-- Top Row: Category & Status -->
           <div class="bcard-top">
             <div class="bcard-cat">
@@ -89,11 +126,20 @@
           <div class="bcard-middle">
             @if (job.workerId) {
               <div class="bcard-worker">
-                <img [src]="job.workerPhoto || 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=100&auto=format&fit=crop&q=80'" class="worker-thumb" [alt]="job.workerName" />
+                <img
+                  [src]="
+                    job.workerPhoto ||
+                    'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=100&auto=format&fit=crop&q=80'
+                  "
+                  class="worker-thumb"
+                  [alt]="job.workerName"
+                />
                 <div class="worker-meta">
                   <span class="wm-label">নিয়োজিত কর্মী</span>
                   <strong class="wm-name">{{ job.workerName }}</strong>
-                  <span class="wm-phone">📞 {{ (job.workerPhone || '01712345678') | maskPhone }}</span>
+                  <span class="wm-phone"
+                    >📞 {{ job.workerPhone || '01712345678' | maskPhone }}</span
+                  >
                 </div>
               </div>
             } @else {
@@ -110,21 +156,57 @@
 
             <div class="bcard-info-item">
               <span class="bii-label">স্থান</span>
-              <span class="bii-val address-truncate">{{ job.location.address || 'সাভার, ঢাকা' }}</span>
+              <span class="bii-val address-truncate">{{
+                job.location.address || 'সাভার, ঢাকা'
+              }}</span>
             </div>
 
             <div class="bcard-price-box">
               <span class="bp-label">মোট প্রদেয়</span>
-              <span class="bp-val">{{ (job.finalPrice || job.estimatedPrice) | taka }}</span>
+              <span class="bp-val">{{ job.finalPrice || job.estimatedPrice | taka }}</span>
             </div>
           </div>
 
           <!-- Card Bottom Action Buttons -->
           <div class="bcard-actions" (click)="$event.stopPropagation()">
-            <button type="button" class="btn-action-track" (click)="viewTracking(job)">
+            <button
+              type="button"
+              class="btn-action-track"
+              [class.disabled]="!isJobActive(job)"
+              [disabled]="!isJobActive(job)"
+              [attr.aria-disabled]="!isJobActive(job)"
+              (click)="viewTracking(job)"
+              [title]="
+                isJobActive(job) ? 'লাইভ ট্র্যাকিং ও বিস্তারিত' : 'কাজটি সক্রিয় নয় — ট্র্যাকিং নিষ্ক্রিয়'
+              "
+            >
               <span class="pi pi-compass"></span>
-              <span>ট্র্যাকিং ও বিস্তারিত</span>
+              <span>{{ isJobActive(job) ? 'ট্র্যাকিং ও বিস্তারিত' : 'ট্র্যাকিং নিষ্ক্রিয়' }}</span>
             </button>
+
+            @if (job.status.includes('cancelled')) {
+              <button
+                type="button"
+                class="btn-action-reopen"
+                (click)="reactivateJob(job)"
+                style="
+                  background: #0f766e;
+                  color: #fff;
+                  border: none;
+                  padding: 7px 14px;
+                  border-radius: 8px;
+                  font-size: 13px;
+                  font-weight: 700;
+                  cursor: pointer;
+                  display: inline-flex;
+                  align-items: center;
+                  gap: 6px;
+                "
+              >
+                <span class="pi pi-refresh"></span>
+                <span>পুনরায় চালু করুন</span>
+              </button>
+            }
 
             @if (job.status === 'completed' || job.status === 'paid') {
               <button type="button" class="btn-action-review" (click)="openReview(job)">
@@ -136,6 +218,30 @@
             @if (job.status === 'reviewed') {
               <span class="reviewed-done-tag">⭐ রিভিউ প্রদান করা হয়েছে</span>
             }
+
+            <button
+              type="button"
+              class="btn-action-delete"
+              (click)="deleteJob(job, $event)"
+              title="অর্ডার ডিলিট করুন"
+              style="
+                background: transparent;
+                color: #dc2626;
+                border: 1.5px solid #fecaca;
+                padding: 7px 12px;
+                border-radius: 8px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                margin-left: auto;
+              "
+            >
+              <span class="pi pi-trash"></span>
+              <span>মুছে ফেলুন</span>
+            </button>
           </div>
         </div>
       }
@@ -157,7 +263,14 @@
         <div class="review-modal-body">
           @if (reviewingJob(); as job) {
             <div class="review-worker-strip">
-              <img [src]="job.workerPhoto || 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=100&auto=format&fit=crop&q=80'" class="r-avatar" [alt]="job.workerName" />
+              <img
+                [src]="
+                  job.workerPhoto ||
+                  'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=100&auto=format&fit=crop&q=80'
+                "
+                class="r-avatar"
+                [alt]="job.workerName"
+              />
               <div>
                 <h4 class="r-name">{{ job.workerName }}</h4>
                 <span class="r-service">সার্ভিস: {{ job.categoryName }} (#{{ job.id }})</span>
@@ -170,9 +283,9 @@
             <label class="rating-label">রেটিং দিন:</label>
             <div class="stars-row">
               @for (star of [1, 2, 3, 4, 5]; track star) {
-                <button 
-                  type="button" 
-                  class="star-btn" 
+                <button
+                  type="button"
+                  class="star-btn"
                   [class.active]="star <= reviewStars()"
                   (click)="reviewStars.set(star)"
                 >
@@ -181,7 +294,15 @@
               }
             </div>
             <span class="star-rating-hint">
-              {{ reviewStars() === 5 ? 'অসাধারণ (৫.০)' : reviewStars() === 4 ? 'ভালো (৪.০)' : reviewStars() === 3 ? 'মোটামুটি (৩.০)' : 'উন্নতি প্রয়োজন' }}
+              {{
+                reviewStars() === 5
+                  ? 'অসাধারণ (৫.০)'
+                  : reviewStars() === 4
+                    ? 'ভালো (৪.০)'
+                    : reviewStars() === 3
+                      ? 'মোটামুটি (৩.০)'
+                      : 'উন্নতি প্রয়োজন'
+              }}
             </span>
           </div>
 
@@ -190,9 +311,9 @@
             <label class="tags-label">দ্রুত প্রশংসা ট্যাগ যুক্ত করুন:</label>
             <div class="tags-cloud">
               @for (tag of availableTags; track tag) {
-                <button 
-                  type="button" 
-                  class="tag-pill" 
+                <button
+                  type="button"
+                  class="tag-pill"
                   [class.selected]="reviewTags().includes(tag)"
                   (click)="toggleTag(tag)"
                 >
@@ -205,10 +326,10 @@
           <!-- Comment textarea -->
           <div class="comment-section">
             <label class="comment-label">আপনার মূল্যবান মন্তব্য লিখুন</label>
-            <textarea 
-              class="comment-textarea" 
-              rows="3" 
-              placeholder="কর্মীর ব্যবহার ও কাজের গুণগত মান সম্পর্কে সংক্ষেপে লিখুন..." 
+            <textarea
+              class="comment-textarea"
+              rows="3"
+              placeholder="কর্মীর ব্যবহার ও কাজের গুণগত মান সম্পর্কে সংক্ষেপে লিখুন..."
               [ngModel]="reviewComment()"
               (ngModelChange)="reviewComment.set($event)"
             ></textarea>
@@ -217,9 +338,9 @@
 
         <div class="modal-footer">
           <button type="button" class="btn-cancel" (click)="closeReview()">বাতিল</button>
-          <button 
-            type="button" 
-            class="btn-primary" 
+          <button
+            type="button"
+            class="btn-primary"
             [disabled]="isSubmittingReview()"
             (click)="submitReview()"
           >

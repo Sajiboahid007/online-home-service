@@ -31,7 +31,7 @@ export class JobService {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.some(j => j.id === 'job_demo_102')) {
+        if (Array.isArray(parsed)) {
           this.jobsSignal.set(parsed);
           return;
         }
@@ -49,6 +49,20 @@ export class JobService {
   private saveToStorage(): void {
     localStorage.setItem('kajkhoj_jobs', JSON.stringify(this.jobsSignal()));
     this.broadcastMessage({ type: 'JOBS_UPDATED' });
+  }
+
+  public deleteJob(jobId: string): boolean {
+    const prev = this.jobsSignal();
+    const filtered = prev.filter(j => j.id !== jobId);
+    if (filtered.length !== prev.length) {
+      this.jobsSignal.set(filtered);
+      this.saveToStorage();
+      if (this.incomingJobOfferSignal()?.job?.id === jobId) {
+        this.clearIncomingOffer();
+      }
+      return true;
+    }
+    return false;
   }
 
   public getJobById(jobId: string): Job | undefined {
@@ -481,6 +495,31 @@ export class JobService {
       return j;
     }));
     this.saveToStorage();
+  }
+
+  // Increase / update budget for an open job request
+  public updateJobBudget(jobId: string, newPrice: number, extraDescription?: string): boolean {
+    let updated = false;
+    this.jobsSignal.update(list => list.map(j => {
+      if (j.id === jobId && (j.status === 'searching' || j.status === 'pending')) {
+        updated = true;
+        return {
+          ...j,
+          estimatedPrice: newPrice,
+          description: extraDescription ? extraDescription : j.description
+        };
+      }
+      return j;
+    }));
+
+    if (updated) {
+      this.saveToStorage();
+      const updatedJob = this.getJobById(jobId);
+      if (updatedJob) {
+        this.dispatchJobOffer(updatedJob);
+      }
+    }
+    return updated;
   }
 
   // Cancel Job with Fee Policy (Item 56)

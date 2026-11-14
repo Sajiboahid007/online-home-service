@@ -1381,6 +1381,32 @@ export class SeedDataService {
 
   public readonly defaultJobs: Job[] = [
     {
+      id: 'job_demo_103',
+      customerId: 'user_customer_demo_1',
+      customerName: 'তানভীর আহমেদ',
+      customerPhone: '01712345678',
+      customerRating: 4.9,
+      categoryId: 'plumber',
+      categoryName: 'প্লাম্বার (পাইপ ফিটিং)',
+      areaId: 'savar_bazar',
+      type: 'instant',
+      description: 'বাথরুমের মেইন লাইনে পানির পাইপ লিক করছে এবং ফ্লাশ ট্যাংক আটকে গেছে। জরুরি মেরামত দরকার।',
+      photos: [],
+      location: {
+        lat: 23.8245,
+        lng: 90.2685,
+        address: 'বাড়ি #৪৫, রোড #২, সাভার থানা রোড, সাভার বাজার'
+      },
+      status: 'searching',
+      estimatedPrice: 400,
+      paymentMethod: 'cash',
+      paymentStatus: 'unpaid',
+      startOtp: '5821',
+      timeline: {
+        createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString()
+      }
+    },
+    {
       id: 'job_demo_102',
       customerId: 'user_customer_demo_2',
       customerName: 'সাব্বির হোসেন',

@@ -1,6 +1,6 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { JobService } from '../../../core/services/job.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -21,12 +21,13 @@ type FilterTab = 'all' | 'active' | 'completed' | 'cancelled';
   templateUrl: './my-bookings.component.html',
   styleUrl: './my-bookings.component.scss'
 })
-export class MyBookingsComponent {
+export class MyBookingsComponent implements OnInit {
   private jobService = inject(JobService);
   private authService = inject(AuthService);
   private reviewService = inject(ReviewService);
   private categoryService = inject(CategoryService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   public activeTab = signal<FilterTab>('all');
   public currentUser = this.authService.currentUser;
@@ -40,12 +41,48 @@ export class MyBookingsComponent {
   public availableTags = ['সময়মতো এসেছে', 'ভদ্র আচরণ', 'কাজ নিখুঁত', 'ন্যায্য মূল্য', 'দক্ষ কারিগর', 'পরিষ্কার-পরিচ্ছন্ন'];
   public isSubmittingReview = signal<boolean>(false);
 
-  // Customer's job list
+  // Customer's job list (inclusive for active customer, demo customer, and test jobs)
   public customerJobs = computed(() => {
     const user = this.currentUser();
     const uid = user ? user.uid : 'user_customer_demo_1';
-    return this.jobService.getCustomerJobs(uid);
+    return this.jobService.jobs().filter(j => 
+      j.customerId === uid || 
+      j.customerId === 'user_customer_demo_1' ||
+      j.id === 'job_demo_103' ||
+      j.id === 'job_demo_102'
+    );
   });
+
+  ngOnInit(): void {
+    const tabParam = this.route.snapshot.queryParamMap.get('tab') as FilterTab;
+    if (tabParam && ['all', 'active', 'completed', 'cancelled'].includes(tabParam)) {
+      this.activeTab.set(tabParam);
+    }
+  }
+
+  public reactivateJob(job: Job): void {
+    const newPrice = (job.estimatedPrice || 400) + 50;
+    this.jobService.updateJobStatus(job.id, 'searching', {
+      cancelReason: undefined,
+      cancelledBy: undefined,
+      estimatedPrice: newPrice,
+      workerId: undefined,
+      workerName: undefined,
+      workerPhone: undefined,
+      workerPhoto: undefined
+    });
+    this.jobService.updateJobBudget(job.id, newPrice);
+    this.router.navigate(['/customer/tracking', job.id]);
+  }
+
+  public deleteJob(job: Job, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    if (confirm(`আপনি কি নিশ্চিত যে "${job.categoryName}" এর এই রিকোয়েস্টটি (#${job.id}) স্থায়ীভাবে মুছে ফেলতে চান?`)) {
+      this.jobService.deleteJob(job.id);
+    }
+  }
 
   // Filtered jobs
   public filteredJobs = computed(() => {
@@ -158,7 +195,15 @@ export class MyBookingsComponent {
     this.closeReview();
   }
 
+  public isJobActive(job: Job): boolean {
+    if (!job) return false;
+    return ['pending', 'searching', 'accepted', 'on_the_way', 'arrived', 'in_progress'].includes(job.status);
+  }
+
   public viewTracking(job: Job): void {
+    if (!this.isJobActive(job)) {
+      return;
+    }
     this.router.navigate(['/customer/tracking', job.id]);
   }
 }

@@ -258,6 +258,20 @@ export class JobTrackingComponent implements OnInit, OnDestroy {
     }
   }
 
+  public reopenJob(job: Job): void {
+    const newPrice = (job.estimatedPrice || 400) + 50;
+    this.jobService.updateJobStatus(job.id, 'searching', {
+      cancelReason: undefined,
+      cancelledBy: undefined,
+      estimatedPrice: newPrice,
+      workerId: undefined,
+      workerName: undefined,
+      workerPhone: undefined,
+      workerPhoto: undefined
+    });
+    this.jobService.updateJobBudget(job.id, newPrice);
+  }
+
   // Fast simulation for first-come first-served grab
   public simulateGrab(workerUid: string): void {
     const job = this.currentJob();

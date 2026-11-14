@@ -571,6 +571,12 @@
     outline: 2px solid #0f766e;
     outline-offset: 1px;
   }
+
+  &.disabled, &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
 }
 
 .sidebar-badge {
@@ -709,6 +715,12 @@
       justify-content: center;
       padding: 0 4px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    &.disabled, &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
     }
   }
 }

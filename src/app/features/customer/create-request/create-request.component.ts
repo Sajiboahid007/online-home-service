@@ -1,7 +1,8 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { Select } from 'primeng/select';
 import { JobService } from '../../../core/services/job.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { LocationService } from '../../../core/services/location.service';
@@ -12,7 +13,8 @@ import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
 import { DoorstepPin, DoorstepPinPickerComponent } from '../../../shared/components/doorstep-pin-picker/doorstep-pin-picker.component';
 
-interface ServicePreset {
+export interface ServicePreset {
+  id: string;
   label: string;
   category: string;
   title: string;
@@ -24,11 +26,19 @@ interface ServicePreset {
 @Component({
   selector: 'app-create-request',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, BnNumberPipe, TakaPipe, DoorstepPinPickerComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    Select,
+    BnNumberPipe,
+    TakaPipe,
+    DoorstepPinPickerComponent
+  ],
   templateUrl: './create-request.component.html',
   styleUrl: './create-request.component.scss'
 })
-export class CreateRequestComponent {
+export class CreateRequestComponent implements OnInit {
   private jobService = inject(JobService);
   private categoryService = inject(CategoryService);
   private locationService = inject(LocationService);
@@ -40,49 +50,52 @@ export class CreateRequestComponent {
   public userLocation = this.locationService.userLocation;
   public categories = this.categoryService.categories;
 
-  // Form State
-  public selectedCategoryId = signal<string>('plumber');
-  public requestTitle = signal<string>('জরুরি প্লাম্বার প্রয়োজন — বাথরুমে পানির পাইপ লিকেজ');
-  public requestDescription = signal<string>(
-    'বাথরুমের মেইন সাপ্লাই পাইপ থেকে পানি লিক করছে এবং মেঝেতে পানি জমছে। জরুরি ভিত্তিতে একজন অভিজ্ঞ প্লাম্বার প্রয়োজন যিনি দ্রুত এসে পাইপ মেরামত করবেন।'
-  );
-  public estimatedBudget = signal<number>(400);
-  public urgencyLevel = signal<'instant_grab' | 'scheduled'>('instant_grab');
-  public paymentMethod = signal<PaymentMethod>('cash');
-  /** Exact doorstep pin + landmark chosen by the customer. */
-  public doorstepPin = signal<DoorstepPin | null>(null);
-  public isSubmitting = signal<boolean>(false);
-  public selectedPhoto = signal<string>(
-    'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600'
-  );
+  // Category Options for p-select
+  public categoryOptions = computed(() => {
+    return this.categories().map(c => ({
+      id: c.id,
+      nameBn: c.nameBn,
+      nameEn: c.nameEn,
+      icon: c.icon
+    }));
+  });
 
-  // Common quick problem presets for fast 1-click filing
+  // Selected Category ID & Category Object for p-select
+  public selectedCategoryId = signal<string>('plumber');
+  public selectedCategory = signal<any>(null);
+
+  // Common quick problem presets for all categories
   public readonly presets: ServicePreset[] = [
+    // Plumber
     {
+      id: 'p1',
       label: 'পানির পাইপ লিকেজ',
       category: 'plumber',
       title: 'বাথরুমের পানির পাইপ লিক করছে (প্লাম্বার প্রয়োজন)',
-      description: 'বাথরুমের মেইন লাইনে পানির পাইপ ফেটে মেঝে ভিজে যাচ্ছে। দ্রুত এসে মেরামত করে দিতে হবে।',
+      description: 'বাথরুমের মেইন সাপ্লাই পাইপ ফেটে মেঝে ভিজে যাচ্ছে। দ্রুত মেরামত করতে অভিজ্ঞ প্লাম্বার প্রয়োজন।',
       suggestedPrice: 380,
       icon: '💧'
     },
     {
+      id: 'p2',
       label: 'বেসিন / সিঙ্কের কল নষ্ট',
       category: 'plumber',
       title: 'কিচেনের সিঙ্কের কল ও ড্রেন পাইপ বদলানো',
-      description: 'কিচেনের পানির কল বন্ধ হচ্ছে না এবং ড্রেন পাইপ দিয়ে পানি চুইয়ে পড়ছে। নতুন পাইপ লাগাতে হবে।',
+      description: 'কিচেনের পানির কল বন্ধ হচ্ছে না এবং ড্রেন পাইপ দিয়ে পানি চুইয়ে পড়ছে। নতুন পাইপ ও কল ফিটিং করতে হবে।',
       suggestedPrice: 400,
       icon: '🚰'
     },
     {
+      id: 'p3',
       label: 'কমোড বা ফ্লাশ ট্যাংক নষ্ট',
       category: 'plumber',
       title: 'কমোড ফ্লাশ ট্যাংক মেরামত ও হ্যান্ডল ফিটিং',
-      description: 'টয়লেটের ফ্লাশ ট্যাঙ্ক স্বয়ংক্রিয়ভাবে পানি ছাড়ছে না এবং হ্যান্ডল আলগা হয়ে গেছে। মেরামত দরকার।',
+      description: 'টয়লেটের ফ্লাশ ট্যাঙ্ক স্বয়ংক্রিয়ভাবে পানি ছাড়ছে না এবং হ্যান্ডল আলগা হয়ে গেছে। জরুরি মেরামত দরকার।',
       suggestedPrice: 450,
       icon: '🚽'
     },
     {
+      id: 'p4',
       label: 'পানির মোটর পাম্প চলছে না',
       category: 'plumber',
       title: 'পানির মোটর পাম্প চেক ও মেরামত সার্ভিস',
@@ -91,6 +104,7 @@ export class CreateRequestComponent {
       icon: '⚙️'
     },
     {
+      id: 'p5',
       label: 'গিজার / হিটার লাইন ফিটিং',
       category: 'plumber',
       title: 'গিজার সংযোগ ও গরম পানির লাইন ফিটিং',
@@ -98,36 +112,205 @@ export class CreateRequestComponent {
       suggestedPrice: 650,
       icon: '♨️'
     },
+
+    // Electrician
     {
+      id: 'e1',
       label: 'শর্ট সার্কিট / ফিউজ কাটা',
       category: 'electrician',
       title: 'জরুরি ইলেকট্রিশিয়ান — বাসার মেইন সুইচ ট্রিপ করছে',
-      description: 'বাসার কয়েকটি রুমে হঠাৎ বিদ্যুৎ নেই এবং মেইন সার্কিট ব্রেকার ট্রিপ করছে। চেক করা দরকার।',
+      description: 'বাসার কয়েকটি রুমে হঠাৎ বিদ্যুৎ নেই এবং মেইন সার্কিট ব্রেকার ট্রিপ করছে। জরুরি চেক করা দরকার।',
       suggestedPrice: 350,
       icon: '⚡'
+    },
+    {
+      id: 'e2',
+      label: 'ফ্যান ও লাইট ওয়্যারিং মেরামত',
+      category: 'electrician',
+      title: 'সিলিং ফ্যান রেগুলেটর ও লাইট পয়েন্ট মেরামত',
+      description: 'সিলিং ফ্যানের স্পিড কন্ট্রোল হচ্ছে না এবং দুটি এলইডি লাইট পয়েন্ট হঠাৎ বন্ধ হয়ে গেছে। মেরামত প্রয়োজন।',
+      suggestedPrice: 400,
+      icon: '💡'
+    },
+    {
+      id: 'e3',
+      label: 'সুইচ বোর্ড ও সকেট পরিবর্তন',
+      category: 'electrician',
+      title: 'মাল্টিপ্লাগ ও দেয়াল সুইচ বোর্ড নতুন ফিটিং',
+      description: 'পুরাতন পোড়া সুইচবোর্ড খুলে নতুন গ্যাং সুইচ ও ৩-পিন পাওয়ার সকেট ফিটিং করতে হবে।',
+      suggestedPrice: 300,
+      icon: '🔌'
+    },
+    {
+      id: 'e4',
+      label: 'সার্কিট ব্রেকার ও ডিবি বক্স চেক',
+      category: 'electrician',
+      title: 'মেইন ডিস্ট্রিবিউশন বক্স ও সার্কিট ব্রেকার ইন্সটলেশন',
+      description: 'মেইন ডিবি বক্সে স্পার্ক করছে। প্রফেশনাল ইলেকট্রিশিয়ান দিয়ে সম্পূর্ণ বক্স চেক ও নতুন ব্রেকার বসাতে হবে।',
+      suggestedPrice: 550,
+      icon: '🛡️'
+    },
+
+    // AC Technician
+    {
+      id: 'ac1',
+      label: 'এসি সার্ভিসিং ও ওয়াশ (জেট ওয়াশ)',
+      category: 'ac_technician',
+      title: 'স্প্লিট এসি মাস্টার সার্ভিসিং ও কেমিক্যাল ওয়াশ',
+      description: 'ইনডোর ও আউটডোর ইউনিটের এয়ার ফিল্টার ও কুলিং কয়েল প্রেসার জেট দিয়ে গভীর পরিষ্কার করতে হবে।',
+      suggestedPrice: 600,
+      icon: '❄️'
+    },
+    {
+      id: 'ac2',
+      label: 'এসি গ্যাস রিফিলিং ও প্রেসার চেক',
+      category: 'ac_technician',
+      title: 'এসি কম্প্রেসার গ্যাস চার্জিং ও লিকেজ টেস্ট',
+      description: 'এসি চলছে কিন্তু কোনো ঠান্ডা বাতাস দিচ্ছে না। আর-৩২ / আর-৪১০এ গ্যাস রিচার্জ ও কপার পাইপ টেস্ট প্রয়োজন।',
+      suggestedPrice: 1200,
+      icon: '🧪'
+    },
+    {
+      id: 'ac3',
+      label: 'ইনডোর ইউনিট থেকে পানি পড়া',
+      category: 'ac_technician',
+      title: 'এসির ড্রেন পাইপ ব্লকেজ ক্লিয়ারিং ও মেরামত',
+      description: 'এসি চালু করলে রুমের ভেতরে ইনডোর থেকে পানি ঝরছে। ড্রেন পাইপের জট ছাড়াতে হবে।',
+      suggestedPrice: 500,
+      icon: '💧'
+    },
+
+    // Cleaner
+    {
+      id: 'c1',
+      label: 'বাথরুম ডিপ ক্লিনিং',
+      category: 'cleaner',
+      title: 'বাথরুম টাইলস, কমোড ও বেসিন কেমিক্যাল ওয়াশ',
+      description: 'বাথরুমের ফ্লোর টাইলসের দাগ, গ্রাউটিং ও বেসিন সম্পূর্ণ জীবাণুমুক্ত ডিপ ক্লিন করতে হবে।',
+      suggestedPrice: 500,
+      icon: '🧹'
+    },
+    {
+      id: 'c2',
+      label: 'কিচেন ডিপ ক্লিনিং ও তেলচিটচিটে দূর',
+      category: 'cleaner',
+      title: 'রান্নাঘরের চুলার স্ল্যাব, হুড ও কিচেন ক্যাবিনেট ডিপ ক্লিন',
+      description: 'রান্নাঘরের গ্রিজ ও তেলচিটচিটে ময়লা বিশেষ ফোম দিয়ে সম্পূর্ণ ক্লিন করে চকচকে করতে হবে।',
+      suggestedPrice: 700,
+      icon: '🍳'
+    },
+    {
+      id: 'c3',
+      label: 'পুরো বাসা ফুল ডিপ ক্লিনিং',
+      category: 'cleaner',
+      title: 'সম্পূর্ণ ফ্ল্যাট/বাসার মেঝে, কাচ ও আসবাবপত্র ক্লিনিং',
+      description: 'বাসা বদলের পর বা উৎসবের আগে সম্পূর্ণ ফ্ল্যাট পরিষ্কার ও স্যানিটাইজেশন সার্ভিস।',
+      suggestedPrice: 1500,
+      icon: '✨'
+    },
+
+    // Painter
+    {
+      id: 'pt1',
+      label: 'দেওয়াল পেইন্ট ও পুটিং টাচআপ',
+      category: 'painter',
+      title: 'রুমের অভ্যন্তরীণ দেয়াল প্লাস্টিক পেইন্ট ও টাচআপ',
+      description: 'বেডরুমের দেয়ালে প্লাস্টিক পেইন্ট ও ক্র্যাক পুটিং মেরামত করে ফ্রেশ লুক দিতে হবে।',
+      suggestedPrice: 1200,
+      icon: '🎨'
+    },
+    {
+      id: 'pt2',
+      label: 'ড্যাম্প কোটিং ও ওয়াটারপ্রুফিং',
+      category: 'painter',
+      title: 'দেওয়ালের নোনা ও ড্যাম্প প্রতিরোধক কোটিং',
+      description: 'বর্ষায় দেয়ালে নোনা ধরে রং খসে পড়ছে। বিশেষ ড্যাম্প সিল কোটিং প্রয়োগ করতে হবে।',
+      suggestedPrice: 1500,
+      icon: '🛡️'
+    },
+
+    // Labor
+    {
+      id: 'l1',
+      label: 'বাসা বদল ও মালামাল বহন (২ জন শ্রমিক)',
+      category: 'labor',
+      title: 'বাসা বদলের আসবাবপত্র ও কার্টুন পরিবহন শ্রমিক',
+      description: 'ফ্ল্যাট শিফটিংয়ের জন্য খাট, আলমারি, সোফা ও বক্স বহন করতে দক্ষ ২ জন দিনমজুর প্রয়োজন।',
+      suggestedPrice: 1200,
+      icon: '📦'
+    },
+    {
+      id: 'l2',
+      label: 'ভারী আসবাবপত্র ও মালামাল ওঠানামা',
+      category: 'labor',
+      title: 'সিঁড়ি দিয়ে ভারী আসবাব বা পণ্য ওঠানামার শ্রমিক',
+      description: 'বিল্ডিংয়ের নিচতলা থেকে তিনতলায় ভারী ফার্নিচার ওঠানোর জন্য শ্রমিক প্রয়োজন।',
+      suggestedPrice: 600,
+      icon: '👷'
+    },
+
+    // Mason
+    {
+      id: 'm1',
+      label: 'টাইলস মেরামত ও নতুন বসানো',
+      category: 'mason',
+      title: 'ভেঙে যাওয়া টাইলস খুলে নতুন টাইলস ফিটিং',
+      description: 'ফ্লোর ও বাথরুমের ফাঁপা টাইলস সিমেন্ট গ্রাউট দিয়ে মজবুতভাবে বসাতে হবে।',
+      suggestedPrice: 700,
+      icon: '🧱'
+    },
+    {
+      id: 'm2',
+      label: 'দেওয়ালের ফাটল ও প্লাস্টার মেরামত',
+      category: 'mason',
+      title: 'ইটের গাঁথুনি ও প্লাস্টার মেরামত কাজ',
+      description: 'ভেঙে যাওয়া প্লাস্টার নতুন করে বালু-সিমেন্ট দিয়ে মসৃণ করে দিতে হবে।',
+      suggestedPrice: 800,
+      icon: '🏗️'
+    },
+
+    // Carpenter
+    {
+      id: 'cp1',
+      label: 'দরজার লক ও হ্যান্ডেল মেরামত',
+      category: 'carpenter',
+      title: 'মেইন দরজার সিলিন্ডার লক ও হ্যান্ডল পরিবর্তন',
+      description: 'মেইন দরজার চাবি আটকে গেছে ও লক ঠিকমতো ঘুরছে না। লকসেট মেরামত বা পরিবর্তন দরকার।',
+      suggestedPrice: 350,
+      icon: '🚪'
+    },
+    {
+      id: 'cp2',
+      label: 'ড্রয়ার, কব্জা ও ফার্নিচার মেরামত',
+      category: 'carpenter',
+      title: 'ওয়ারড্রব পাল্লা ও ড্রয়ারের হাইড্রলিক চ্যানেল মেরামত',
+      description: 'ওয়ারড্রবের পাল্লা বাঁকা হয়ে আটকে যাচ্ছে এবং ড্রয়ারের চ্যানেল আলগা হয়ে গেছে। কাঠমিস্ত্রি প্রয়োজন।',
+      suggestedPrice: 600,
+      icon: '🪚'
     }
   ];
 
-  public availablePhotos = [
-    {
-      url: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600',
-      label: 'পাইপ লিকেজ'
-    },
-    {
-      url: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=600',
-      label: 'সিঙ্ক ও কল'
-    },
-    {
-      url: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600',
-      label: 'স্যানিটারি ফিটিংস'
-    },
-    {
-      url: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600',
-      label: 'ইলেকট্রিক ওয়্যারিং'
-    }
-  ];
+  // Presets available for current selected category
+  public availablePresetsForCategory = computed(() => {
+    const cat = this.selectedCategoryId();
+    return this.presets.filter(p => p.category === cat);
+  });
 
-  // Active plumbers count nearby
+  // Selected Preset signal
+  public selectedPreset = signal<ServicePreset | null>(null);
+
+  // Form State
+  public requestTitle = signal<string>('জরুরি প্লাম্বার প্রয়োজন — বাথরুমে পানির পাইপ লিকেজ');
+  public requestDescription = signal<string>(
+    'বাথরুমের মেইন সাপ্লাই পাইপ থেকে পানি লিক করছে এবং মেঝেতে পানি জমছে। জরুরি ভিত্তিতে একজন অভিজ্ঞ প্লাম্বার প্রয়োজন যিনি দ্রুত এসে পাইপ মেরামত করবেন।'
+  );
+  public estimatedBudget = signal<number>(400);
+  public urgencyLevel = signal<'instant_grab' | 'scheduled'>('instant_grab');
+  public paymentMethod = signal<PaymentMethod>('cash');
+  public doorstepPin = signal<DoorstepPin | null>(null);
+  public isSubmitting = signal<boolean>(false);
+
+  // Active technicians count nearby
   public nearbyPlumbersCount = computed(() => {
     const loc = this.userLocation();
     const cat = this.selectedCategoryId();
@@ -135,34 +318,54 @@ export class CreateRequestComponent {
       .filter(w => w.isOnline).length || 2;
   });
 
-  public selectCategory(catId: string): void {
-    this.selectedCategoryId.set(catId);
-    if (catId === 'plumber') {
-      this.requestTitle.set('জরুরি প্লাম্বার প্রয়োজন — বাথরুমে পানির পাইপ লিকেজ');
-      this.requestDescription.set('বাথরুমের মেইন সাপ্লাই পাইপ থেকে পানি লিক করছে। দ্রুত মেরামত করতে অভিজ্ঞ প্লাম্বার প্রয়োজন।');
-      this.estimatedBudget.set(400);
-    } else if (catId === 'electrician') {
-      this.requestTitle.set('জরুরি ইলেকট্রিশিয়ান প্রয়োজন — ওয়্যারিং ও সুইচ মেরামত');
-      this.requestDescription.set('বাসার রুমের লাইট ও ফ্যানের সুইচ কাজ করছে না। দ্রুত একজন ইলেকট্রিশিয়ান প্রয়োজন।');
-      this.estimatedBudget.set(350);
-    } else if (catId === 'ac_technician') {
-      this.requestTitle.set('এসি সার্ভিসিং ও গ্যাস চার্জিং প্রয়োজন');
-      this.requestDescription.set('এসি চলছে কিন্তু পর্যাপ্ত ঠান্ডা হচ্ছে না। ফিল্টার ক্লিনিং ও গ্যাস প্রেসার চেক করতে হবে।');
-      this.estimatedBudget.set(800);
+  ngOnInit(): void {
+    const defaultCat = this.categoryOptions().find(c => c.id === 'plumber') || this.categoryOptions()[0];
+    if (defaultCat) {
+      this.selectedCategory.set(defaultCat);
+      this.selectedCategoryId.set(defaultCat.id);
+    }
+    const defaultPlumberPreset = this.presets.find(p => p.category === 'plumber');
+    if (defaultPlumberPreset) {
+      this.selectedPreset.set(defaultPlumberPreset);
     }
   }
 
-  public applyPreset(preset: ServicePreset): void {
-    this.selectedCategoryId.set(preset.category);
-    this.requestTitle.set(preset.title);
-    this.requestDescription.set(preset.description);
-    this.estimatedBudget.set(preset.suggestedPrice);
+  public onCategoryChange(catOrId: any): void {
+    const catId = typeof catOrId === 'string' ? catOrId : catOrId?.id;
+    if (!catId) return;
+    this.selectedCategoryId.set(catId);
+    const catObj = this.categoryOptions().find(c => c.id === catId);
+    if (catObj) {
+      this.selectedCategory.set(catObj);
+    }
+    const catPresets = this.presets.filter(p => p.category === catId);
+    if (catPresets.length > 0) {
+      this.onPresetChange(catPresets[0]);
+    } else {
+      this.selectedPreset.set(null);
+      const cat = this.categoryService.getCategoryById(catId);
+      const name = cat ? cat.nameBn : 'সার্ভিস';
+      this.requestTitle.set(`জরুরি ${name} প্রয়োজন`);
+      this.requestDescription.set(`${name} সংক্রান্ত জরুরি কাজের জন্য অভিজ্ঞ কারিগর প্রয়োজন।`);
+      this.estimatedBudget.set(400);
+    }
+  }
+
+  public onPresetChange(preset: ServicePreset | null): void {
+    this.selectedPreset.set(preset);
+    if (preset) {
+      this.selectedCategoryId.set(preset.category);
+      this.requestTitle.set(preset.title);
+      this.requestDescription.set(preset.description);
+      this.estimatedBudget.set(preset.suggestedPrice);
+    }
   }
 
   public setBudget(amount: number): void {
     this.estimatedBudget.set(amount);
   }
 
+  // Submit new request
   public submitRequest(): void {
     if (!this.requestDescription().trim()) {
       alert('অনুগ্রহ করে কাজের বিবরণ লিখুন।');
@@ -189,7 +392,7 @@ export class CreateRequestComponent {
       areaId: 'savar_bazar',
       type: 'board_fixed',
       status: 'searching',
-      workerId: null, // Unassigned! Waiting for first plumber to grab!
+      workerId: null, // Open request waiting for first technician to grab!
       description: `${this.requestTitle()}: ${this.requestDescription()}`,
       estimatedPrice: this.estimatedBudget(),
       location: {
@@ -200,7 +403,7 @@ export class CreateRequestComponent {
       locationPinned: pin?.pinned ?? false,
       landmark: pin?.landmark || undefined,
       doorPhotoURL: pin?.doorPhotoURL,
-      photos: this.selectedPhoto() ? [this.selectedPhoto()] : [],
+      photos: [], // Sample photos removed per user requirement
       paymentMethod: this.paymentMethod()
     });
 
