@@ -323,7 +323,8 @@
               </button>
             } @else {
               <div class="cancelled-banner">
-                <span>এই অর্ডারটি বাতিল করা হয়েছে।</span>
+                <span>❌ এই অর্ডারটি বাতিল করা হয়েছে।</span>
+                <a routerLink="/customer/bookings" class="btn-view-bookings">সকল বুকিং দেখুন →</a>
               </div>
             }
           </div>
@@ -355,22 +356,22 @@
           <p class="cancel-desc">আপনি কি নিশ্চিত যে এই কাজটি বাতিল করতে চান? অনুগ্রহ করে বাতিলের কারণ নির্বাচন করুন:</p>
 
           <div class="reasons-list">
-            <label class="reason-option" [class.selected]="cancelReason() === 'দেরি হচ্ছে'">
+            <label class="reason-option" [class.selected]="cancelReason() === 'দেরি হচ্ছে'" (click)="cancelReason.set('দেরি হচ্ছে')">
               <input type="radio" name="creason" value="দেরি হচ্ছে" [checked]="cancelReason() === 'দেরি হচ্ছে'" (change)="cancelReason.set('দেরি হচ্ছে')" />
               <span>ওয়ার্কার আসতে অতিরিক্ত দেরি করছে</span>
             </label>
 
-            <label class="reason-option" [class.selected]="cancelReason() === 'ভুল অর্ডার'">
+            <label class="reason-option" [class.selected]="cancelReason() === 'ভুল অর্ডার'" (click)="cancelReason.set('ভুল অর্ডার')">
               <input type="radio" name="creason" value="ভুল অর্ডার" [checked]="cancelReason() === 'ভুল অর্ডার'" (change)="cancelReason.set('ভুল অর্ডার')" />
               <span>ভুলবশত অর্ডার তৈরি করা হয়েছে</span>
             </label>
 
-            <label class="reason-option" [class.selected]="cancelReason() === 'অন্য মিস্ত্রি পেয়েছি'">
+            <label class="reason-option" [class.selected]="cancelReason() === 'অন্য মিস্ত্রি পেয়েছি'" (click)="cancelReason.set('অন্য মিস্ত্রি পেয়েছি')">
               <input type="radio" name="creason" value="অন্য মিস্ত্রি পেয়েছি" [checked]="cancelReason() === 'অন্য মিস্ত্রি পেয়েছি'" (change)="cancelReason.set('অন্য মিস্ত্রি পেয়েছি')" />
               <span>স্থানীয় অন্য মিস্ত্রি দ্বারা কাজ করানো হয়েছে</span>
             </label>
 
-            <label class="reason-option" [class.selected]="cancelReason() === 'অতিরিক্ত ফি দাবি'">
+            <label class="reason-option" [class.selected]="cancelReason() === 'অতিরিক্ত ফি দাবি'" (click)="cancelReason.set('অতিরিক্ত ফি দাবি')">
               <input type="radio" name="creason" value="অতিরিক্ত ফি দাবি" [checked]="cancelReason() === 'অতিরিক্ত ফি দাবি'" (change)="cancelReason.set('অতিরিক্ত ফি দাবি')" />
               <span>ওয়ার্কার অতিরিক্ত পারিশ্রমিক দাবি করেছেন</span>
             </label>

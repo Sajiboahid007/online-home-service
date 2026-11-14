@@ -250,9 +250,11 @@ export class JobTrackingComponent implements OnInit, OnDestroy {
   public confirmCancel(): void {
     const job = this.currentJob();
     if (job) {
+      if (job.workerId) {
+        this.workerService.setBusyStatus(job.workerId, false);
+      }
       this.jobService.cancelJob(job.id, 'customer', this.cancelReason());
       this.showCancelModal.set(false);
-      this.router.navigate(['/customer/bookings']);
     }
   }
 

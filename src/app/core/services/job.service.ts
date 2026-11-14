@@ -176,6 +176,7 @@ export class JobService {
         if (status === 'arrived') timeline.arrivedAt = now;
         if (status === 'in_progress') timeline.startedAt = now;
         if (status === 'completed') timeline.completedAt = now;
+        if (status.includes('cancelled')) timeline.cancelledAt = now;
 
         return {
           ...j,
@@ -524,6 +525,23 @@ export class JobService {
           cancellationFee: feeApplied
         }
       );
+
+      // Clear any pending offers
+      if (this.incomingJobOfferSignal()?.job?.id === jobId) {
+        this.incomingJobOfferSignal.set(null);
+        try {
+          localStorage.removeItem('kajkhoj_incoming_offer');
+          this.broadcastMessage({ type: 'OFFER_CLEARED' });
+        } catch (e) {}
+      }
+
+      this.notificationService.addNotification({
+        userId: job.customerId,
+        title: 'অর্ডার বাতিল করা হয়েছে ❌',
+        body: `${job.categoryName} অর্ডারটি বাতিল করা হয়েছে। কারণ: ${reason}`,
+        type: 'info',
+        link: `/customer/bookings`
+      });
     }
 
     return { feeApplied };

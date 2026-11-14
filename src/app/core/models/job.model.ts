@@ -26,6 +26,7 @@ export interface JobTimeline {
   arrivedAt?: string;
   startedAt?: string;
   completedAt?: string;
+  cancelledAt?: string;
 }
 
 export interface JobOffer {
