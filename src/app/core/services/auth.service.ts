@@ -48,9 +48,6 @@ export class AuthService {
         localStorage.removeItem('kajkhoj_user');
         localStorage.removeItem('kajkhoj_worker');
       }
-    } else {
-      // Default to customer demo for smooth immediate UX
-      this.loginAsDemo('customer');
     }
   }
 

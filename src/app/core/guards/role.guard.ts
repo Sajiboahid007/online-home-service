@@ -20,6 +20,6 @@ export const roleGuard: CanActivateFn = (route, state) => {
   } else if (currentRole === 'worker') {
     return router.createUrlTree(['/worker']);
   } else {
-    return router.createUrlTree(['/customer']);
+    return router.createUrlTree(['/customer/home']);
   }
 };

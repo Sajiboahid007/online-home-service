@@ -35,8 +35,19 @@ export class CustomerLayoutComponent {
   private router = inject(Router);
 
   public currentUser = this.authService.currentUser;
+  public currentWorker = this.authService.currentWorker;
   public isAuthenticated = this.authService.isAuthenticated;
+  public isWorker = this.authService.isWorker;
+  public isAdmin = this.authService.isAdmin;
+  public currentRole = this.authService.currentRole;
   public userLocation = this.locationService.userLocation;
+
+  public currentRoleLabel = computed(() => {
+    if (!this.isAuthenticated()) return 'অতিথি (লগইন করুন)';
+    if (this.isWorker()) return 'কারিগর';
+    if (this.isAdmin()) return 'অ্যাডমিন';
+    return 'কাস্টমার';
+  });
 
   // Favorite workers list
   public showFavoritesModal = signal<boolean>(false);
@@ -48,9 +59,9 @@ export class CustomerLayoutComponent {
   // Active jobs for badge counter
   public activeJobsCount = computed(() => {
     const user = this.currentUser();
-    const uid = user ? user.uid : 'user_customer_demo_1';
+    if (!user) return 0;
     return this.jobService.jobs().filter(j => 
-      j.customerId === uid &&
+      j.customerId === user.uid &&
       ['pending', 'searching', 'accepted', 'on_the_way', 'arrived', 'in_progress'].includes(j.status)
     ).length;
   });
@@ -124,6 +135,10 @@ export class CustomerLayoutComponent {
   }
 
   public toggleProfileModal(): void {
+    if (!this.isAuthenticated()) {
+      this.router.navigate(['/auth/login']);
+      return;
+    }
     this.showProfileModal.update(v => !v);
   }
 
@@ -177,9 +192,12 @@ export class CustomerLayoutComponent {
 
   public navigateToTracking(): void {
     const user = this.currentUser();
-    const uid = user ? user.uid : 'user_customer_demo_1';
+    if (!user) {
+      this.router.navigate(['/auth/login']);
+      return;
+    }
     const activeJob = this.jobService.jobs().find(j => 
-      j.customerId === uid &&
+      j.customerId === user.uid &&
       ['pending', 'searching', 'accepted', 'on_the_way', 'arrived', 'in_progress'].includes(j.status)
     );
 

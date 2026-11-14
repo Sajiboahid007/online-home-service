@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { authGuard } from '../../core/guards/auth.guard';
+import { notBannedGuard } from '../../core/guards/not-banned.guard';
 
 export const CUSTOMER_ROUTES: Routes = [
   {
@@ -33,11 +35,13 @@ export const CUSTOMER_ROUTES: Routes = [
   },
   {
     path: 'payment/:id',
+    canActivate: [authGuard, notBannedGuard],
     loadComponent: () => import('./payment/payment-page.component').then(m => m.PaymentPageComponent),
     title: 'কাজখোঁজ — বিল পরিশোধ ও ইনভয়েস'
   },
   {
     path: 'profile',
+    canActivate: [authGuard, notBannedGuard],
     loadComponent: () => import('./profile/customer-profile.component').then(m => m.CustomerProfileComponent),
     title: 'কাজখোঁজ — কাস্টমার প্রোফাইল'
   },
@@ -53,6 +57,7 @@ export const CUSTOMER_ROUTES: Routes = [
   },
   {
     path: 'bookings',
+    canActivate: [authGuard, notBannedGuard],
     loadComponent: () => import('./my-bookings/my-bookings.component').then(m => m.MyBookingsComponent),
     title: 'কাজখোঁজ — আমার বুকিং সমূহ'
   }

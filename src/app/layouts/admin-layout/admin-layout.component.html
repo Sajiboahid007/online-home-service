@@ -2,13 +2,15 @@
   <!-- Sidebar -->
   <aside class="admin-sidebar">
     <div class="sidebar-header">
-      <span class="logo-icon">🛠️</span>
-      <div class="brand">
-        <h2>{{ 'কাজখোঁজ' | t }}</h2>
-        <span class="badge" [class.badge-warning]="isSuperAdmin()" [class.badge-info]="!isSuperAdmin()">
-          {{ isSuperAdmin() ? '👑 Super Admin' : '🛡️ Admin' }}
-        </span>
-      </div>
+      <a routerLink="/customer/home" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;">
+        <span class="logo-icon">🛠️</span>
+        <div class="brand">
+          <h2>{{ 'কাজখোঁজ' | t }}</h2>
+          <span class="badge" [class.badge-warning]="isSuperAdmin()" [class.badge-info]="!isSuperAdmin()">
+            {{ isSuperAdmin() ? '👑 Super Admin' : '🛡️ Admin' }}
+          </span>
+        </div>
+      </a>
     </div>
 
     <nav class="sidebar-nav">

@@ -300,6 +300,49 @@
   }
 }
 
+/* Quick Portal Jump Button (Worker / Admin) */
+.role-portal-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 18px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+  cursor: pointer;
+
+  &.worker-portal {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+
+    &:hover {
+      background: #fde68a;
+      color: #78350f;
+    }
+  }
+
+  &.admin-portal {
+    background: #ede9fe;
+    color: #5b21b6;
+    border: 1px solid #ddd6fe;
+
+    &:hover {
+      background: #ddd6fe;
+      color: #4c1d95;
+    }
+  }
+
+  .portal-text {
+    display: none;
+    @media (min-width: 640px) {
+      display: inline;
+    }
+  }
+}
+
 /* User Avatar */
 .user-profile-trigger {
   position: relative;
@@ -362,6 +405,7 @@
     .create-req-header-btn,
     .fav-header-btn,
     .role-badge-btn,
+    .role-portal-btn,
     .auth-header-btn {
       display: none !important;
     }
@@ -443,6 +487,22 @@
 
     .pi {
       color: #0f766e;
+    }
+  }
+
+  &.portal-link {
+    background: #fef3c7;
+    color: #92400e;
+    font-weight: 700;
+    margin-bottom: 2px;
+
+    .pi {
+      color: #b45309;
+    }
+
+    &:hover {
+      background: #fde68a;
+      color: #78350f;
     }
   }
 

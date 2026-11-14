@@ -58,8 +58,22 @@
       <!-- Role Switcher Trigger -->
       <div class="role-badge-btn" (click)="toggleRoleSwitcher()" [title]="'ভূমিকা পরিবর্তন করুন' | t">
         <span class="role-icon">🔄</span>
-        <span class="role-name">{{ 'কাস্টমার' | t }}</span>
+        <span class="role-name">{{ currentRoleLabel() | t }}</span>
       </div>
+
+      <!-- Quick Portal Jump Buttons (when logged in as Worker or Admin) -->
+      @if (isWorker()) {
+        <a routerLink="/worker/dashboard" class="role-portal-btn worker-portal" [title]="'ওয়ার্কার / কারিগর ড্যাশবোর্ডে যান' | t">
+          <span class="portal-icon">🛠️</span>
+          <span class="portal-text">{{ 'কারিগর প্যানেল' | t }}</span>
+        </a>
+      }
+      @if (isAdmin()) {
+        <a routerLink="/admin/dashboard" class="role-portal-btn admin-portal" [title]="'অ্যাডমিন ড্যাশবোর্ডে যান' | t">
+          <span class="portal-icon">🛡️</span>
+          <span class="portal-text">{{ 'অ্যাডমিন প্যানেল' | t }}</span>
+        </a>
+      }
 
       <!-- Login / Logout -->
       @if (isAuthenticated()) {
@@ -75,9 +89,11 @@
       }
 
       <!-- User Avatar / Profile -->
-      <div class="user-profile-trigger" (click)="toggleProfileModal()" [title]="'প্রোফাইল দেখুন' | t">
+      <div class="user-profile-trigger" (click)="toggleProfileModal()" [title]="(isAuthenticated() ? 'প্রোফাইল দেখুন' : 'লগইন করুন') | t">
         <img [src]="currentUser()?.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'" [alt]="currentUser()?.name || ('কাস্টমার' | t)" class="avatar-img" />
-        <span class="online-dot"></span>
+        @if (isAuthenticated()) {
+          <span class="online-dot"></span>
+        }
       </div>
     </div>
   </header>
@@ -120,6 +136,19 @@
         </button>
 
         <span class="sidebar-section-label">{{ 'অ্যাকাউন্ট' | t }}</span>
+
+        @if (isWorker()) {
+          <a routerLink="/worker/dashboard" class="sidebar-link portal-link">
+            <i class="pi pi-wrench"></i>
+            <span>{{ 'কারিগর ড্যাশবোর্ড' | t }}</span>
+          </a>
+        }
+        @if (isAdmin()) {
+          <a routerLink="/admin/dashboard" class="sidebar-link portal-link">
+            <i class="pi pi-shield"></i>
+            <span>{{ 'অ্যাডমিন ড্যাশবোর্ড' | t }}</span>
+          </a>
+        }
 
         <a routerLink="/customer/profile" routerLinkActive="active" class="sidebar-link">
           <i class="pi pi-user"></i>
@@ -188,6 +217,13 @@
       <span class="nav-icon">👤</span>
       <span class="nav-text">{{ 'প্রোফাইল' | t }}</span>
     </button>
+
+    @if (isWorker()) {
+      <a routerLink="/worker/dashboard" class="nav-item">
+        <span class="nav-icon">🛠️</span>
+        <span class="nav-text">{{ 'কারিগর' | t }}</span>
+      </a>
+    }
 
     <button type="button" class="nav-item" (click)="toggleRoleSwitcher()">
       <span class="nav-icon">🔄</span>
@@ -281,8 +317,10 @@
         <p class="role-desc">{{ 'প্ল্যাটফর্মের ভিন্ন ভিন্ন রোল ও ইন্টারফেস টেস্ট করতে নিচের যেকোনো প্রোফাইল বেছে নিন:' | t }}</p>
 
         <div class="role-cards-grid">
-          <div class="role-card active-role" (click)="switchRole('customer')">
-            <div class="rc-badge active">{{ 'বর্তমান' | t }}</div>
+          <div class="role-card" [class.active-role]="currentRole() === 'customer'" (click)="switchRole('customer')">
+            @if (currentRole() === 'customer') {
+              <div class="rc-badge active">{{ 'বর্তমান' | t }}</div>
+            }
             <div class="rc-avatar">👤</div>
             <div class="rc-info">
               <h4>{{ 'কাস্টমার ডেমো' | t }}</h4>
@@ -291,8 +329,12 @@
             </div>
           </div>
 
-          <div class="role-card" (click)="switchRole('worker')">
-            <div class="rc-badge worker">{{ 'প্লাম্বার ১' | t }}</div>
+          <div class="role-card" [class.active-role]="currentRole() === 'worker' && currentWorker()?.uid === 'worker_rahim_1'" (click)="switchRole('worker')">
+            @if (currentRole() === 'worker' && currentWorker()?.uid === 'worker_rahim_1') {
+              <div class="rc-badge active">{{ 'বর্তমান' | t }}</div>
+            } @else {
+              <div class="rc-badge worker">{{ 'প্লাম্বার ১' | t }}</div>
+            }
             <div class="rc-avatar">🔧</div>
             <div class="rc-info">
               <h4>{{ 'রহিম প্লাম্বার (ভেরিফায়েড)' | t }}</h4>
@@ -301,8 +343,12 @@
             </div>
           </div>
 
-          <div class="role-card" (click)="switchRole('worker_kalam')">
-            <div class="rc-badge worker">{{ 'প্লাম্বার ২' | t }}</div>
+          <div class="role-card" [class.active-role]="currentRole() === 'worker' && currentWorker()?.uid === 'worker_kalam_5'" (click)="switchRole('worker_kalam')">
+            @if (currentRole() === 'worker' && currentWorker()?.uid === 'worker_kalam_5') {
+              <div class="rc-badge active">{{ 'বর্তমান' | t }}</div>
+            } @else {
+              <div class="rc-badge worker">{{ 'প্লাম্বার ২' | t }}</div>
+            }
             <div class="rc-avatar">🚰</div>
             <div class="rc-info">
               <h4>{{ 'কালাম হোসেন (প্লাম্বার)' | t }}</h4>
@@ -311,8 +357,12 @@
             </div>
           </div>
 
-          <div class="role-card" (click)="switchRole('worker_korim')">
-            <div class="rc-badge worker">{{ 'ওয়ার্কার' | t }}</div>
+          <div class="role-card" [class.active-role]="currentRole() === 'worker' && currentWorker()?.uid === 'worker_korim_2'" (click)="switchRole('worker_korim')">
+            @if (currentRole() === 'worker' && currentWorker()?.uid === 'worker_korim_2') {
+              <div class="rc-badge active">{{ 'বর্তমান' | t }}</div>
+            } @else {
+              <div class="rc-badge worker">{{ 'ওয়ার্কার' | t }}</div>
+            }
             <div class="rc-avatar">⚡</div>
             <div class="rc-info">
               <h4>{{ 'করিম মিয়া (ইলেকট্রিশিয়ান)' | t }}</h4>
@@ -321,8 +371,12 @@
             </div>
           </div>
 
-          <div class="role-card" (click)="switchRole('admin')">
-            <div class="rc-badge admin">{{ 'অ্যাডমিন' | t }}</div>
+          <div class="role-card" [class.active-role]="isAdmin()" (click)="switchRole('admin')">
+            @if (isAdmin()) {
+              <div class="rc-badge active">{{ 'বর্তমান' | t }}</div>
+            } @else {
+              <div class="rc-badge admin">{{ 'অ্যাডমিন' | t }}</div>
+            }
             <div class="rc-avatar">🛡️</div>
             <div class="rc-info">
               <h4>{{ 'সাভার এরিয়া অ্যাডমিন' | t }}</h4>

@@ -165,6 +165,10 @@
 
               <!-- Quick Links -->
               <div class="menu-section-label">{{ 'প্রোফাইল নেভিগেশন' | t }}</div>
+              <a routerLink="/customer/home" (click)="closeProfileDropdown()" class="menu-item">
+                <i class="pi pi-home menu-icon"></i>
+                <span>{{ 'মূল হোমপেজ' | t }}</span>
+              </a>
               <a routerLink="/worker/edit-profile" (click)="closeProfileDropdown()" class="menu-item">
                 <i class="pi pi-user-edit menu-icon"></i>
                 <span>{{ 'প্রোফাইল ও স্কিল এডিট' | t }}</span>
@@ -249,6 +253,13 @@
             class="nav-tab">
             <i class="pi pi-history"></i>
             <span>{{ 'কাজের ইতিহাস' | t }}</span>
+          </a>
+
+          <a 
+            routerLink="/customer/home" 
+            class="nav-tab">
+            <i class="pi pi-compass"></i>
+            <span>{{ 'মূল হোমপেজ' | t }}</span>
           </a>
         </div>
 

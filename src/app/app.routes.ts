@@ -19,8 +19,6 @@ export const routes: Routes = [
   },
   {
     path: 'customer',
-    canActivate: [authGuard, notBannedGuard, roleGuard],
-    data: { roles: ['customer', 'admin', 'superadmin'] },
     loadComponent: () =>
       import('./layouts/customer-layout/customer-layout.component').then(m => m.CustomerLayoutComponent),
     loadChildren: () =>
