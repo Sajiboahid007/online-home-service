@@ -27,7 +27,9 @@
         </div>
         <div class="plumber-counter-chip">
           <span class="pulse-dot"></span>
-          <span>{{ nearbyPlumbersCount() | bnNumber }} জন কারিগর প্রস্তুত</span>
+          @for (count of [nearbyPlumbersCount()]; track count) {
+            <span>{{ count | bnNumber }} জন কারিগর প্রস্তুত</span>
+          }
         </div>
       </div>
 
@@ -47,29 +49,36 @@
               <span class="search-hint-inline">নাম লিখে সার্চ করতে পারবেন</span>
             </label>
             <p-select
-              [options]="categoryOptions()"
-              [ngModel]="selectedCategory()"
-              (ngModelChange)="onCategoryChange($event)"
+              [options]="categoryOptions"
+              [(ngModel)]="selectedCategory"
+              (onChange)="onCategoryChange($event.value)"
               optionLabel="nameBn"
               placeholder="সার্ভিস ক্যাটাগরি বেছে নিন বা সার্চ করুন..."
               [filter]="true"
               filterBy="nameBn,nameEn"
               filterPlaceholder="🔍 ক্যাটাগরি বা পেশা সার্চ করুন..."
+              [resetFilterOnHide]="true"
               [fluid]="true"
+              panelStyleClass="kajkhoj-select-overlay"
               styleClass="kajkhoj-custom-select"
             >
               <ng-template #selectedItem let-selected>
                 @if (selected) {
-                  <div class="pselect-selected-row">
-                    <span class="pselect-icon">{{ selected.icon }}</span>
-                    <div class="pselect-text-wrap">
-                      <strong class="pselect-title">{{ selected.nameBn }}</strong>
-                      <span class="pselect-sub">({{ selected.nameEn }})</span>
+                  <!-- Keyed @for rebuilds the row on every selection change. Browser page
+                       translation (Chrome/Google Translate) swaps text nodes for its own,
+                       so updating the old nodes in place would leave a stale label. -->
+                  @for (sel of [selected]; track sel.id) {
+                    <div class="pselect-selected-row">
+                      <span class="pselect-icon">{{ sel.icon }}</span>
+                      <div class="pselect-text-wrap">
+                        <strong class="pselect-title">{{ sel.nameBn }}</strong>
+                        <span class="pselect-sub">({{ sel.nameEn }})</span>
+                      </div>
+                      @if (sel.id === 'plumber') {
+                        <span class="badge-recommended">জনপ্রিয়</span>
+                      }
                     </div>
-                    @if (selected.id === 'plumber') {
-                      <span class="badge-recommended">জনপ্রিয়</span>
-                    }
-                  </div>
+                  }
                 }
               </ng-template>
 
@@ -105,26 +114,31 @@
               <span class="search-hint-inline">সমস্যা লিখে সার্চ করতে পারবেন</span>
             </label>
             <p-select
-              [options]="availablePresetsForCategory()"
-              [ngModel]="selectedPreset()"
-              (ngModelChange)="onPresetChange($event)"
+              [options]="availablePresets"
+              [(ngModel)]="selectedPreset"
+              (onChange)="onPresetChange($event.value)"
               optionLabel="label"
               placeholder="সমস্যার তালিকা থেকে বেছে নিন বা সার্চ করুন..."
               [filter]="true"
               filterBy="label,title,description"
               filterPlaceholder="🔍 সমস্যা বা কাজের বিবরণ সার্চ করুন..."
+              [resetFilterOnHide]="true"
               [fluid]="true"
+              panelStyleClass="kajkhoj-select-overlay"
               styleClass="kajkhoj-custom-select"
             >
               <ng-template #selectedItem let-preset>
                 @if (preset) {
-                  <div class="pselect-selected-row">
-                    <span class="pselect-icon">{{ preset.icon }}</span>
-                    <div class="pselect-text-wrap">
-                      <strong class="pselect-title">{{ preset.label }}</strong>
+                  <!-- Keyed rebuild: see the category select above. -->
+                  @for (sel of [preset]; track sel.id) {
+                    <div class="pselect-selected-row">
+                      <span class="pselect-icon">{{ sel.icon }}</span>
+                      <div class="pselect-text-wrap">
+                        <strong class="pselect-title">{{ sel.label }}</strong>
+                      </div>
+                      <span class="pselect-price-tag">{{ sel.suggestedPrice | taka }}</span>
                     </div>
-                    <span class="pselect-price-tag">{{ preset.suggestedPrice | taka }}</span>
-                  </div>
+                  }
                 }
               </ng-template>
 

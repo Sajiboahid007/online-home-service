@@ -13,6 +13,13 @@ import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
 import { DoorstepPin, DoorstepPinPickerComponent } from '../../../shared/components/doorstep-pin-picker/doorstep-pin-picker.component';
 
+export interface CategoryOption {
+  id: string;
+  nameBn: string;
+  nameEn: string;
+  icon: string;
+}
+
 export interface ServicePreset {
   id: string;
   label: string;
@@ -51,18 +58,9 @@ export class CreateRequestComponent implements OnInit {
   public categories = this.categoryService.categories;
 
   // Category Options for p-select
-  public categoryOptions = computed(() => {
-    return this.categories().map(c => ({
-      id: c.id,
-      nameBn: c.nameBn,
-      nameEn: c.nameEn,
-      icon: c.icon
-    }));
-  });
-
-  // Selected Category ID & Category Object for p-select
+  public categoryOptions: CategoryOption[] = [];
+  public selectedCategory: CategoryOption | null = null;
   public selectedCategoryId = signal<string>('plumber');
-  public selectedCategory = signal<any>(null);
 
   // Common quick problem presets for all categories
   public readonly presets: ServicePreset[] = [
@@ -233,7 +231,7 @@ export class CreateRequestComponent implements OnInit {
     {
       id: 'l1',
       label: 'বাসা বদল ও মালামাল বহন (২ জন শ্রমিক)',
-      category: 'labor',
+      category: 'day_laborer',
       title: 'বাসা বদলের আসবাবপত্র ও কার্টুন পরিবহন শ্রমিক',
       description: 'ফ্ল্যাট শিফটিংয়ের জন্য খাট, আলমারি, সোফা ও বক্স বহন করতে দক্ষ ২ জন দিনমজুর প্রয়োজন।',
       suggestedPrice: 1200,
@@ -242,7 +240,7 @@ export class CreateRequestComponent implements OnInit {
     {
       id: 'l2',
       label: 'ভারী আসবাবপত্র ও মালামাল ওঠানামা',
-      category: 'labor',
+      category: 'day_laborer',
       title: 'সিঁড়ি দিয়ে ভারী আসবাব বা পণ্য ওঠানামার শ্রমিক',
       description: 'বিল্ডিংয়ের নিচতলা থেকে তিনতলায় ভারী ফার্নিচার ওঠানোর জন্য শ্রমিক প্রয়োজন।',
       suggestedPrice: 600,
@@ -290,14 +288,10 @@ export class CreateRequestComponent implements OnInit {
     }
   ];
 
-  // Presets available for current selected category
-  public availablePresetsForCategory = computed(() => {
-    const cat = this.selectedCategoryId();
-    return this.presets.filter(p => p.category === cat);
-  });
-
-  // Selected Preset signal
-  public selectedPreset = signal<ServicePreset | null>(null);
+  // Available Presets for selected category
+  public availablePresets: ServicePreset[] = [];
+  public selectedPreset: ServicePreset | null = null;
+  public selectedPresetId = signal<string>('p1');
 
   // Form State
   public requestTitle = signal<string>('জরুরি প্লাম্বার প্রয়োজন — বাথরুমে পানির পাইপ লিকেজ');
@@ -319,30 +313,35 @@ export class CreateRequestComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const defaultCat = this.categoryOptions().find(c => c.id === 'plumber') || this.categoryOptions()[0];
+    const cats = this.categories();
+    this.categoryOptions = cats.map(c => ({
+      id: c.id,
+      nameBn: c.nameBn,
+      nameEn: c.nameEn,
+      icon: c.icon
+    }));
+
+    const defaultCat = this.categoryOptions.find(c => c.id === 'plumber') || this.categoryOptions[0] || null;
+    this.selectedCategory = defaultCat;
     if (defaultCat) {
-      this.selectedCategory.set(defaultCat);
       this.selectedCategoryId.set(defaultCat.id);
     }
-    const defaultPlumberPreset = this.presets.find(p => p.category === 'plumber');
-    if (defaultPlumberPreset) {
-      this.selectedPreset.set(defaultPlumberPreset);
-    }
+
+    this.updatePresetsForCategory(defaultCat ? defaultCat.id : 'plumber');
   }
 
-  public onCategoryChange(catOrId: any): void {
-    const catId = typeof catOrId === 'string' ? catOrId : catOrId?.id;
-    if (!catId) return;
-    this.selectedCategoryId.set(catId);
-    const catObj = this.categoryOptions().find(c => c.id === catId);
-    if (catObj) {
-      this.selectedCategory.set(catObj);
-    }
-    const catPresets = this.presets.filter(p => p.category === catId);
-    if (catPresets.length > 0) {
-      this.onPresetChange(catPresets[0]);
+  public updatePresetsForCategory(catId: string): void {
+    this.availablePresets = this.presets.filter(p => p.category === catId);
+    if (this.availablePresets.length > 0) {
+      const defaultPreset = this.availablePresets[0];
+      this.selectedPreset = defaultPreset;
+      this.selectedPresetId.set(defaultPreset.id);
+      this.requestTitle.set(defaultPreset.title);
+      this.requestDescription.set(defaultPreset.description);
+      this.estimatedBudget.set(defaultPreset.suggestedPrice);
     } else {
-      this.selectedPreset.set(null);
+      this.selectedPreset = null;
+      this.selectedPresetId.set('');
       const cat = this.categoryService.getCategoryById(catId);
       const name = cat ? cat.nameBn : 'সার্ভিস';
       this.requestTitle.set(`জরুরি ${name} প্রয়োজন`);
@@ -351,14 +350,31 @@ export class CreateRequestComponent implements OnInit {
     }
   }
 
-  public onPresetChange(preset: ServicePreset | null): void {
-    this.selectedPreset.set(preset);
-    if (preset) {
-      this.selectedCategoryId.set(preset.category);
-      this.requestTitle.set(preset.title);
-      this.requestDescription.set(preset.description);
-      this.estimatedBudget.set(preset.suggestedPrice);
+  public onCategoryChange(catOrId: any): void {
+    const cat = typeof catOrId === 'object' && catOrId ? catOrId : this.categoryOptions.find(c => c.id === catOrId);
+    if (!cat) return;
+    this.selectedCategory = cat;
+    this.selectedCategoryId.set(cat.id);
+    this.updatePresetsForCategory(cat.id);
+  }
+
+  public onPresetChange(presetOrId: any): void {
+    const preset = typeof presetOrId === 'object' && presetOrId ? presetOrId : this.presets.find(p => p.id === presetOrId);
+    if (!preset) return;
+    this.selectedPreset = preset;
+    this.selectedPresetId.set(preset.id);
+    this.selectedCategoryId.set(preset.category);
+
+    if (!this.selectedCategory || this.selectedCategory.id !== preset.category) {
+      const cat = this.categoryOptions.find(c => c.id === preset.category);
+      if (cat) {
+        this.selectedCategory = cat;
+      }
     }
+
+    this.requestTitle.set(preset.title);
+    this.requestDescription.set(preset.description);
+    this.estimatedBudget.set(preset.suggestedPrice);
   }
 
   public setBudget(amount: number): void {
@@ -376,9 +392,9 @@ export class CreateRequestComponent implements OnInit {
 
     const user = this.currentUser();
     const loc = this.userLocation();
-    const catId = this.selectedCategoryId();
+    const catId = this.selectedCategory?.id || this.selectedCategoryId();
     const cat = this.categoryService.getCategoryById(catId);
-    const categoryName = cat ? cat.nameBn : 'প্লাম্বার (পাইপ ফিটিং)';
+    const categoryName = this.selectedCategory?.nameBn || cat?.nameBn || 'প্লাম্বার (পাইপ ফিটিং)';
 
     const pin = this.doorstepPin();
     const pinLoc = pin?.location ?? loc;
