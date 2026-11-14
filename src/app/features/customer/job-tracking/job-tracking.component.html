@@ -20,19 +20,21 @@
     <div class="tracking-content-grid">
       <!-- Left Column: Status Timeline & OTP Security -->
       <div class="timeline-column">
-        <!-- Interactive Simulation Control (Testing Helper) -->
-        <div class="simulation-banner">
-          <div class="sim-info">
-            <span class="sim-icon">🧪</span>
-            <div>
-              <span class="sim-title">লাইভ ডেমো সিমুলেটর</span>
-              <p class="sim-sub">ওয়ার্কারের অবস্থান ও কাজের ধাপ পরিবর্তন টেস্ট করুন</p>
+        <!-- Interactive Simulation Control (Staff/Testing Helper) -->
+        @if (isAdmin() || isWorker()) {
+          <div class="simulation-banner">
+            <div class="sim-info">
+              <span class="sim-icon">🧪</span>
+              <div>
+                <span class="sim-title">লাইভ ডেমো সিমুলেটর</span>
+                <p class="sim-sub">ওয়ার্কারের অবস্থান ও কাজের ধাপ পরিবর্তন টেস্ট করুন</p>
+              </div>
             </div>
+            <button type="button" class="btn-advance-step" (click)="advanceSimulationStep()" [disabled]="job.status === 'completed' || job.status.includes('cancelled')">
+              <span>ধাপ পরিবর্তন করুন ⏩</span>
+            </button>
           </div>
-          <button type="button" class="btn-advance-step" (click)="advanceSimulationStep()" [disabled]="job.status === 'completed' || job.status.includes('cancelled')">
-            <span>ধাপ পরিবর্তন করুন ⏩</span>
-          </button>
-        </div>
+        }
 
         <!-- 4-Digit Start OTP Card (Prominent Uber-style verification) -->
         @if (job.status !== 'completed' && !job.status.includes('cancelled')) {

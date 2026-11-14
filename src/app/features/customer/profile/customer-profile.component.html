@@ -10,9 +10,15 @@
       <h3>মৌলিক তথ্য</h3>
 
       <div class="avatar-edit">
-        <img [src]="photoURL() || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'" alt="Profile Photo" />
+        @if (photoURL() && !avatarImgError()) {
+          <img [src]="photoURL()" alt="Profile Photo" (error)="avatarImgError.set(true)" />
+        } @else {
+          <div class="avatar-initials-circle">
+            {{ userInitials() }}
+          </div>
+        }
         <div class="upload-btn-wrap">
-          <app-image-uploader label="ছবি পরিবর্তন করুন" (imageSelected)="photoURL.set($event)"></app-image-uploader>
+          <app-image-uploader label="ছবি পরিবর্তন করুন" (imageSelected)="photoURL.set($event); avatarImgError.set(false)"></app-image-uploader>
         </div>
       </div>
 

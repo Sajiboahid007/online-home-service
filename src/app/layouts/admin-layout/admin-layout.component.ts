@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -27,6 +27,23 @@ export class AdminLayoutComponent {
   public currentUser = this.authService.currentUser;
   public isSuperAdmin = this.authService.isSuperAdmin;
 
+  public adminAvatarError = signal<boolean>(false);
+
+  public onAdminAvatarError(): void {
+    this.adminAvatarError.set(true);
+  }
+
+  public adminInitials = computed(() => {
+    const user = this.currentUser();
+    const name = user?.name;
+    if (!name) return '🛡️';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return parts[0].slice(0, 2).toUpperCase();
+  });
+
   public pendingVerificationCount = computed(() => {
     return this.workerService.workers().filter(w => w.verificationStatus === 'pending').length;
   });
@@ -34,11 +51,6 @@ export class AdminLayoutComponent {
   public activeSOSAlertsCount = computed(() => {
     return this.reportService.sosAlerts().filter(s => s.status === 'active').length;
   });
-
-  public switchRole(role: 'customer' | 'worker'): void {
-    this.authService.loginAsDemo(role);
-    this.router.navigate([role === 'worker' ? '/worker/dashboard' : '/customer/home']);
-  }
 
   public logout(): void {
     this.authService.logout();

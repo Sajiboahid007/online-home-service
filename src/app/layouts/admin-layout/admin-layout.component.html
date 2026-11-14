@@ -76,21 +76,17 @@
           <span>{{ 'সুপার অ্যাডমিন পোর্টাল' | t }}</span>
         </a>
       }
-
-      <div class="nav-divider"></div>
-
-      <div class="demo-switch-panel">
-        <span class="panel-title">{{ 'ভূমিকা পরিবর্তন করুন:' | t }}</span>
-        <div class="switch-buttons">
-          <button (click)="switchRole('customer')" class="switch-btn">{{ '👤 কাস্টমার ভিউ' | t }}</button>
-          <button (click)="switchRole('worker')" class="switch-btn">{{ '🔧 ওয়ার্কার ভিউ' | t }}</button>
-        </div>
-      </div>
     </nav>
 
     <div class="sidebar-footer">
       <div class="admin-user-info">
-        <img [src]="currentUser()?.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'" alt="Avatar" class="avatar" />
+        @if (currentUser()?.photoURL && !adminAvatarError()) {
+          <img [src]="currentUser()?.photoURL" alt="Avatar" class="avatar" (error)="onAdminAvatarError()" />
+        } @else {
+          <div class="admin-avatar-initials">
+            {{ adminInitials() }}
+          </div>
+        }
         <div class="user-details">
           <span class="name">{{ currentUser()?.name }}</span>
           <span class="role">{{ (isSuperAdmin() ? 'প্রধান প্রশাসক' : 'অঞ্চল নিয়ন্ত্রক') | t }}</span>

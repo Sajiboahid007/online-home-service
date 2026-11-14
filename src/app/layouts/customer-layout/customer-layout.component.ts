@@ -69,9 +69,24 @@ export class CustomerLayoutComponent {
   // Modal signals
   public showSOSModal = signal<boolean>(false);
   public sosSent = signal<boolean>(false);
-  public showRoleSwitcher = signal<boolean>(false);
   public showProfileModal = signal<boolean>(false);
   public isRefreshingLocation = signal<boolean>(false);
+  public avatarImgError = signal<boolean>(false);
+
+  public onAvatarError(): void {
+    this.avatarImgError.set(true);
+  }
+
+  public userInitials = computed(() => {
+    const user = this.currentUser();
+    const name = user?.name;
+    if (!name) return '👤';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return parts[0].slice(0, 2).toUpperCase();
+  });
 
   public logout(): void {
     this.authService.logout();
@@ -111,27 +126,6 @@ export class CustomerLayoutComponent {
     }).catch(() => {
       this.isRefreshingLocation.set(false);
     });
-  }
-
-  public toggleRoleSwitcher(): void {
-    this.showRoleSwitcher.update(v => !v);
-  }
-
-  public closeRoleSwitcher(): void {
-    this.showRoleSwitcher.set(false);
-  }
-
-  public switchRole(role: UserRole | 'worker_korim' | 'worker_kalam'): void {
-    this.authService.loginAsDemo(role);
-    this.showRoleSwitcher.set(false);
-
-    if (role === 'admin' || role === 'superadmin') {
-      this.router.navigate(['/admin/dashboard']);
-    } else if (role === 'worker' || role === 'worker_korim' || role === 'worker_kalam') {
-      this.router.navigate(['/worker/dashboard']);
-    } else {
-      this.router.navigate(['/customer/home']);
-    }
   }
 
   public toggleProfileModal(): void {
@@ -175,7 +169,7 @@ export class CustomerLayoutComponent {
       categoryName: cat.nameBn,
       areaId: worker.areaId || 'savar_bazar',
       type: 'direct',
-      status: 'accepted',
+      status: 'pending',
       description: `পুনরায় বুকিং: প্রিয় কারিগর ${worker.name}-কে সরাসরি অর্ডার করা হয়েছে`,
       estimatedPrice: worker.rate,
       location: loc,

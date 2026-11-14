@@ -38,6 +38,8 @@ export class JobTrackingComponent implements OnInit, OnDestroy {
   private reportService = inject(ReportService);
 
   public currentUser = this.authService.currentUser;
+  public isAdmin = this.authService.isAdmin;
+  public isWorker = this.authService.isWorker;
   public jobId = signal<string>('');
   public showCancelModal = signal<boolean>(false);
   public cancelReason = signal<string>('দেরি হচ্ছে');

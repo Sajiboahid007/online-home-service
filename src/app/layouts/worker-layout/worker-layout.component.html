@@ -83,16 +83,6 @@
 
         <div class="topbar-divider"></div>
 
-        <!-- Role Switcher Trigger Button -->
-        <button 
-          type="button" 
-          class="role-badge-btn" 
-          (click)="toggleRoleSwitcher()" 
-          [title]="'ভূমিকা পরিবর্তন করুন (Role Switcher)' | t">
-          <span class="role-icon">🔄</span>
-          <span class="role-text">{{ 'রোল সুইচ' | t }}</span>
-        </button>
-
         <!-- Worker Profile Dropdown Menu -->
         <div class="worker-profile-dropdown" [class.is-open]="showProfileDropdown()">
           <button 
@@ -101,10 +91,17 @@
             (click)="toggleProfileDropdown(); $event.stopPropagation()"
             [attr.aria-expanded]="showProfileDropdown()">
             <div class="avatar-wrapper">
-              <img 
-                [src]="currentWorker()?.photoURL || 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=100'" 
-                [alt]="currentWorker()?.name" 
-                class="profile-avatar" />
+              @if (currentWorker()?.photoURL && !workerAvatarError()) {
+                <img 
+                  [src]="currentWorker()?.photoURL" 
+                  [alt]="currentWorker()?.name" 
+                  class="profile-avatar"
+                  (error)="onWorkerAvatarError()" />
+              } @else {
+                <div class="avatar-initials-badge worker-initials">
+                  {{ workerInitials() }}
+                </div>
+              }
               <span class="status-indicator-dot" [class.online]="currentWorker()?.isOnline"></span>
             </div>
             <div class="profile-meta">
@@ -123,10 +120,17 @@
           @if (showProfileDropdown()) {
             <div class="profile-dropdown-menu" (click)="$event.stopPropagation()">
               <div class="menu-user-header">
-                <img 
-                  [src]="currentWorker()?.photoURL || 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=100'" 
-                  [alt]="currentWorker()?.name" 
-                  class="menu-avatar" />
+                @if (currentWorker()?.photoURL && !workerAvatarError()) {
+                  <img 
+                    [src]="currentWorker()?.photoURL" 
+                    [alt]="currentWorker()?.name" 
+                    class="menu-avatar"
+                    (error)="onWorkerAvatarError()" />
+                } @else {
+                  <div class="avatar-initials-badge worker-initials menu-initials">
+                    {{ workerInitials() }}
+                  </div>
+                }
                 <div class="menu-user-details">
                   <div class="name-line">
                     <strong class="user-fullname">{{ currentWorker()?.name }}</strong>
@@ -138,28 +142,6 @@
                   <span class="menu-phone">{{ currentWorker()?.phone }}</span>
                 </div>
               </div>
-
-              <div class="menu-divider"></div>
-
-              <!-- Switch Worker Shortcut (Rahim <-> Kalam) -->
-              <div class="menu-section-label">{{ 'ওয়ার্কার অ্যাকাউন্ট বদল' | t }}</div>
-              @if (currentWorker()?.uid === 'worker_rahim_1') {
-                <button type="button" class="menu-item switch-item" (click)="switchWorker('worker_kalam')">
-                  <span class="menu-item-icon">🚰</span>
-                  <div class="menu-item-text">
-                    <span class="item-title">{{ 'প্লাম্বার কালাম হোসেন' | t }}</span>
-                    <span class="item-sub">{{ 'বিকল্প প্লাম্বার অ্যাকাউন্টে সুইচ করুন' | t }}</span>
-                  </div>
-                </button>
-              } @else {
-                <button type="button" class="menu-item switch-item" (click)="switchWorker('worker')">
-                  <span class="menu-item-icon">🔧</span>
-                  <div class="menu-item-text">
-                    <span class="item-title">{{ 'প্লাম্বার রহিম মিয়া' | t }}</span>
-                    <span class="item-sub">{{ 'মূল প্লাম্বার অ্যাকাউন্টে সুইচ করুন' | t }}</span>
-                  </div>
-                </button>
-              }
 
               <div class="menu-divider"></div>
 
@@ -299,94 +281,19 @@
     </nav>
   </header>
 
-  <!-- Role Switcher Modal -->
-  @if (showRoleSwitcher()) {
-    <div class="modal-backdrop" (click)="closeRoleSwitcher()">
-      <div class="modal-card role-modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <div class="modal-title-wrap">
-            <span class="modal-icon">🔄</span>
-            <h3 class="modal-title">{{ 'ভূমিকা পরিবর্তন করুন (Role Switcher)' | t }}</h3>
-          </div>
-          <button type="button" class="close-btn" (click)="closeRoleSwitcher()" [attr.aria-label]="'বন্ধ করুন' | t">✕</button>
-        </div>
-
-        <p class="role-desc">{{ 'প্ল্যাটফর্মের ভিন্ন ভিন্ন রোল ও ইন্টারফেস টেস্ট করতে নিচের যেকোনো প্রোফাইল বেছে নিন:' | t }}</p>
-
-        <div class="role-cards-grid">
-          <div class="role-card" (click)="switchRole('customer')">
-            <div class="rc-badge customer">{{ 'কাস্টমার' | t }}</div>
-            <div class="rc-avatar">👤</div>
-            <div class="rc-info">
-              <h4>{{ 'কাস্টমার ডেমো' | t }}</h4>
-              <p>{{ 'তানভীর আহমেদ (সাভার বাজার)' | t }}</p>
-              <span class="rc-hint">{{ 'সার্ভিস বুকিং ও লাইভ ম্যাপ ট্র্যাকিং' | t }}</span>
-            </div>
-          </div>
-
-          <div class="role-card" [class.active-role]="currentWorker()?.uid === 'worker_rahim_1'" (click)="switchRole('worker')">
-            @if (currentWorker()?.uid === 'worker_rahim_1') {
-              <div class="rc-badge active">{{ 'বর্তমান' | t }}</div>
-            } @else {
-              <div class="rc-badge worker">{{ 'প্লাম্বার ১' | t }}</div>
-            }
-            <div class="rc-avatar">🔧</div>
-            <div class="rc-info">
-              <h4>{{ 'রহিম প্লাম্বার (ভেরিফায়েড)' | t }}</h4>
-              <p>{{ 'সাভার বাসস্ট্যান্ড (অনলাইন 🟢)' | t }}</p>
-              <span class="rc-hint">{{ 'ওয়ার্কার ড্যাশবোর্ড, রিকোয়েস্ট ও ওয়ালেট' | t }}</span>
-            </div>
-          </div>
-
-          <div class="role-card" [class.active-role]="currentWorker()?.uid === 'worker_kalam'" (click)="switchRole('worker_kalam')">
-            @if (currentWorker()?.uid === 'worker_kalam') {
-              <div class="rc-badge active">{{ 'বর্তমান' | t }}</div>
-            } @else {
-              <div class="rc-badge worker">{{ 'প্লাম্বার ২' | t }}</div>
-            }
-            <div class="rc-avatar">🚰</div>
-            <div class="rc-info">
-              <h4>{{ 'কালাম হোসেন (প্লাম্বার)' | t }}</h4>
-              <p>{{ 'ব্যাংক টাউন (অনলাইন 🟢)' | t }}</p>
-              <span class="rc-hint">{{ 'দ্বিতীয় প্লাম্বার — ফার্স্ট গ্র্যাব যাচাই করুন' | t }}</span>
-            </div>
-          </div>
-
-          <div class="role-card" [class.active-role]="currentWorker()?.uid === 'worker_korim'" (click)="switchRole('worker_korim')">
-            <div class="rc-badge worker">{{ 'ওয়ার্কার' | t }}</div>
-            <div class="rc-avatar">⚡</div>
-            <div class="rc-info">
-              <h4>{{ 'করিম মিয়া (ইলেকট্রিশিয়ান)' | t }}</h4>
-              <p>{{ 'রেডিও কলোনি (অনলাইন 🟢)' | t }}</p>
-              <span class="rc-hint">{{ 'জব বোর্ড ও কাজের আবেদন' | t }}</span>
-            </div>
-          </div>
-
-          <div class="role-card" (click)="switchRole('admin')">
-            <div class="rc-badge admin">{{ 'অ্যাডমিন' | t }}</div>
-            <div class="rc-avatar">🛡️</div>
-            <div class="rc-info">
-              <h4>{{ 'সাভার এরিয়া অ্যাডমিন' | t }}</h4>
-              <p>{{ 'সাভার উপজেলা কন্ট্রোল রুম' | t }}</p>
-              <span class="rc-hint">{{ 'ভেরিফিকেশন, এরিয়া নিয়ন্ত্রণ ও লাইভ মনিটর' | t }}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn-cancel" (click)="closeRoleSwitcher()">{{ 'বন্ধ করুন' | t }}</button>
-        </div>
-      </div>
-    </div>
-  }
-
-  <!-- Mobile Drawer Menu (Overlay) -->
+      <!-- Mobile Drawer Menu (Overlay) -->
   @if (mobileMenuOpen()) {
     <div class="mobile-drawer-backdrop" (click)="closeMobileMenu()"></div>
     <aside class="mobile-drawer">
       <div class="drawer-header">
         <div class="drawer-user">
-          <img [src]="currentWorker()?.photoURL || 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=100'" class="drawer-avatar" alt="User Avatar" />
+          @if (currentWorker()?.photoURL && !workerAvatarError()) {
+            <img [src]="currentWorker()?.photoURL" class="drawer-avatar" alt="User Avatar" (error)="onWorkerAvatarError()" />
+          } @else {
+            <div class="drawer-avatar-initials">
+              {{ workerInitials() }}
+            </div>
+          }
           <div>
             <h4>{{ currentWorker()?.name }}</h4>
             <span class="worker-category">{{ currentWorker()?.skills?.[0] || ('কারিগর' | t) }}</span>
@@ -473,12 +380,6 @@
 
         <div class="drawer-divider"></div>
 
-        <!-- Role switch trigger from drawer -->
-        <button type="button" (click)="closeMobileMenu(); toggleRoleSwitcher()" class="drawer-nav-item secondary">
-          <i class="pi pi-sync"></i>
-          <span>{{ 'রোল ও একাউন্ট পরিবর্তন...' | t }}</span>
-        </button>
-
         <button type="button" (click)="logout(); closeMobileMenu()" class="drawer-nav-item text-danger">
           <i class="pi pi-sign-out"></i>
           <span>{{ 'লগআউট' | t }}</span>
@@ -524,4 +425,120 @@
       <span>{{ 'ওয়ালেট' | t }}</span>
     </a>
   </nav>
+
+  <!-- GLOBAL INCOMING JOB OFFER POPUP MODAL FOR TECHNICIAN -->
+  @if (shouldShowOffer() && incomingOffer(); as offer) {
+    <div class="offer-popup-backdrop">
+      <div class="offer-popup-card" role="dialog" aria-modal="true">
+        <!-- Popup Header -->
+        <div class="offer-header">
+          <div class="header-tag">
+            <span class="pulse-beacon"></span>
+            <span>{{ 'নতুন কাজের রিকোয়েস্ট এসেছে!' | t }}</span>
+          </div>
+          <button type="button" class="btn-close-popup" (click)="rejectOffer()" [title]="'বন্ধ করুন' | t">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+
+        <!-- Circular Countdown Timer -->
+        <div class="timer-section">
+          <div class="circular-timer-wrapper">
+            <svg class="timer-svg" viewBox="0 0 100 100">
+              <circle class="timer-circle-bg" cx="50" cy="50" r="45"></circle>
+              <circle 
+                class="timer-circle-progress" 
+                cx="50" 
+                cy="50" 
+                r="45"
+                [style.strokeDashoffset]="calculateProgressDash()"
+                [class.timer-urgent]="remainingSeconds() <= 10">
+              </circle>
+            </svg>
+            <div class="timer-label">
+              <span class="seconds-num" [class.urgent]="remainingSeconds() <= 10">
+                {{ remainingSeconds() | bnNumber }}
+              </span>
+              <span class="seconds-unit">{{ 'সেকেন্ড বাকি' | t }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Job Details Card -->
+        <div class="offer-job-body">
+          <div class="offer-price-highlight">
+            <span class="price-title">{{ 'আনুমানিক পারিশ্রমিক' | t }}</span>
+            <span class="price-amount">{{ offer.job.estimatedPrice | taka }}</span>
+          </div>
+
+          <div class="job-category-badge">
+            <i class="pi pi-wrench"></i>
+            <span>{{ offer.job.categoryName }}</span>
+          </div>
+
+          <p class="offer-job-desc">
+            "{{ offer.job.description }}"
+          </p>
+
+          <!-- Customer & Location Details -->
+          <div class="offer-meta-box">
+            <div class="meta-item">
+              <i class="pi pi-user meta-icon"></i>
+              <div>
+                <span class="meta-label">{{ 'কাস্টমার' | t }}</span>
+                <strong>{{ offer.job.customerName }} (⭐ {{ (offer.job.customerRating || 4.9) | bnNumber }})</strong>
+              </div>
+            </div>
+
+            <div class="meta-item">
+              <i class="pi pi-map-marker meta-icon"></i>
+              <div>
+                <span class="meta-label">{{ 'ঠিকানা' | t }}</span>
+                <strong>{{ offer.job.location.address }}</strong>
+              </div>
+            </div>
+
+            <div class="meta-item">
+              <i class="pi pi-compass meta-icon"></i>
+              <div>
+                <span class="meta-label">{{ 'সার্ভিস ধরন' | t }}</span>
+                <strong>{{ offer.job.type === 'instant' ? ('ইনস্ট্যান্ট সার্ভিস রিকোয়েস্ট ⚡' | t) : offer.job.type === 'direct' ? ('সরাসরি বুকিং অর্ডার 🎯' | t) : ('ওপেন কাজ (পোস্টেড)' | t) }}</strong>
+              </div>
+            </div>
+          </div>
+          <p class="exact-location-lock">🔒 {{ 'সঠিক বাড়ির পিন, ল্যান্ডমার্ক ও গেটের ছবি কাজ গ্রহণের পর দেখা যাবে।' | t }}</p>
+
+          @if (offer.job.photos && offer.job.photos.length > 0) {
+            <div class="job-photos-preview">
+              <span class="photos-title">{{ 'কাজের ছবি:' | t }}</span>
+              <div class="photos-grid">
+                @for (photo of offer.job.photos; track photo) {
+                  <img [src]="photo" alt="Job preview" class="preview-img" />
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="offer-actions">
+          <button 
+            type="button" 
+            class="btn-reject" 
+            (click)="rejectOffer()">
+            <i class="pi pi-times-circle"></i>
+            <span>{{ 'প্রত্যাখ্যান করুন' | t }}</span>
+          </button>
+
+          <button 
+            type="button" 
+            class="btn-accept" 
+            (click)="acceptOffer()">
+            <i class="pi pi-check-circle"></i>
+            <span>{{ 'কাজটি গ্রহণ করুন' | t }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

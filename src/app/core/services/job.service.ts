@@ -17,10 +17,13 @@ export class JobService {
   public jobs = this.jobsSignal.asReadonly();
 
   // Active incoming job offer for worker alert popup
-  public incomingJobOfferSignal = signal<{ job: Job; expiresAt: number } | null>(null);
+  public incomingJobOfferSignal = signal<{ job: Job; expiresAt: number; targetWorkerId?: string } | null>(null);
+  private broadcastChannel: BroadcastChannel | null = null;
 
   constructor() {
     this.loadJobs();
+    this.loadStoredOffer();
+    this.initCrossTabSync();
   }
 
   private loadJobs(): void {
@@ -45,6 +48,7 @@ export class JobService {
 
   private saveToStorage(): void {
     localStorage.setItem('kajkhoj_jobs', JSON.stringify(this.jobsSignal()));
+    this.broadcastMessage({ type: 'JOBS_UPDATED' });
   }
 
   public getJobById(jobId: string): Job | undefined {
@@ -106,6 +110,9 @@ export class JobService {
       link: `/customer/tracking/${newJob.id}`
     });
 
+    // Automatically dispatch incoming job offer popup to technician / workers
+    this.dispatchJobOffer(newJob);
+
     return newJob;
   }
 
@@ -128,14 +135,13 @@ export class JobService {
       description: details.description || 'সরাসরি কারিগর বুকিং',
       photos: details.photos || [],
       location: details.location || { lat: 23.8223, lng: 90.2673, address: 'সাভার, ঢাকা' },
-      status: 'accepted',
+      status: 'pending',
       estimatedPrice: worker.rate || 350,
       paymentMethod: details.paymentMethod || 'cash',
       paymentStatus: 'unpaid',
       startOtp,
       timeline: {
-        createdAt: new Date().toISOString(),
-        acceptedAt: new Date().toISOString()
+        createdAt: new Date().toISOString()
       },
       ...details
     } as Job;
@@ -151,6 +157,9 @@ export class JobService {
       type: 'job_offer',
       link: `/worker/active`
     });
+
+    // Dispatch incoming job offer popup to target worker
+    this.dispatchJobOffer(newJob);
 
     return newJob;
   }
@@ -189,12 +198,17 @@ export class JobService {
   }
 
   public acceptJob(jobId: string, workerId: string, workerName: string, workerPhone: string, workerPhoto: string): boolean {
-    return this.updateJobStatus(jobId, 'accepted', {
+    const success = this.updateJobStatus(jobId, 'accepted', {
       workerId,
       workerName,
       workerPhone,
       workerPhoto
     });
+    if (success) {
+      this.clearIncomingOffer();
+      this.broadcastMessage({ type: 'OFFER_ACCEPTED', jobId, workerId });
+    }
+    return success;
   }
 
   /**
@@ -233,6 +247,11 @@ export class JobService {
       workerPhone: worker.phone,
       workerPhoto: worker.photoURL
     });
+
+    if (updated) {
+      this.clearIncomingOffer();
+      this.broadcastMessage({ type: 'OFFER_ACCEPTED', jobId, workerId: worker.uid });
+    }
 
     const updatedJob = this.getJobById(jobId);
     return {
@@ -510,14 +529,113 @@ export class JobService {
     return { feeApplied };
   }
 
-  public triggerIncomingOfferForWorker(job: Job): void {
-    this.incomingJobOfferSignal.set({
+  public dispatchJobOffer(job: Job): void {
+    if (job.status === 'completed' || job.status === 'cancelled_by_customer' || job.status === 'cancelled_by_worker') {
+      return;
+    }
+
+    const expiresAt = Date.now() + 45000;
+    const offer = {
       job,
-      expiresAt: Date.now() + 30000
+      expiresAt,
+      targetWorkerId: job.workerId || undefined
+    };
+
+    this.incomingJobOfferSignal.set(offer);
+
+    try {
+      localStorage.setItem('kajkhoj_incoming_offer', JSON.stringify(offer));
+      this.broadcastMessage({ type: 'JOB_OFFER', offer });
+    } catch (e) {}
+
+    // Add alert notification for worker
+    const targetUid = job.workerId || 'worker';
+    this.notificationService.addNotification({
+      userId: targetUid,
+      title: 'নতুন কাজের অ্যালার্ট! ⚡',
+      body: `${job.customerName}: ${job.categoryName} (${job.location?.address || 'সাভার'}) — ${job.estimatedPrice} ৳`,
+      type: 'job_offer',
+      link: '/worker/dashboard'
     });
+  }
+
+  public triggerIncomingOfferForWorker(job: Job): void {
+    this.dispatchJobOffer(job);
   }
 
   public clearIncomingOffer(): void {
     this.incomingJobOfferSignal.set(null);
+    try {
+      localStorage.removeItem('kajkhoj_incoming_offer');
+      this.broadcastMessage({ type: 'OFFER_CLEARED' });
+    } catch (e) {}
+  }
+
+  private loadStoredOffer(): void {
+    try {
+      const saved = localStorage.getItem('kajkhoj_incoming_offer');
+      if (saved) {
+        const offer = JSON.parse(saved);
+        if (offer && offer.expiresAt > Date.now()) {
+          const liveJob = this.getJobById(offer.job?.id);
+          if (liveJob && (liveJob.status === 'searching' || liveJob.status === 'pending')) {
+            this.incomingJobOfferSignal.set(offer);
+            return;
+          }
+        }
+        localStorage.removeItem('kajkhoj_incoming_offer');
+      }
+    } catch (e) {}
+  }
+
+  private initCrossTabSync(): void {
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      try {
+        this.broadcastChannel = new BroadcastChannel('kajkhoj_sync_channel');
+        this.broadcastChannel.onmessage = (event) => {
+          if (event.data?.type === 'JOB_OFFER') {
+            const offer = event.data.offer;
+            if (offer && offer.expiresAt > Date.now()) {
+              this.incomingJobOfferSignal.set(offer);
+            }
+          } else if (event.data?.type === 'OFFER_ACCEPTED' || event.data?.type === 'OFFER_CLEARED') {
+            this.incomingJobOfferSignal.set(null);
+            this.loadJobs();
+          } else if (event.data?.type === 'JOBS_UPDATED') {
+            this.loadJobs();
+          }
+        };
+      } catch (e) {}
+    }
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', (event) => {
+        if (event.key === 'kajkhoj_incoming_offer') {
+          if (event.newValue) {
+            try {
+              const offer = JSON.parse(event.newValue);
+              if (offer && offer.expiresAt > Date.now()) {
+                this.incomingJobOfferSignal.set(offer);
+              } else {
+                this.incomingJobOfferSignal.set(null);
+              }
+            } catch (e) {}
+          } else {
+            this.incomingJobOfferSignal.set(null);
+          }
+        }
+        if (event.key === 'kajkhoj_jobs') {
+          this.loadJobs();
+        }
+      });
+    }
+  }
+
+  private broadcastMessage(data: any): void {
+    try {
+      if (this.broadcastChannel) {
+        this.broadcastChannel.postMessage(data);
+      }
+    } catch (e) {}
   }
 }

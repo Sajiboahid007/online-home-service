@@ -1,15 +1,63 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { AppNotification } from '../models/notification.model';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationService {
+  private authService = inject(AuthService);
   private notificationsSignal = signal<AppNotification[]>([]);
-  public notifications = this.notificationsSignal.asReadonly();
+
+  // Role-filtered notifications for the currently active user & role
+  public notifications = computed(() => {
+    const user = this.authService.currentUser();
+    const role = this.authService.currentRole();
+    const all = this.notificationsSignal();
+
+    if (!user) {
+      // Guest: only public general notifications
+      return all.filter(n => n.userId === 'all');
+    }
+
+    if (role === 'customer') {
+      // Customer: can ONLY see notifications addressed to them or to 'all', or general 'current'
+      // Strictly exclude any worker job offers ('job_offer'), worker alerts, or worker/admin links
+      return all.filter(n => {
+        if (n.type === 'job_offer') return false;
+        if (n.link && (n.link.startsWith('/worker') || n.link.startsWith('/admin') || n.link.startsWith('/superadmin'))) {
+          return false;
+        }
+        if (n.userId === 'worker_all' || (n.userId && n.userId.startsWith('worker_'))) {
+          return false;
+        }
+        return n.userId === 'all' || n.userId === user.uid || n.userId === 'current';
+      });
+    }
+
+    if (role === 'worker') {
+      const worker = this.authService.currentWorker();
+      const workerUid = worker?.uid || user.uid;
+      // Worker: sees worker job offers, general 'all', and notifications for this worker
+      return all.filter(n => {
+        if (n.link && (n.link.startsWith('/admin') || n.link.startsWith('/superadmin'))) {
+          return false;
+        }
+        return n.userId === 'all' || 
+               n.userId === 'worker_all' || 
+               n.userId === workerUid || 
+               n.userId === user.uid ||
+               n.userId === 'current' ||
+               n.type === 'job_offer';
+      });
+    }
+
+    // Admin / SuperAdmin: can see all
+    return all;
+  });
 
   public unreadCount = computed(() => {
-    return this.notificationsSignal().filter(n => !n.isRead).length;
+    return this.notifications().filter(n => !n.isRead).length;
   });
 
   constructor() {
@@ -85,14 +133,18 @@ export class NotificationService {
   }
 
   public markAllAsRead(): void {
+    const visibleIds = new Set(this.notifications().map(n => n.id));
     this.notificationsSignal.update(list =>
-      list.map(n => ({ ...n, isRead: true }))
+      list.map(n => visibleIds.has(n.id) ? { ...n, isRead: true } : n)
     );
     this.persist();
   }
 
   public clearAll(): void {
-    this.notificationsSignal.set([]);
+    const visibleIds = new Set(this.notifications().map(n => n.id));
+    this.notificationsSignal.update(list =>
+      list.filter(n => !visibleIds.has(n.id))
+    );
     this.persist();
   }
 

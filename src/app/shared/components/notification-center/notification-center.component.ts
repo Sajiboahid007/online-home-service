@@ -21,7 +21,12 @@ export class NotificationCenterComponent {
   public isOpen = signal<boolean>(false);
 
   public toggleOpen(): void {
-    this.isOpen.update(v => !v);
+    const nextState = !this.isOpen();
+    this.isOpen.set(nextState);
+    if (nextState) {
+      // User opened/viewed notifications: mark all as read so badge disappears
+      this.notificationService.markAllAsRead();
+    }
   }
 
   public close(): void {

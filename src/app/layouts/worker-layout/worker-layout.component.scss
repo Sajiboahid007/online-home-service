@@ -336,6 +336,27 @@
         display: block;
       }
 
+      .avatar-initials-badge {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0284c7, #06b6d4);
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #0284c7;
+        user-select: none;
+
+        &.menu-initials {
+          width: 44px;
+          height: 44px;
+          font-size: 16px;
+        }
+      }
+
       .status-indicator-dot {
         position: absolute;
         bottom: 0;
@@ -1019,6 +1040,22 @@
         border: 2px solid var(--primary-light);
       }
 
+      .drawer-avatar-initials {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0284c7, #06b6d4);
+        color: #ffffff;
+        font-size: 16px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #0284c7;
+        user-select: none;
+        flex-shrink: 0;
+      }
+
       h4 {
         margin: 0;
         font-size: 15px;
@@ -1424,4 +1461,314 @@
       }
     }
   }
+}
+
+/* =========================================================
+   GLOBAL INCOMING 45-SECOND COUNTDOWN OFFER POPUP MODAL
+   ========================================================= */
+.offer-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(5px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.25s ease;
+}
+
+.offer-popup-card {
+  background: #ffffff;
+  border-radius: 20px;
+  max-width: 480px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  .offer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f5f9;
+
+    .header-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f766e;
+
+      .pulse-beacon {
+        width: 10px;
+        height: 10px;
+        background: #10b981;
+        border-radius: 50%;
+        animation: pulse 1.2s infinite;
+      }
+    }
+
+    .btn-close-popup {
+      background: none;
+      border: none;
+      font-size: 16px;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 4px;
+      &:hover { color: #475569; }
+    }
+  }
+
+  /* Circular Countdown Timer */
+  .timer-section {
+    padding: 16px 20px 8px 20px;
+    display: flex;
+    justify-content: center;
+
+    .circular-timer-wrapper {
+      position: relative;
+      width: 110px;
+      height: 110px;
+
+      .timer-svg {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+
+        .timer-circle-bg {
+          fill: none;
+          stroke: #f1f5f9;
+          stroke-width: 8;
+        }
+
+        .timer-circle-progress {
+          fill: none;
+          stroke: #10b981;
+          stroke-width: 8;
+          stroke-linecap: round;
+          stroke-dasharray: 283;
+          stroke-dashoffset: 0;
+          transition: stroke-dashoffset 0.5s linear, stroke 0.3s ease;
+
+          &.timer-urgent {
+            stroke: #ef4444;
+            animation: pulse-ring 1s infinite;
+          }
+        }
+      }
+
+      .timer-label {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        .seconds-num {
+          font-size: 26px;
+          font-weight: 800;
+          color: #0f766e;
+          line-height: 1;
+
+          &.urgent {
+            color: #ef4444;
+            animation: bounce 0.5s infinite alternate;
+          }
+        }
+
+        .seconds-unit {
+          font-size: 10px;
+          color: var(--text-secondary);
+          margin-top: 2px;
+        }
+      }
+    }
+  }
+
+  .offer-job-body {
+    padding: 10px 20px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .offer-price-highlight {
+      background: #f0fdf4;
+      border: 1.5px dashed #86efac;
+      padding: 10px;
+      border-radius: 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+
+      .price-title {
+        font-size: 12px;
+        color: #15803d;
+        font-weight: 600;
+      }
+      .price-amount {
+        font-size: 24px;
+        font-weight: 800;
+        color: #16a34a;
+      }
+    }
+
+    .job-category-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f5f9;
+      color: var(--text-primary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      width: fit-content;
+    }
+
+    .offer-job-desc {
+      font-size: 14px;
+      color: var(--text-primary);
+      margin: 0;
+      background: #f8fafc;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border-left: 3px solid var(--primary-color);
+      line-height: 1.4;
+    }
+
+    .offer-meta-box {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px 12px;
+
+      .meta-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+
+        .meta-icon {
+          font-size: 16px;
+          color: var(--primary-color);
+          margin-top: 3px;
+        }
+
+        .meta-label {
+          font-size: 11px;
+          color: var(--text-secondary);
+          display: block;
+        }
+
+        strong {
+          font-size: 13px;
+          color: var(--text-primary);
+        }
+      }
+    }
+
+    .exact-location-lock {
+      margin: 4px 0 0;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: rgba(15, 118, 110, 0.06);
+      border-radius: 8px;
+    }
+
+    .job-photos-preview {
+      .photos-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .photos-grid {
+        display: flex;
+        gap: 8px;
+
+        .preview-img {
+          width: 70px;
+          height: 70px;
+          border-radius: 8px;
+          object-fit: cover;
+          border: 1px solid var(--border-color);
+        }
+      }
+    }
+  }
+
+  .offer-actions {
+    display: flex;
+    gap: 12px;
+    padding: 16px 20px;
+    background: #f8fafc;
+    border-top: 1px solid #f1f5f9;
+    border-radius: 0 0 20px 20px;
+
+    button {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .btn-reject {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #cbd5e1;
+      &:hover {
+        background: #fee2e2;
+        color: #ef4444;
+        border-color: #fca5a5;
+      }
+    }
+
+    .btn-accept {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      &:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+        transform: scale(1.02);
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes bounce {
+  from { transform: scale(1); }
+  to { transform: scale(1.1); }
 }

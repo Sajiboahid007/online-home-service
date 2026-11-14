@@ -49,10 +49,9 @@ export class DispatchService {
   }
 
   private triggerJobOffer(job: Job, worker: WorkerProfile): void {
-    const expiresAt = Date.now() + 30000; // 30 seconds
-    this.jobService.incomingJobOfferSignal.set({
-      job,
-      expiresAt
+    this.jobService.dispatchJobOffer({
+      ...job,
+      workerId: worker.uid
     });
   }
 }

@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
@@ -19,6 +19,15 @@ export class CustomerProfileComponent implements OnInit {
   public phone = signal<string>('');
   public email = signal<string>('');
   public photoURL = signal<string>('');
+  public avatarImgError = signal<boolean>(false);
+
+  public userInitials = computed(() => {
+    const n = this.name();
+    if (!n) return '👤';
+    const parts = n.trim().split(/\s+/);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return parts[0].slice(0, 2).toUpperCase();
+  });
 
   public emergencyName = signal<string>('');
   public emergencyPhone = signal<string>('');
