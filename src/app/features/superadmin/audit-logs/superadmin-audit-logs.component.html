@@ -1,11 +1,11 @@
 <div class="sa-audit-page">
   <div class="page-header">
     <div>
-      <h2>অডিট ট্রেইল ও সিস্টেম লগ (Audit Logs)</h2>
-      <p class="subtitle">প্রশাসনিক কার্যকলাপ, সেটিংস পরিবর্তন এবং স্পর্শকাতর সিস্টেম অ্যাকশনের অপরিবর্তনীয় রেকর্ড</p>
+      <h2>{{ theme.currentLang() === 'bn' ? 'অডিট ট্রেইল ও সিস্টেম লগ' : 'Audit Trail & System Logs' }}</h2>
+      <p class="subtitle">{{ theme.currentLang() === 'bn' ? 'প্রশাসনিক কার্যকলাপ, সেটিংস পরিবর্তন এবং স্পর্শকাতর সিস্টেম অ্যাকশনের অপরিবর্তনীয় রেকর্ড' : 'Immutable records of administrative actions, settings changes and system operations' }}</p>
     </div>
     <button class="btn-outline" (click)="exportLogs()">
-      <i class="pi pi-download"></i> CSV এক্সপোর্ট
+      <i class="pi pi-download"></i> {{ theme.currentLang() === 'bn' ? 'CSV এক্সপোর্ট' : 'Export CSV' }}
     </button>
   </div>
 

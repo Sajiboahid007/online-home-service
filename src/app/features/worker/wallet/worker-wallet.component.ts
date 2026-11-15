@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -6,6 +6,7 @@ import { WorkerService } from '../../../core/services/worker.service';
 import { PaymentService } from '../../../core/services/payment.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { JobService } from '../../../core/services/job.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { WorkerProfile } from '../../../core/models/worker.model';
 import { Transaction } from '../../../core/models/transaction.model';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
@@ -20,6 +21,8 @@ import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
   styleUrl: './worker-wallet.component.scss'
 })
 export class WorkerWalletComponent {
+  public theme = inject(ThemeService);
+
   // Current active worker computed reactively
   public currentWorker = computed<WorkerProfile | null>(() => {
     const authWorker = this.authService.currentWorker();

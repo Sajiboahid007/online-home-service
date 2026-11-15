@@ -2,6 +2,7 @@ import { Component, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuditLogService } from '../../../core/services/audit-log.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { AuditLog } from '../../../core/models/audit-log.model';
 import { exportToCsv } from '../../../core/utils/csv-exporter';
 
@@ -13,6 +14,7 @@ import { exportToCsv } from '../../../core/utils/csv-exporter';
   styleUrls: ['./superadmin-audit-logs.component.scss']
 })
 export class SuperadminAuditLogsComponent {
+  public theme = inject(ThemeService);
   private auditLogService = inject(AuditLogService);
 
   public logs = this.auditLogService.logs;

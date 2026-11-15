@@ -16,6 +16,9 @@ import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { LangToggleComponent } from '../../shared/components/lang-toggle/lang-toggle.component';
 import { UserRole } from '../../core/models/user.model';
 import { WorkerProfile } from '../../core/models/worker.model';
+import { ConfirmationService } from 'primeng/api';
+
+import { NotificationService } from '../../core/services/notification.service';
 
 @Component({
   selector: 'app-customer-layout',
@@ -31,8 +34,10 @@ export class CustomerLayoutComponent {
   private reportService = inject(ReportService);
   private jobService = inject(JobService);
   private workerService = inject(WorkerService);
+  private confirmationService = inject(ConfirmationService);
   private categoryService = inject(CategoryService);
   private router = inject(Router);
+  private notificationService = inject(NotificationService);
 
   public currentUser = this.authService.currentUser;
   public currentWorker = this.authService.currentWorker;
@@ -52,7 +57,11 @@ export class CustomerLayoutComponent {
   // Favorite workers list
   public showFavoritesModal = signal<boolean>(false);
   public favoriteWorkers = computed(() => {
-    const favIds = this.currentUser()?.favoriteWorkers || [];
+    const user = this.currentUser();
+    const guest = this.authService.getGuestFavorites();
+    const favIds = user?.favoriteWorkers && user.favoriteWorkers.length > 0
+      ? user.favoriteWorkers
+      : (guest.length > 0 ? guest : (user?.favoriteWorkers || []));
     return this.workerService.workers().filter(w => favIds.includes(w.uid));
   });
 
@@ -149,7 +158,28 @@ export class CustomerLayoutComponent {
   }
 
   public removeFavorite(workerId: string): void {
-    this.authService.toggleFavoriteWorker(workerId);
+    const isBn = this.themeService.currentLang() === 'bn';
+    this.confirmationService.confirm({
+      header: isBn ? 'প্রিয় তালিকা থেকে অপসারণ' : 'Remove Favorite',
+      message: isBn
+        ? 'আপনি কি নিশ্চিত যে এই কারিগরকে আপনার প্রিয় তালিকা থেকে অপসারণ করতে চান?'
+        : 'Are you sure you want to remove this worker from your favorites list?',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: isBn ? 'অপসারণ' : 'Remove',
+      rejectLabel: isBn ? 'বাতিল' : 'Cancel',
+      acceptButtonStyleClass: 'p-button-danger',
+      rejectButtonStyleClass: 'p-button-text',
+      accept: () => {
+        const success = this.authService.removeFavoriteWorker(workerId);
+        if (success) {
+          this.notificationService.notify(
+            isBn ? 'প্রিয় তালিকা থেকে সফলভাবে সরানো হয়েছে' : 'Removed from favorites successfully',
+            'info',
+            isBn ? 'প্রিয় কারিগর' : 'Favorite Worker'
+          );
+        }
+      }
+    });
   }
 
   public bookFavoriteWorker(worker: WorkerProfile): void {

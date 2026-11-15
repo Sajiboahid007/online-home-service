@@ -1,25 +1,47 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { ConfirmationService } from 'primeng/api';
 import { AuthService } from '../../../core/services/auth.service';
+import { WorkerService } from '../../../core/services/worker.service';
+import { NotificationService } from '../../../core/services/notification.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { ImageUploaderComponent } from '../../../shared/components/image-uploader/image-uploader.component';
+import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
+import { TakaPipe } from '../../../shared/pipes/taka.pipe';
 import { User } from '../../../core/models/user.model';
+import { WorkerProfile } from '../../../core/models/worker.model';
 
 @Component({
   selector: 'app-customer-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImageUploaderComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ImageUploaderComponent, BnNumberPipe, TakaPipe],
   templateUrl: './customer-profile.component.html',
   styleUrls: ['./customer-profile.component.scss']
 })
 export class CustomerProfileComponent implements OnInit {
+  public theme = inject(ThemeService);
   private auth = inject(AuthService);
+  private workerService = inject(WorkerService);
+  private notification = inject(NotificationService);
+  private router = inject(Router);
+  private confirmation = inject(ConfirmationService);
 
   public name = signal<string>('');
   public phone = signal<string>('');
   public email = signal<string>('');
   public photoURL = signal<string>('');
   public avatarImgError = signal<boolean>(false);
+
+  public favoriteWorkers = computed(() => {
+    const user = this.auth.currentUser();
+    const guest = this.auth.getGuestFavorites();
+    const favIds = user?.favoriteWorkers && user.favoriteWorkers.length > 0
+      ? user.favoriteWorkers
+      : (guest.length > 0 ? guest : (user?.favoriteWorkers || []));
+    return this.workerService.workers().filter(w => favIds.includes(w.uid));
+  });
 
   public userInitials = computed(() => {
     const n = this.name();
@@ -77,7 +99,50 @@ export class CustomerProfileComponent implements OnInit {
   }
 
   public deleteAddress(id: string): void {
-    this.savedAddresses.update(list => list.filter(a => a.id !== id));
+    const isBn = this.theme.currentLang() === 'bn';
+    this.confirmation.confirm({
+      header: isBn ? 'ঠিকানা মুছে ফেলার নিশ্চিতকরণ' : 'Confirm Delete Address',
+      message: isBn
+        ? 'আপনি কি নিশ্চিত যে এই সংরক্ষিত ঠিকানাটি মুছে ফেলতে চান?'
+        : 'Are you sure you want to delete this saved address?',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: isBn ? 'মুছুন' : 'Delete',
+      rejectLabel: isBn ? 'বাতিল' : 'Cancel',
+      acceptButtonStyleClass: 'p-button-danger',
+      rejectButtonStyleClass: 'p-button-text',
+      accept: () => {
+        this.savedAddresses.update(list => list.filter(a => a.id !== id));
+      }
+    });
+  }
+
+  public removeFavorite(workerId: string): void {
+    const isBn = this.theme.currentLang() === 'bn';
+    this.confirmation.confirm({
+      header: isBn ? 'প্রিয় তালিকা থেকে অপসারণ' : 'Remove Favorite',
+      message: isBn
+        ? 'আপনি কি নিশ্চিত যে এই কারিগরকে আপনার প্রিয় তালিকা থেকে অপসারণ করতে চান?'
+        : 'Are you sure you want to remove this worker from your favorites list?',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: isBn ? 'অপসারণ' : 'Remove',
+      rejectLabel: isBn ? 'বাতিল' : 'Cancel',
+      acceptButtonStyleClass: 'p-button-danger',
+      rejectButtonStyleClass: 'p-button-text',
+      accept: () => {
+        const success = this.auth.removeFavoriteWorker(workerId);
+        if (success) {
+          this.notification.notify(
+            isBn ? 'প্রিয় তালিকা থেকে সফলভাবে সরানো হয়েছে' : 'Removed from favorites successfully',
+            'info',
+            isBn ? 'প্রিয় কারিগর' : 'Favorite Worker'
+          );
+        }
+      }
+    });
+  }
+
+  public viewWorker(workerId: string): void {
+    this.router.navigate(['/customer/worker-profile', workerId]);
   }
 
   public saveProfile(): void {

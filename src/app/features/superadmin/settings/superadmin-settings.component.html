@@ -1,11 +1,11 @@
 <div class="sa-settings-page">
   <div class="page-header">
     <div>
-      <h2>প্ল্যাটফর্ম গ্লোবাল সেটিংস (Global Settings)</h2>
-      <p class="subtitle">সিস্টেম হেল্পলাইন নম্বর, মেইনটেন্যান্স মোড এবং গোপনীয়তা নীতি নিয়ন্ত্রণ</p>
+      <h2>{{ theme.currentLang() === 'bn' ? 'প্ল্যাটফর্ম গ্লোবাল সেটিংস' : 'Platform Global Settings' }}</h2>
+      <p class="subtitle">{{ theme.currentLang() === 'bn' ? 'সিস্টেম হেল্পলাইন নম্বর, মেইনটেন্যান্স মোড এবং গোপনীয়তা নীতি নিয়ন্ত্রণ' : 'System helpline, maintenance mode and privacy settings control' }}</p>
     </div>
     <button class="btn-primary" (click)="saveSettings()">
-      <i class="pi pi-check"></i> সেটিংস সংরক্ষণ করুন
+      <i class="pi pi-check"></i> {{ theme.currentLang() === 'bn' ? 'সেটিংস সংরক্ষণ করুন' : 'Save Settings' }}
     </button>
   </div>
 

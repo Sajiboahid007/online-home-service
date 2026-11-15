@@ -426,7 +426,7 @@
                   <button type="button" class="btn-book-fav" [disabled]="!w.isOnline || w.isBusy" (click)="bookFavoriteWorker(w)">
                     {{ (w.isBusy ? 'ব্যস্ত' : 'আবার ডাকুন') | t }}
                   </button>
-                  <button type="button" class="btn-remove-fav" (click)="removeFavorite(w.uid)" [title]="'প্রিয় তালিকা থেকে সরান' | t">
+                  <button type="button" class="btn-remove-fav" (click)="removeFavorite(w.uid); $event.stopPropagation()" [title]="'প্রিয় তালিকা থেকে সরান' | t" aria-label="প্রিয় তালিকা থেকে সরান">
                     🗑️
                   </button>
                 </div>

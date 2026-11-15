@@ -111,6 +111,57 @@
         </div>
       }
     </div>
+
+    <!-- Favorite Workers Card -->
+    <div class="card fav-workers-card full-width">
+      <div class="section-title-between">
+        <div>
+          <h3>❤️ প্রিয় কারিগর তালিকা (Favorite Workers)</h3>
+          <p class="sub">আপনার পছন্দের বিশ্বস্ত কারিগরদের তালিকা, যেখান থেকে সরাসরি বুক করতে বা মুছে ফেলতে পারবেন</p>
+        </div>
+        <span class="fav-count-pill">{{ favoriteWorkers().length | bnNumber }} জন</span>
+      </div>
+
+      @if (favoriteWorkers().length === 0) {
+        <div class="empty-fav-box">
+          <p class="empty-text">কোনো প্রিয় কারিগর সংরক্ষিত নেই। মানচিত্র বা কারিগরের প্রোফাইল থেকে "প্রিয়তে রাখুন" ক্লিক করে সংরক্ষণ করুন।</p>
+        </div>
+      } @else {
+        <div class="profile-fav-list">
+          @for (w of favoriteWorkers(); track w.uid) {
+            <div class="profile-fav-item">
+              <img [src]="w.photoURL" [alt]="w.name" class="pf-avatar" />
+              <div class="pf-info">
+                <div class="pf-name-row">
+                  <h4>{{ w.name }}</h4>
+                  @if (w.verified) {
+                    <span class="verified-tag">✓ ভেরিফায়েড</span>
+                  }
+                </div>
+                <div class="pf-sub">
+                  <span>⭐ {{ w.rating | bnNumber }} ({{ w.totalJobs | bnNumber }} কাজ)</span>
+                  <span class="sep">•</span>
+                  <span class="pf-rate">{{ w.rate | taka }} / {{ (w.rateUnit === 'job' ? 'কাজ' : w.rateUnit === 'hour' ? 'ঘণ্টা' : 'দিন') }}</span>
+                  <span class="sep">•</span>
+                  <span class="pf-status" [class.online]="w.isOnline && !w.isBusy" [class.busy]="w.isBusy">
+                    {{ (w.isOnline ? (w.isBusy ? '🟠 কাজে ব্যস্ত' : '🟢 প্রস্তুত') : '⚪ অফলাইন') }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="pf-actions">
+                <button type="button" class="btn-outline-sm" (click)="viewWorker(w.uid)">
+                  প্রোফাইল
+                </button>
+                <button type="button" class="btn-delete-fav" (click)="removeFavorite(w.uid); $event.stopPropagation()" title="প্রিয় তালিকা থেকে সরান">
+                  <i class="pi pi-trash"></i> মুছুন
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
   </div>
 
   <div class="save-bar">

@@ -277,6 +277,66 @@ body.kajkhoj-app {
   }
 }
 
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12.5px;
+  border-radius: var(--radius-sm, 6px);
+  gap: 6px;
+}
+
+.btn-primary-sm {
+  background-color: var(--primary-color);
+  color: white;
+  border: 1px solid transparent;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm, 8px);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(15, 118, 110, 0.2);
+
+  &:hover {
+    background-color: var(--primary-hover);
+    box-shadow: 0 3px 8px rgba(15, 118, 110, 0.35);
+    transform: translateY(-1px);
+  }
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.btn-outline-sm {
+  background-color: var(--bg-surface, #ffffff);
+  color: var(--primary-color);
+  border: 1.5px solid var(--primary-color);
+  padding: 7px 14px;
+  border-radius: var(--radius-sm, 8px);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+
+  &:hover {
+    background-color: var(--primary-light);
+    border-color: var(--primary-hover);
+    transform: translateY(-1px);
+  }
+  &:active {
+    transform: translateY(0);
+  }
+}
+
 .card {
   background: var(--bg-surface);
   border-radius: var(--radius-lg);
@@ -298,4 +358,64 @@ body.kajkhoj-app {
   &.badge-danger  { background: #fee2e2; color: #b91c1c; }
   &.badge-info    { background: #e0f2fe; color: #0369a1; }
   &.badge-neutral { background: #f3f4f6; color: #4b5563; }
+}
+
+/* Global PrimeNG ConfirmDialog Customization & High-Priority Stacking */
+.p-dialog-mask,
+.p-dialog-mask.p-overlay-mask,
+.p-dialog-mask.p-dialog-mask-scrollblocker,
+div.p-dialog-mask {
+  z-index: 99999 !important;
+}
+
+.p-confirmdialog,
+div.p-confirmdialog {
+  z-index: 100000 !important;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+
+  .p-dialog-header {
+    padding: 18px 24px 12px;
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .p-dialog-content {
+    padding: 12px 24px 20px;
+    font-size: 14px;
+    line-height: 1.6;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+
+    .p-confirmdialog-icon {
+      font-size: 26px;
+      color: #ef4444;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .p-confirmdialog-message {
+      color: var(--text-primary);
+      white-space: pre-line;
+    }
+  }
+
+  .p-dialog-footer {
+    padding: 14px 24px 18px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+
+    button {
+      padding: 7px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+  }
 }

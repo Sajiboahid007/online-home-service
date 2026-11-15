@@ -39,11 +39,22 @@ export class ThemeService {
       document.body.classList.add('dark-mode');
     }
 
-    const savedLang = localStorage.getItem('kajkhoj_lang');
-    this.currentLang.set(savedLang === 'en' ? 'en' : 'bn');
+    try {
+      const savedLang = localStorage.getItem('kajkhoj_lang');
+      if (savedLang === 'en' || savedLang === 'bn') {
+        this.currentLang.set(savedLang);
+      } else {
+        this.currentLang.set('bn');
+      }
+    } catch {
+      this.currentLang.set('bn');
+    }
 
     effect(() => {
-      document.documentElement.lang = this.currentLang();
+      const lang = this.currentLang();
+      if (typeof document !== 'undefined') {
+        document.documentElement.lang = lang;
+      }
     });
 
     effect(() => {
@@ -56,6 +67,16 @@ export class ThemeService {
         localStorage.setItem('kajkhoj_theme', 'light');
       }
     });
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', (event: StorageEvent) => {
+        if (event.key === 'kajkhoj_lang' && (event.newValue === 'en' || event.newValue === 'bn')) {
+          if (this.currentLang() !== event.newValue) {
+            this.currentLang.set(event.newValue);
+          }
+        }
+      });
+    }
   }
 
   public toggleDarkMode(): void {
@@ -63,8 +84,18 @@ export class ThemeService {
   }
 
   public setLanguage(lang: Language): void {
-    this.currentLang.set(lang);
-    localStorage.setItem('kajkhoj_lang', lang);
+    if (this.currentLang() !== lang) {
+      this.currentLang.set(lang);
+    }
+    try {
+      localStorage.setItem('kajkhoj_lang', lang);
+    } catch {}
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = lang;
+    }
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('kajkhoj_lang_changed', { detail: lang }));
+    }
   }
 
   public toggleLanguage(): void {

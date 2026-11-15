@@ -1,11 +1,11 @@
 <div class="sa-dispatch-page">
   <div class="page-header">
     <div>
-      <h2>কমিশন ও অটোমেটেড ডিসপ্যাচ সেটিংস (Dispatch & Commission)</h2>
-      <p class="subtitle">প্ল্যাটফর্ম কমিশন রেট, ডিউ লিমিট এবং এলগরিদম ডিসপ্যাচ প্যারামিটার কনফিগার করুন</p>
+      <h2>{{ theme.currentLang() === 'bn' ? 'কমিশন ও অটোমেটেড ডিসপ্যাচ সেটিংস' : 'Dispatch & Commission Settings' }}</h2>
+      <p class="subtitle">{{ theme.currentLang() === 'bn' ? 'প্ল্যাটফর্ম কমিশন রেট, ডিউ লিমিট এবং এলগরিদম ডিসপ্যাচ প্যারামিটার কনফিগার করুন' : 'Configure platform commission, worker due limits and algorithm dispatch parameters' }}</p>
     </div>
     <button class="btn-primary" (click)="saveSettings()">
-      <i class="pi pi-check"></i> সেটিংস সংরক্ষণ করুন
+      <i class="pi pi-check"></i> {{ theme.currentLang() === 'bn' ? 'সেটিংস সংরক্ষণ করুন' : 'Save Settings' }}
     </button>
   </div>
 
@@ -14,25 +14,25 @@
     <div class="card">
       <div class="card-header">
         <i class="pi pi-wallet card-icon"></i>
-        <h3>প্ল্যাটফর্ম কমিশন ও ডিউ সীমা</h3>
+        <h3>{{ theme.currentLang() === 'bn' ? 'প্ল্যাটফর্ম কমিশন ও ডিউ সীমা' : 'Platform Commission & Due Limit' }}</h3>
       </div>
       <div class="card-body">
         <div class="form-group mb-3">
-          <label>ডিফল্ট প্ল্যাটফর্ম কমিশন (%)</label>
+          <label>{{ theme.currentLang() === 'bn' ? 'ডিফল্ট প্ল্যাটফর্ম কমিশন (%)' : 'Default Platform Commission (%)' }}</label>
           <div class="input-unit-wrap">
             <input type="number" [(ngModel)]="commissionPercent" class="input-field" min="0" max="100" step="1" />
             <span class="unit-tag">%</span>
           </div>
-          <small class="hint">প্রতিটি সফল সম্পন্ন কাজের বিল থেকে এই কমিশন নির্ধারিত হয় (ডিফল্ট ১৫%)।</small>
+          <small class="hint">{{ theme.currentLang() === 'bn' ? 'প্রতিটি সফল সম্পন্ন কাজের বিল থেকে এই কমিশন নির্ধারিত হয় (ডিফল্ট ১৫%)।' : 'Deducted from each completed job bill (Default 15%).' }}</small>
         </div>
 
         <div class="form-group mb-3">
-          <label>কর্মী ডিউ লিমিট (বকেয়া সীমা ৳)</label>
+          <label>{{ theme.currentLang() === 'bn' ? 'কর্মী ডিউ লিমিট (বকেয়া সীমা ৳)' : 'Worker Due Limit (৳)' }}</label>
           <div class="input-unit-wrap">
             <input type="number" [(ngModel)]="dueLimit" class="input-field" min="100" step="50" />
             <span class="unit-tag">৳</span>
           </div>
-          <small class="hint">বকেয়া কমিশন এই সীমার বেশি হলে কর্মী নতুন কাজ গ্রহণ করতে পারবেন না (ডিফল্ট ৫০০ টাকা)।</small>
+          <small class="hint">{{ theme.currentLang() === 'bn' ? 'বকেয়া কমিশন এই সীমার বেশি হলে কর্মী নতুন কাজ গ্রহণ করতে পারবেন না (ডিফল্ট ৫০০ টাকা)।' : 'Workers cannot accept new jobs if due balance exceeds this limit (Default ৳500).' }}</small>
         </div>
       </div>
     </div>
@@ -41,46 +41,46 @@
     <div class="card">
       <div class="card-header">
         <i class="pi pi-compass card-icon"></i>
-        <h3>ডিসপ্যাচ রেডিয়াস ও অফার টাইমার</h3>
+        <h3>{{ theme.currentLang() === 'bn' ? 'ডিসপ্যাচ রেডিয়াস ও অফার টাইমার' : 'Dispatch Radii & Offer Timer' }}</h3>
       </div>
       <div class="card-body">
         <div class="form-row mb-3">
           <div class="form-group col">
-            <label>প্রাথমিক ব্যাসার্ধ (Initial Radius)</label>
+            <label>{{ theme.currentLang() === 'bn' ? 'প্রাথমিক ব্যাসার্ধ' : 'Initial Search Radius' }}</label>
             <div class="input-unit-wrap">
               <input type="number" [(ngModel)]="initialRadius" class="input-field" min="1" max="20" />
-              <span class="unit-tag">কিমি</span>
+              <span class="unit-tag">{{ theme.currentLang() === 'bn' ? 'কিমি' : 'km' }}</span>
             </div>
-            <small class="hint">প্রথম রাউন্ডের অনুসন্ধান পরিধি (ডিফল্ট ৩ কিমি)।</small>
+            <small class="hint">{{ theme.currentLang() === 'bn' ? 'প্রথম রাউন্ডের অনুসন্ধান পরিধি (ডিফল্ট ৩ কিমি)।' : 'First search wave radius (Default 3 km).' }}</small>
           </div>
 
           <div class="form-group col">
-            <label>সর্বোচ্চ ব্যাসার্ধ (Max Radius)</label>
+            <label>{{ theme.currentLang() === 'bn' ? 'সর্বোচ্চ ব্যাসার্ধ' : 'Max Search Radius' }}</label>
             <div class="input-unit-wrap">
               <input type="number" [(ngModel)]="maxRadius" class="input-field" min="1" max="50" />
-              <span class="unit-tag">কিমি</span>
+              <span class="unit-tag">{{ theme.currentLang() === 'bn' ? 'কিমি' : 'km' }}</span>
             </div>
-            <small class="hint">পরবর্তী রাউন্ডে প্রসারিত সর্বোচ্চ সীমা (ডিফল্ট ১০ কিমি)।</small>
+            <small class="hint">{{ theme.currentLang() === 'bn' ? 'পরবর্তী রাউন্ডে প্রসারিত সর্বোচ্চ সীমা (ডিফল্ট ১০ কিমি)।' : 'Cascade expanded search limit (Default 10 km).' }}</small>
           </div>
         </div>
 
         <div class="form-row mb-3">
           <div class="form-group col">
-            <label>অফার সময়সীমা (Timeout)</label>
+            <label>{{ theme.currentLang() === 'bn' ? 'অফার সময়সীমা' : 'Offer Timeout' }}</label>
             <div class="input-unit-wrap">
               <input type="number" [(ngModel)]="offerTimeoutSec" class="input-field" min="10" max="120" />
-              <span class="unit-tag">সেকেন্ড</span>
+              <span class="unit-tag">{{ theme.currentLang() === 'bn' ? 'সেকেন্ড' : 'sec' }}</span>
             </div>
-            <small class="hint">কর্মী কাজ গ্রহণের জন্য কাউন্টডাউন সময় (ডিফল্ট ৩০ সেকেন্ড)।</small>
+            <small class="hint">{{ theme.currentLang() === 'bn' ? 'কর্মী কাজ গ্রহণের জন্য কাউন্টডাউন সময় (ডিফল্ট ৩০ সেকেন্ড)।' : 'Worker offer accept countdown (Default 30s).' }}</small>
           </div>
 
           <div class="form-group col">
-            <label>ব্যাচ সাইজ (Workers per Batch)</label>
+            <label>{{ theme.currentLang() === 'bn' ? 'ব্যাচ সাইজ' : 'Batch Size' }}</label>
             <div class="input-unit-wrap">
               <input type="number" [(ngModel)]="batchSize" class="input-field" min="1" max="10" />
-              <span class="unit-tag">জন</span>
+              <span class="unit-tag">{{ theme.currentLang() === 'bn' ? 'জন' : 'workers' }}</span>
             </div>
-            <small class="hint">একত্রে শীর্ষ কতজন কর্মীকে অফার পাঠানো হবে (ডিফল্ট ৩-৫ জন)।</small>
+            <small class="hint">{{ theme.currentLang() === 'bn' ? 'একত্রে শীর্ষ কতজন কর্মীকে অফার পাঠানো হবে (ডিফল্ট ৩-৫ জন)।' : 'Top matched workers offered concurrently (Default 3-5).' }}</small>
           </div>
         </div>
       </div>
@@ -90,41 +90,41 @@
     <div class="card full-width">
       <div class="card-header">
         <i class="pi pi-sliders-v card-icon"></i>
-        <h3>ডিসপ্যাচ স্কোরিং অ্যালগরিদম ওয়েট (Dispatch Scoring Weights)</h3>
+        <h3>{{ theme.currentLang() === 'bn' ? 'ডিসপ্যাচ স্কোরিং অ্যালগরিদম ওয়েট' : 'Dispatch Scoring Weights' }}</h3>
         <span class="badge" [class.badge-success]="totalWeight === 1" [class.badge-danger]="totalWeight !== 1">
-          মোট অনুপাত: {{ totalWeight.toFixed(2) }} (লক্ষ্য: 1.00)
+          {{ theme.currentLang() === 'bn' ? 'মোট অনুপাত:' : 'Total Weight:' }} {{ totalWeight.toFixed(2) }} ({{ theme.currentLang() === 'bn' ? 'লক্ষ্য: 1.00' : 'Target: 1.00' }})
         </span>
       </div>
       <div class="card-body">
-        <p class="description">শীর্ষ কর্মীদের নির্বাচন করতে কাজখোঁজ স্কোরিং সূত্র: Distance×w₁ + Rating×w₂ + AcceptRate×w₃ + IdleTime×w₄ + PremiumBonus×w₅</p>
+        <p class="description">{{ theme.currentLang() === 'bn' ? 'শীর্ষ কর্মীদের নির্বাচন করতে কাজখোঁজ স্কোরিং সূত্র: Distance×w₁ + Rating×w₂ + AcceptRate×w₃ + IdleTime×w₄ + PremiumBonus×w₅' : 'KajKhoj ranking formula: Distance×w₁ + Rating×w₂ + AcceptRate×w₃ + IdleTime×w₄ + PremiumBonus×w₅' }}</p>
 
         <div class="weights-grid">
           <div class="weight-item">
-            <label>দূরত্ব ওয়েট (Distance Weight)</label>
+            <label>{{ theme.currentLang() === 'bn' ? 'দূরত্ব ওয়েট' : 'Distance Weight' }}</label>
             <input type="number" [(ngModel)]="weightDistance" class="input-field" step="0.05" min="0" max="1" />
             <span class="weight-bar" [style.width.%]="weightDistance * 100"></span>
           </div>
 
           <div class="weight-item">
-            <label>রেটিং ওয়েট (Rating Weight)</label>
+            <label>{{ theme.currentLang() === 'bn' ? 'রেটিং ওয়েট' : 'Rating Weight' }}</label>
             <input type="number" [(ngModel)]="weightRating" class="input-field" step="0.05" min="0" max="1" />
             <span class="weight-bar" [style.width.%]="weightRating * 100"></span>
           </div>
 
           <div class="weight-item">
-            <label>গ্রহণযোগ্যতার হার (Accept Rate)</label>
+            <label>{{ theme.currentLang() === 'bn' ? 'গ্রহণযোগ্যতার হার' : 'Acceptance Rate Weight' }}</label>
             <input type="number" [(ngModel)]="weightAcceptRate" class="input-field" step="0.05" min="0" max="1" />
             <span class="weight-bar" [style.width.%]="weightAcceptRate * 100"></span>
           </div>
 
           <div class="weight-item">
-            <label>অলস সময় (Idle Time Weight)</label>
+            <label>{{ theme.currentLang() === 'bn' ? 'অলস সময় ওয়েট' : 'Idle Time Weight' }}</label>
             <input type="number" [(ngModel)]="weightIdleTime" class="input-field" step="0.05" min="0" max="1" />
             <span class="weight-bar" [style.width.%]="weightIdleTime * 100"></span>
           </div>
 
           <div class="weight-item">
-            <label>প্রিমিয়াম বোনাস (Premium Bonus)</label>
+            <label>{{ theme.currentLang() === 'bn' ? 'প্রিমিয়াম বোনাস' : 'Premium Bonus Weight' }}</label>
             <input type="number" [(ngModel)]="weightPremiumBonus" class="input-field" step="0.05" min="0" max="1" />
             <span class="weight-bar" [style.width.%]="weightPremiumBonus * 100"></span>
           </div>

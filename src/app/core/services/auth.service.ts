@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { User, UserRole } from '../models/user.model';
 import { WorkerProfile } from '../models/worker.model';
 import { SeedDataService } from './seed-data.service';
+import { FirebaseService } from './firebase.service';
+import { doc, updateDoc, setDoc } from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root'
@@ -28,7 +30,8 @@ export class AuthService {
 
   constructor(
     private router: Router,
-    private seedData: SeedDataService
+    private seedData: SeedDataService,
+    private firebaseService: FirebaseService
   ) {
     this.restoreSession();
   }
@@ -131,14 +134,100 @@ export class AuthService {
     localStorage.setItem('kajkhoj_worker', JSON.stringify(worker));
   }
 
+  public getGuestFavorites(): string[] {
+    try {
+      const saved = localStorage.getItem('kajkhoj_guest_favorites');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private setGuestFavorites(favs: string[]): void {
+    try {
+      localStorage.setItem('kajkhoj_guest_favorites', JSON.stringify(favs));
+    } catch {}
+  }
+
   public isFavoriteWorker(workerId: string): boolean {
     const user = this.currentUserSignal();
-    return !!(user?.favoriteWorkers && user.favoriteWorkers.includes(workerId));
+    if (user) {
+      return !!(user.favoriteWorkers && user.favoriteWorkers.includes(workerId));
+    }
+    // Fallback: check guest favorites or default demo customer
+    const guestFavs = this.getGuestFavorites();
+    if (guestFavs.includes(workerId)) return true;
+    const defaultCust = this.seedData.defaultUsers.find(u => u.uid === 'user_customer_demo_1');
+    return !!(defaultCust?.favoriteWorkers && defaultCust.favoriteWorkers.includes(workerId));
+  }
+
+  /**
+   * Explicitly and idempotently removes a worker from the favorite list.
+   * Never toggles it back on even if pressed repeatedly.
+   */
+  public removeFavoriteWorker(workerId: string): boolean {
+    let user = this.currentUserSignal();
+
+    if (!user) {
+      // If user is guest, remove from guest favorites and update default customer seed data
+      const currentGuest = this.getGuestFavorites();
+      const updatedGuest = currentGuest.filter(id => id !== workerId);
+      this.setGuestFavorites(updatedGuest);
+
+      const defaultCust = this.seedData.defaultUsers.find(u => u.uid === 'user_customer_demo_1');
+      if (defaultCust) {
+        defaultCust.favoriteWorkers = (defaultCust.favoriteWorkers || []).filter(id => id !== workerId);
+        // Also initialize session with this demo customer so changes persist across the portal
+        this.setUser({ ...defaultCust, favoriteWorkers: defaultCust.favoriteWorkers }, null);
+      }
+      return true;
+    }
+
+    const currentFavs = user.favoriteWorkers || [];
+    const updatedFavs = currentFavs.filter(id => id !== workerId);
+
+    const updatedUser: User = {
+      ...user,
+      favoriteWorkers: updatedFavs
+    };
+
+    // 1. Update in-memory seedData defaultUsers so demo re-logins will not bring back the deleted worker
+    const seedUser = this.seedData.defaultUsers.find(u => u.uid === user!.uid || u.phone === user!.phone);
+    if (seedUser) {
+      seedUser.favoriteWorkers = [...updatedFavs];
+    }
+
+    // 2. Save session & localStorage
+    this.setUser(updatedUser, this.currentWorkerSignal());
+
+    // 3. Clear guest favorites as well
+    const guestFavs = this.getGuestFavorites().filter(id => id !== workerId);
+    this.setGuestFavorites(guestFavs);
+
+    // 4. Synchronize to Firestore live document if available
+    this.syncFavoritesToFirestore(user.uid, updatedFavs);
+
+    return true;
   }
 
   public toggleFavoriteWorker(workerId: string): boolean {
-    const user = this.currentUserSignal();
-    if (!user) return false;
+    let user = this.currentUserSignal();
+
+    if (!user) {
+      // If no active user session, initialize with demo customer so favorites can be saved
+      const defaultCust = this.seedData.defaultUsers.find(u => u.uid === 'user_customer_demo_1');
+      if (defaultCust) {
+        user = { ...defaultCust };
+        this.currentUserSignal.set(user);
+        localStorage.setItem('kajkhoj_user', JSON.stringify(user));
+      } else {
+        const guest = this.getGuestFavorites();
+        const isFav = guest.includes(workerId);
+        const updated = isFav ? guest.filter(id => id !== workerId) : [...guest, workerId];
+        this.setGuestFavorites(updated);
+        return !isFav;
+      }
+    }
 
     const currentFavs = user.favoriteWorkers || [];
     const isFav = currentFavs.includes(workerId);
@@ -151,8 +240,40 @@ export class AuthService {
       favoriteWorkers: updatedFavs
     };
 
+    // 1. Update in-memory seedData so demo switches don't revert
+    const seedUser = this.seedData.defaultUsers.find(u => u.uid === user!.uid || u.phone === user!.phone);
+    if (seedUser) {
+      seedUser.favoriteWorkers = [...updatedFavs];
+    }
+
+    // 2. Save session & localStorage
     this.setUser(updatedUser, this.currentWorkerSignal());
+
+    // 3. Keep guest favorites aligned
+    this.setGuestFavorites(updatedFavs);
+
+    // 4. Synchronize to Firestore
+    this.syncFavoritesToFirestore(user.uid, updatedFavs);
+
     return !isFav;
+  }
+
+  private async syncFavoritesToFirestore(uid: string, favs: string[]): Promise<void> {
+    try {
+      if (this.firebaseService?.db) {
+        const userRef = doc(this.firebaseService.db, 'users', uid);
+        await updateDoc(userRef, { favoriteWorkers: favs });
+      }
+    } catch {
+      try {
+        if (this.firebaseService?.db) {
+          const userRef = doc(this.firebaseService.db, 'users', uid);
+          await setDoc(userRef, { favoriteWorkers: favs }, { merge: true });
+        }
+      } catch (err) {
+        console.warn('Firestore favorite sync skipped:', err);
+      }
+    }
   }
 
   public logout(): void {

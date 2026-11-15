@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { SettingsService } from '../../../core/services/settings.service';
 import { AuditLogService } from '../../../core/services/audit-log.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { PlatformSettings } from '../../../core/models/settings.model';
 
 @Component({
@@ -14,6 +15,7 @@ import { PlatformSettings } from '../../../core/models/settings.model';
   styleUrls: ['./superadmin-settings.component.scss']
 })
 export class SuperadminSettingsComponent {
+  public theme = inject(ThemeService);
   private settingsService = inject(SettingsService);
   private auditLogService = inject(AuditLogService);
   private notificationService = inject(NotificationService);

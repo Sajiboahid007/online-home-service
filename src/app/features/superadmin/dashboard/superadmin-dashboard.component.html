@@ -1,8 +1,8 @@
 <div class="sa-dashboard">
   <div class="page-header">
     <div>
-      <h2>সার্বিক প্ল্যাটফর্ম রাজস্ব ও কর্মক্ষমতা (Super Admin KPI Dashboard)</h2>
-      <p class="subtitle">বাংলাদেশ জুড়ে কাজখোঁজের রাজস্ব, সক্রিয় কাজ ও নেটওয়ার্ক প্রবৃদ্ধি</p>
+      <h2>{{ theme.currentLang() === 'bn' ? 'সার্বিক প্ল্যাটফর্ম রাজস্ব ও কর্মক্ষমতা' : 'Platform Revenue & Performance' }}</h2>
+      <p class="subtitle">{{ theme.currentLang() === 'bn' ? 'বাংলাদেশ জুড়ে কাজখোঁজের রাজস্ব, সক্রিয় কাজ ও নেটওয়ার্ক প্রবৃদ্ধি' : 'Nationwide platform revenue, active jobs and service partner network growth' }}</p>
     </div>
   </div>
 
@@ -11,36 +11,36 @@
     <div class="card kpi-card">
       <div class="kpi-icon teal"><i class="pi pi-wallet"></i></div>
       <div class="kpi-meta">
-        <span class="label">মোট প্ল্যাটফর্ম রাজস্ব (GMV)</span>
-        <span class="val">৳১,৮২,৪৫০</span>
-        <span class="trend text-success"><i class="pi pi-arrow-up"></i> +১৮.২% এই মাসে</span>
+        <span class="label">{{ theme.currentLang() === 'bn' ? 'মোট প্ল্যাটফর্ম রাজস্ব (GMV)' : 'Total Platform GMV' }}</span>
+        <span class="val">{{ gmv | taka }}</span>
+        <span class="trend text-success"><i class="pi pi-arrow-up"></i> {{ theme.currentLang() === 'bn' ? '+১৮.২% এই মাসে' : '+18.2% this month' }}</span>
       </div>
     </div>
 
     <div class="card kpi-card">
       <div class="kpi-icon orange"><i class="pi pi-percentage"></i></div>
       <div class="kpi-meta">
-        <span class="label">মোট সংগৃহীত কমিশন</span>
-        <span class="val">৳২৭,৩৬৭</span>
-        <span class="trend text-success">গড় কমিশন ১৫%</span>
+        <span class="label">{{ theme.currentLang() === 'bn' ? 'মোট সংগৃহীত কমিশন' : 'Total Commission Earned' }}</span>
+        <span class="val">{{ commission | taka }}</span>
+        <span class="trend text-success">{{ theme.currentLang() === 'bn' ? 'গড় কমিশন ১৫%' : 'Avg Commission 15%' }}</span>
       </div>
     </div>
 
     <div class="card kpi-card">
       <div class="kpi-icon blue"><i class="pi pi-check-circle"></i></div>
       <div class="kpi-meta">
-        <span class="label">সফলভাবে সম্পন্ন কাজ</span>
-        <span class="val">৫১২ টি</span>
-        <span class="trend text-success">সাফল্যের হার ৯৬.৪%</span>
+        <span class="label">{{ theme.currentLang() === 'bn' ? 'সফলভাবে সম্পন্ন কাজ' : 'Completed Jobs' }}</span>
+        <span class="val">{{ completedJobs | bnNumber }}{{ theme.currentLang() === 'bn' ? ' টি' : '' }}</span>
+        <span class="trend text-success">{{ theme.currentLang() === 'bn' ? 'সাফল্যের হার ৯৬.৪%' : 'Success Rate 96.4%' }}</span>
       </div>
     </div>
 
     <div class="card kpi-card">
       <div class="kpi-icon purple"><i class="pi pi-users"></i></div>
       <div class="kpi-meta">
-        <span class="label">মোট সক্রিয় ওয়ার্কার নেটওয়ার্ক</span>
-        <span class="val">৬৮ জন</span>
-        <span class="trend">সাভার ও আশুলিয়া জোন</span>
+        <span class="label">{{ theme.currentLang() === 'bn' ? 'মোট সক্রিয় ওয়ার্কার নেটওয়ার্ক' : 'Active Worker Partners' }}</span>
+        <span class="val">{{ activeWorkers | bnNumber }}{{ theme.currentLang() === 'bn' ? ' জন' : '' }}</span>
+        <span class="trend">{{ theme.currentLang() === 'bn' ? 'সাভার ও আশুলিয়া জোন' : 'Savar & Ashulia Zones' }}</span>
       </div>
     </div>
   </div>
@@ -49,13 +49,13 @@
   <div class="breakdown-grid">
     <!-- Area Revenue Breakdown -->
     <div class="card">
-      <h3>অঞ্চলভিত্তিক রাজস্ব বন্টন (Revenue by Area)</h3>
+      <h3>{{ theme.currentLang() === 'bn' ? 'অঞ্চলভিত্তিক রাজস্ব বণ্টন' : 'Revenue by Area' }}</h3>
       <div class="bars-list mt-3">
-        @for (area of areaRevenue(); track area.name) {
+        @for (area of areaRevenue(); track area.nameBn) {
           <div class="breakdown-item">
             <div class="item-head">
-              <span>{{ area.name }}</span>
-              <strong>{{ area.revenue | taka }} ({{ area.percentage }}%)</strong>
+              <span>{{ theme.currentLang() === 'bn' ? area.nameBn : area.nameEn }}</span>
+              <strong>{{ area.revenue | taka }} ({{ area.percentage | bnNumber }}%)</strong>
             </div>
             <div class="item-track">
               <div class="item-fill bg-teal" [style.width.%]="area.percentage"></div>
@@ -67,13 +67,13 @@
 
     <!-- Category Revenue Breakdown -->
     <div class="card">
-      <h3>ক্যাটাগরিভিত্তিক রাজস্ব (Revenue by Category)</h3>
+      <h3>{{ theme.currentLang() === 'bn' ? 'ক্যাটাগরিভিত্তিক রাজস্ব' : 'Revenue by Category' }}</h3>
       <div class="bars-list mt-3">
-        @for (cat of categoryRevenue(); track cat.name) {
+        @for (cat of categoryRevenue(); track cat.nameBn) {
           <div class="breakdown-item">
             <div class="item-head">
-              <span>{{ cat.name }}</span>
-              <strong>{{ cat.revenue | taka }} ({{ cat.percentage }}%)</strong>
+              <span>{{ theme.currentLang() === 'bn' ? cat.nameBn : cat.nameEn }}</span>
+              <strong>{{ cat.revenue | taka }} ({{ cat.percentage | bnNumber }}%)</strong>
             </div>
             <div class="item-track">
               <div class="item-fill bg-orange" [style.width.%]="cat.percentage"></div>

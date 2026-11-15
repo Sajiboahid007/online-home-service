@@ -636,6 +636,17 @@ export class LoginComponent implements OnDestroy {
       // 4. User found in local SeedData defaultUsers
       const localUser = this.seedData.defaultUsers.find(u => u.phone === cleanPhone);
       if (localUser) {
+        // Preserve any previously updated favorite workers or customizations
+        try {
+          const savedRaw = localStorage.getItem('kajkhoj_user');
+          if (savedRaw) {
+            const parsed = JSON.parse(savedRaw);
+            if (parsed.uid === localUser.uid && Array.isArray(parsed.favoriteWorkers)) {
+              localUser.favoriteWorkers = parsed.favoriteWorkers;
+            }
+          }
+        } catch {}
+
         if (localUser.role === 'superadmin' || localUser.role === 'admin') {
           this.authService.setUser(localUser, null);
           this.isLoading.set(false);

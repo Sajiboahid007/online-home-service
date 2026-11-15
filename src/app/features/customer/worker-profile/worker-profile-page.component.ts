@@ -5,6 +5,7 @@ import { WorkerService } from '../../../core/services/worker.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ReviewService } from '../../../core/services/review.service';
 import { JobService } from '../../../core/services/job.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { WorkerProfile } from '../../../core/models/worker.model';
 import { RatingStarsComponent } from '../../../shared/components/rating-stars/rating-stars.component';
 import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loader/skeleton-loader.component';
@@ -25,6 +26,7 @@ export class WorkerProfilePageComponent implements OnInit {
   private auth = inject(AuthService);
   private reviewService = inject(ReviewService);
   private jobService = inject(JobService);
+  private notificationService = inject(NotificationService);
 
   public worker = signal<WorkerProfile | null>(null);
   public isFav = signal<boolean>(false);
@@ -47,8 +49,13 @@ export class WorkerProfilePageComponent implements OnInit {
   public toggleFavorite(): void {
     const w = this.worker();
     if (w) {
-      this.auth.toggleFavoriteWorker(w.uid);
+      const isNowFav = this.auth.toggleFavoriteWorker(w.uid);
       this.isFav.set(this.auth.isFavoriteWorker(w.uid));
+      if (isNowFav) {
+        this.notificationService.notify(`"${w.name}" প্রিয় তালিকায় যোগ করা হয়েছে`, 'info', 'প্রিয় কারিগর');
+      } else {
+        this.notificationService.notify(`"${w.name}" প্রিয় তালিকা থেকে সরানো হয়েছে`, 'info', 'প্রিয় কারিগর');
+      }
     }
   }
 

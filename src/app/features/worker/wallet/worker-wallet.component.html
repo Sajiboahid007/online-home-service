@@ -2,9 +2,9 @@
   <!-- Page Header -->
   <header class="wallet-header">
     <div>
-      <h1 class="page-title">ওয়ালেট ও কমিশন ট্র্যাকার</h1>
+      <h1 class="page-title">{{ theme.currentLang() === 'bn' ? 'ওয়ালেট ও কমিশন ট্র্যাকার' : 'Wallet & Commission Tracker' }}</h1>
       <p class="page-sub">
-        আপনার কাজের আয়, ওয়ালেট ব্যালেন্স এবং প্ল্যাটফর্ম কমিশন ম্যানেজ করুন।
+        {{ theme.currentLang() === 'bn' ? 'আপনার কাজের আয়, ওয়ালেট ব্যালেন্স এবং প্ল্যাটফর্ম কমিশন ম্যানেজ করুন।' : 'Manage your job earnings, wallet balance, and platform commission.' }}
       </p>
     </div>
   </header>
@@ -17,19 +17,19 @@
         <div class="icon-wrap icon-green">
           <i class="pi pi-wallet"></i>
         </div>
-        <span class="card-label">উত্তোলনযোগ্য ব্যালেন্স</span>
+        <span class="card-label">{{ theme.currentLang() === 'bn' ? 'উত্তোলনযোগ্য ব্যালেন্স' : 'Withdrawable Balance' }}</span>
       </div>
       <div class="card-amount text-green">
         {{ (currentWorker()?.walletBalance || 0) | taka }}
       </div>
-      <p class="card-hint">অনলাইন পেমেন্ট বা প্রিপেইড বুকিংয়ের অর্জিত অর্থ</p>
+      <p class="card-hint">{{ theme.currentLang() === 'bn' ? 'অনলাইন পেমেন্ট বা প্রিপেইড বুকিংয়ের অর্জিত অর্থ' : 'Earned money from online payments or prepaid bookings' }}</p>
       <button 
         type="button" 
         class="btn-action-withdraw" 
         (click)="openWithdrawModal()"
         [disabled]="(currentWorker()?.walletBalance || 0) < 100">
         <i class="pi pi-arrow-up-right"></i>
-        <span>টাকা উত্তোলন (Withdraw)</span>
+        <span>{{ theme.currentLang() === 'bn' ? 'টাকা উত্তোলন' : 'Withdraw Money' }}</span>
       </button>
     </div>
 
@@ -41,15 +41,15 @@
         <div class="icon-wrap icon-orange">
           <i class="pi pi-exclamation-triangle"></i>
         </div>
-        <span class="card-label">প্ল্যাটফর্ম বকেয়া কমিশন</span>
+        <span class="card-label">{{ theme.currentLang() === 'bn' ? 'প্ল্যাটফর্ম বকেয়া কমিশন' : 'Platform Outstanding Commission' }}</span>
       </div>
       <div class="card-amount text-orange">
         {{ (currentWorker()?.commissionDue || 0) | taka }}
       </div>
       <p class="card-hint">
-        সর্বোচ্চ সীমা <strong>৳৫০০</strong>
+        {{ theme.currentLang() === 'bn' ? 'সর্বোচ্চ সীমা' : 'Maximum Limit' }} <strong>৳৫০০</strong>
         @if ((currentWorker()?.commissionDue || 0) >= 400) {
-          <span class="text-danger font-bold"> (⚠️ সীমা প্রায় পূর্ণ)</span>
+          <span class="text-danger font-bold"> (⚠️ {{ theme.currentLang() === 'bn' ? 'সীমা প্রায় পূর্ণ' : 'Limit almost reached' }})</span>
         }
       </p>
       <button 
@@ -58,7 +58,7 @@
         (click)="openRepayModal()"
         [disabled]="(currentWorker()?.commissionDue || 0) <= 0">
         <i class="pi pi-credit-card"></i>
-        <span>বকেয়া কমিশন পরিশোধ করুন</span>
+        <span>{{ theme.currentLang() === 'bn' ? 'বকেয়া কমিশন পরিশোধ করুন' : 'Pay Outstanding Commission' }}</span>
       </button>
     </div>
 
@@ -68,16 +68,20 @@
         <div class="icon-wrap icon-blue">
           <i class="pi pi-chart-bar"></i>
         </div>
-        <span class="card-label">সর্বমোট অর্জিত আয়</span>
+        <span class="card-label">{{ theme.currentLang() === 'bn' ? 'সর্বমোট অর্জিত আয়' : 'Total Earned Income' }}</span>
       </div>
       <div class="card-amount text-blue">
         {{ totalEarnings() | taka }}
       </div>
       <p class="card-hint">
-        কাজখোঁজ প্ল্যাটফর্মে সর্বমোট সম্পন্ন কাজ: {{ (currentWorker()?.totalJobs || 0) | bnNumber }} টি
+        @if (theme.currentLang() === 'bn') {
+          কাজখোঁজ প্ল্যাটফর্মে সর্বমোট সম্পন্ন কাজ: {{ (currentWorker()?.totalJobs || 0) | bnNumber }} টি
+        } @else {
+          Total completed jobs on the platform: {{ currentWorker()?.totalJobs || 0 }}
+        }
       </p>
       <a routerLink="/worker/dashboard" class="link-view-jobs">
-        <span>কাজের বিবরণ দেখুন</span>
+        <span>{{ theme.currentLang() === 'bn' ? 'কাজের বিবরণ দেখুন' : 'View Job Description' }}</span>
         <i class="pi pi-arrow-right"></i>
       </a>
     </div>
@@ -87,15 +91,17 @@
   <section class="card commission-tracker-card">
     <div class="tracker-header">
       <div class="tracker-title-box">
-        <h3 class="tracker-title">বকেয়া কমিশন ট্র্যাকার (Due Limit Progress)</h3>
+        <h3 class="tracker-title">{{ theme.currentLang() === 'bn' ? 'বকেয়া কমিশন ট্র্যাকার' : 'Due Commission Tracker' }}</h3>
         <p class="tracker-desc">
-          কাস্টমার ক্যাশ টাকা দিলে প্ল্যাটফর্মের ১৫% কমিশন আপনার এখানে জমা হয়। বকেয়া ৳৫০০ পৌঁছালে আপনার আইডি অটোমেটিক সাময়িক স্থগিত হবে।
+          {{ theme.currentLang() === 'bn' 
+            ? 'কাস্টমার ক্যাশ টাকা দিলে প্ল্যাটফর্মের ১৫% কমিশন আপনার এখানে জমা হয়। বকেয়া ৳৫০০ পৌঁছালে আপনার আইডি অটোমেটিক সাময়িক স্থগিত হবে।' 
+            : 'When customers pay in cash, the 15% platform commission is tracked here. Reaching the ৳500 limit will temporarily pause new job assignments.' }}
         </p>
       </div>
 
       <div class="due-pill" [class.due-urgent]="(currentWorker()?.commissionDue || 0) >= 400">
         <span class="due-amt">{{ (currentWorker()?.commissionDue || 0) | taka }}</span>
-        <span class="due-max">/ ৳৫০০ সর্বোচ্চ</span>
+        <span class="due-max">/ {{ theme.currentLang() === 'bn' ? '৳৫০০ সর্বোচ্চ' : '৳500 max limit' }}</span>
       </div>
     </div>
 
@@ -111,8 +117,8 @@
         </div>
       </div>
       <div class="progress-labels">
-        <span>৳০ (কোনো বকেয়া নেই)</span>
-        <span class="limit-target">৳৫০০ (অ্যাকাউন্ট স্থগিত সীমা)</span>
+        <span>{{ theme.currentLang() === 'bn' ? '৳০ (কোনো বকেয়া নেই)' : '৳0 (No dues)' }}</span>
+        <span class="limit-target">{{ theme.currentLang() === 'bn' ? '৳৫০০ (অ্যাকাউন্ট স্থগিত সীমা)' : '৳500 (Suspension limit)' }}</span>
       </div>
     </div>
 
@@ -120,12 +126,16 @@
     @if ((currentWorker()?.commissionDue || 0) >= 500) {
       <div class="tracker-alert alert-danger">
         <i class="pi pi-ban"></i>
-        <span>আপনার বকেয়া কমিশন ৳৫০০ ছাড়িয়েছে! নতুন কাজের কল পেতে অবিলম্বে বিকাশ বা নগদ দিয়ে বকেয়া পরিশোধ করুন।</span>
+        <span>{{ theme.currentLang() === 'bn' 
+          ? 'আপনার বকেয়া কমিশন ৳৫০০ ছাড়িয়েছে! নতুন কাজের কল পেতে অবিলম্বে বিকাশ বা নগদ দিয়ে বকেয়া পরিশোধ করুন।' 
+          : 'Your due commission has exceeded ৳500! Please pay via bKash or Nagad immediately to receive new jobs.' }}</span>
       </div>
     } @else if ((currentWorker()?.commissionDue || 0) >= 400) {
       <div class="tracker-alert alert-warning">
         <i class="pi pi-exclamation-circle"></i>
-        <span>সতর্কতা: আপনার বকেয়া কমিশন ৳৪০০ অতিক্রম করেছে। ঝামেলাহীন কাজ পেতে এখনি পরিশোধ করুন।</span>
+        <span>{{ theme.currentLang() === 'bn' 
+          ? 'সতর্কতা: আপনার বকেয়া কমিশন ৳৪০০ অতিক্রম করেছে। ঝামেলাহীন কাজ পেতে এখনি পরিশোধ করুন।' 
+          : 'Warning: Your due commission has exceeded ৳400. Pay promptly to prevent job interruptions.' }}</span>
       </div>
     }
   </section>
@@ -134,8 +144,8 @@
   <section class="card transactions-card">
     <div class="tx-header">
       <div>
-        <h3 class="tx-title">লেনদেনের ইতিহাস (Transaction History)</h3>
-        <p class="tx-desc">আপনার ওয়ালেটের সকল জমা, উত্তোলন ও কমিশন পরিশোধের রেকর্ড</p>
+        <h3 class="tx-title">{{ theme.currentLang() === 'bn' ? 'লেনদেনের ইতিহাস' : 'Transaction History' }}</h3>
+        <p class="tx-desc">{{ theme.currentLang() === 'bn' ? 'আপনার ওয়ালেটের সকল জমা, উত্তোলন ও কমিশন পরিশোধের রেকর্ড' : 'History of all your wallet earnings, withdrawals, and commission payments' }}</p>
       </div>
 
       <!-- Filters -->
@@ -145,28 +155,28 @@
           class="tx-filter-btn" 
           [class.active]="txFilter() === 'all'"
           (click)="txFilter.set('all')">
-          সব
+          {{ theme.currentLang() === 'bn' ? 'সব' : 'All' }}
         </button>
         <button 
           type="button" 
           class="tx-filter-btn" 
           [class.active]="txFilter() === 'job_payment'"
           (click)="txFilter.set('job_payment')">
-          জব পেমেন্ট
+          {{ theme.currentLang() === 'bn' ? 'জব পেমেন্ট' : 'Job Payments' }}
         </button>
         <button 
           type="button" 
           class="tx-filter-btn" 
           [class.active]="txFilter() === 'due_payment'"
           (click)="txFilter.set('due_payment')">
-          কমিশন পরিশোধ
+          {{ theme.currentLang() === 'bn' ? 'কমিশন পরিশোধ' : 'Due Payments' }}
         </button>
         <button 
           type="button" 
           class="tx-filter-btn" 
           [class.active]="txFilter() === 'withdraw'"
           (click)="txFilter.set('withdraw')">
-          উত্তোলন
+          {{ theme.currentLang() === 'bn' ? 'উত্তোলন' : 'Withdrawals' }}
         </button>
       </div>
     </div>
@@ -177,11 +187,11 @@
         <table class="tx-table">
           <thead>
             <tr>
-              <th>বিবরণ ও আইডি</th>
-              <th>পেমেন্ট মাধ্যম</th>
-              <th>তারিখ ও সময়</th>
-              <th>পরিমাণ</th>
-              <th>স্ট্যাটাস</th>
+              <th>{{ theme.currentLang() === 'bn' ? 'বিবরণ ও আইডি' : 'Description & ID' }}</th>
+              <th>{{ theme.currentLang() === 'bn' ? 'পেমেন্ট মাধ্যম' : 'Payment Method' }}</th>
+              <th>{{ theme.currentLang() === 'bn' ? 'তারিখ ও সময়' : 'Date & Time' }}</th>
+              <th>{{ theme.currentLang() === 'bn' ? 'পরিমাণ' : 'Amount' }}</th>
+              <th>{{ theme.currentLang() === 'bn' ? 'স্ট্যাটাস' : 'Status' }}</th>
             </tr>
           </thead>
           <tbody>
@@ -216,11 +226,11 @@
                 </td>
                 <td>
                   @if (tx.status === 'success') {
-                    <span class="badge badge-success">সফল</span>
+                    <span class="badge badge-success">{{ theme.currentLang() === 'bn' ? 'সফল' : 'Success' }}</span>
                   } @else if (tx.status === 'pending') {
-                    <span class="badge badge-warning">অপেক্ষমাণ</span>
+                    <span class="badge badge-warning">{{ theme.currentLang() === 'bn' ? 'অপেক্ষমাণ' : 'Pending' }}</span>
                   } @else {
-                    <span class="badge badge-danger">ব্যর্থ</span>
+                    <span class="badge badge-danger">{{ theme.currentLang() === 'bn' ? 'ব্যর্থ' : 'Failed' }}</span>
                   }
                 </td>
               </tr>
@@ -231,8 +241,8 @@
     } @else {
       <div class="empty-tx-state">
         <i class="pi pi-receipt empty-icon"></i>
-        <h4>কোনো লেনদেন পাওয়া যায়নি</h4>
-        <p>আপনার অ্যাকাউন্ট থেকে কোনো লেনদেন সম্পন্ন হলে এখানে তালিকাভুক্ত হবে।</p>
+        <h4>{{ theme.currentLang() === 'bn' ? 'কোনো লেনদেন পাওয়া যায়নি' : 'No Transactions Found' }}</h4>
+        <p>{{ theme.currentLang() === 'bn' ? 'আপনার অ্যাকাউন্ট থেকে কোনো লেনদেন সম্পন্ন হলে এখানে তালিকাভুক্ত হবে।' : 'Transactions will appear here once made from your account.' }}</p>
       </div>
     }
   </section>
@@ -242,7 +252,7 @@
     <div class="modal-backdrop">
       <div class="modal-dialog repay-dialog">
         <div class="modal-header">
-          <h3>বকেয়া কমিশন পরিশোধ</h3>
+          <h3>{{ theme.currentLang() === 'bn' ? 'বকেয়া কমিশন পরিশোধ' : 'Pay Outstanding Commission' }}</h3>
           <button type="button" class="btn-close" (click)="closeRepayModal()">
             <i class="pi pi-times"></i>
           </button>
@@ -257,7 +267,7 @@
               [class.selected]="repayMethod() === 'bkash'"
               (click)="repayMethod.set('bkash')">
               <span class="logo-text bkash-pink">bKash</span>
-              <span>বিকাশ পেমেন্ট</span>
+              <span>{{ theme.currentLang() === 'bn' ? 'বিকাশ পেমেন্ট' : 'bKash Payment' }}</span>
             </button>
 
             <button 
@@ -266,13 +276,13 @@
               [class.selected]="repayMethod() === 'nagad'"
               (click)="repayMethod.set('nagad')">
               <span class="logo-text nagad-orange">Nagad</span>
-              <span>নগদ পেমেন্ট</span>
+              <span>{{ theme.currentLang() === 'bn' ? 'নগদ পেমেন্ট' : 'Nagad Payment' }}</span>
             </button>
           </div>
 
           <!-- Amount -->
           <div class="form-group">
-            <label for="repayAmount">পরিশোধের পরিমাণ (৳):</label>
+            <label for="repayAmount">{{ theme.currentLang() === 'bn' ? 'পরিশোধের পরিমাণ (৳):' : 'Repayment Amount (৳):' }}</label>
             <div class="input-taka-wrap">
               <span class="taka-mark">৳</span>
               <input 
@@ -283,12 +293,12 @@
                 [max]="currentWorker()?.commissionDue || 0"
                 min="1" />
             </div>
-            <span class="input-sub">বর্তমান মোট বকেয়া: {{ (currentWorker()?.commissionDue || 0) | taka }}</span>
+            <span class="input-sub">{{ theme.currentLang() === 'bn' ? 'বর্তমান মোট বকেয়া: ' : 'Current total due: ' }}{{ (currentWorker()?.commissionDue || 0) | taka }}</span>
           </div>
 
           <!-- Phone Number -->
           <div class="form-group">
-            <label for="repayPhone">{{ repayMethod().toUpperCase() }} অ্যাকাউন্ট নম্বর:</label>
+            <label for="repayPhone">{{ repayMethod().toUpperCase() }} {{ theme.currentLang() === 'bn' ? 'অ্যাকাউন্ট নম্বর:' : 'Account Number:' }}</label>
             <input 
               id="repayPhone" 
               type="tel" 
@@ -299,13 +309,13 @@
 
           <!-- Simulated PIN -->
           <div class="form-group">
-            <label for="repayPin">সিমুলেটেড পিন নম্বর (পরীক্ষামূলক):</label>
+            <label for="repayPin">{{ theme.currentLang() === 'bn' ? 'সিমুলেটেড পিন নম্বর (পরীক্ষামূলক):' : 'Simulated PIN (Demo):' }}</label>
             <input 
               id="repayPin" 
               type="password" 
               class="form-control" 
               [(ngModel)]="repayPin" 
-              placeholder="পিন কোড লিখুন" />
+              [placeholder]="theme.currentLang() === 'bn' ? 'পিন কোড লিখুন' : 'Enter PIN'" />
           </div>
 
           @if (repayErrorMessage()) {
@@ -324,7 +334,7 @@
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn-outline" (click)="closeRepayModal()">বাতিল</button>
+          <button type="button" class="btn-outline" (click)="closeRepayModal()">{{ theme.currentLang() === 'bn' ? 'বাতিল' : 'Cancel' }}</button>
           <button 
             type="button" 
             class="btn-primary" 
@@ -332,7 +342,7 @@
             [class.btn-nagad]="repayMethod() === 'nagad'"
             (click)="submitRepayment()">
             <i class="pi pi-check"></i>
-            <span>{{ repayAmount() | taka }} পরিশোধ নিশ্চিত করুন</span>
+            <span>{{ repayAmount() | taka }} {{ theme.currentLang() === 'bn' ? 'পরিশোধ নিশ্চিত করুন' : 'Confirm Payment' }}</span>
           </button>
         </div>
       </div>
@@ -344,7 +354,7 @@
     <div class="modal-backdrop">
       <div class="modal-dialog withdraw-dialog">
         <div class="modal-header">
-          <h3>টাকা উত্তোলনের অনুরোধ (Withdraw)</h3>
+          <h3>{{ theme.currentLang() === 'bn' ? 'টাকা উত্তোলনের অনুরোধ' : 'Withdrawal Request' }}</h3>
           <button type="button" class="btn-close" (click)="closeWithdrawModal()">
             <i class="pi pi-times"></i>
           </button>
@@ -352,7 +362,7 @@
 
         <div class="modal-body">
           <div class="balance-available-pill">
-            <span>উত্তোলনযোগ্য ব্যালেন্স:</span>
+            <span>{{ theme.currentLang() === 'bn' ? 'উত্তোলনযোগ্য ব্যালেন্স:' : 'Withdrawable Balance:' }}</span>
             <strong>{{ (currentWorker()?.walletBalance || 0) | taka }}</strong>
           </div>
 
@@ -364,7 +374,7 @@
               [class.selected]="withdrawMethod() === 'bkash'"
               (click)="withdrawMethod.set('bkash')">
               <span class="logo-text bkash-pink">bKash</span>
-              <span>বিকাশ ওয়ালেট</span>
+              <span>{{ theme.currentLang() === 'bn' ? 'বিকাশ ওয়ালেট' : 'bKash Wallet' }}</span>
             </button>
 
             <button 
@@ -373,13 +383,13 @@
               [class.selected]="withdrawMethod() === 'nagad'"
               (click)="withdrawMethod.set('nagad')">
               <span class="logo-text nagad-orange">Nagad</span>
-              <span>নগদ ওয়ালেট</span>
+              <span>{{ theme.currentLang() === 'bn' ? 'নগদ ওয়ালেট' : 'Nagad Wallet' }}</span>
             </button>
           </div>
 
           <!-- Amount -->
           <div class="form-group">
-            <label for="withdrawAmount">উত্তোলনের পরিমাণ (৳):</label>
+            <label for="withdrawAmount">{{ theme.currentLang() === 'bn' ? 'উত্তোলনের পরিমাণ (৳):' : 'Withdrawal Amount (৳):' }}</label>
             <div class="input-taka-wrap">
               <span class="taka-mark">৳</span>
               <input 
@@ -390,12 +400,12 @@
                 min="100" 
                 [max]="currentWorker()?.walletBalance || 0" />
             </div>
-            <span class="input-sub">সর্বনিম্ন উত্তোলন ৳১০০</span>
+            <span class="input-sub">{{ theme.currentLang() === 'bn' ? 'সর্বনিম্ন উত্তোলন ৳১০০' : 'Minimum withdrawal ৳100' }}</span>
           </div>
 
           <!-- Destination Phone -->
           <div class="form-group">
-            <label for="withdrawPhone">{{ withdrawMethod().toUpperCase() }} ব্যক্তিগত/পার্সোনাল নম্বর:</label>
+            <label for="withdrawPhone">{{ withdrawMethod().toUpperCase() }} {{ theme.currentLang() === 'bn' ? 'ব্যক্তিগত নম্বর:' : 'Personal Number:' }}</label>
             <input 
               id="withdrawPhone" 
               type="tel" 
@@ -420,10 +430,10 @@
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn-outline" (click)="closeWithdrawModal()">বাতিল</button>
+          <button type="button" class="btn-outline" (click)="closeWithdrawModal()">{{ theme.currentLang() === 'bn' ? 'বাতিল' : 'Cancel' }}</button>
           <button type="button" class="btn-primary" (click)="submitWithdrawal()">
             <i class="pi pi-send"></i>
-            <span>অনুরোধ জমা দিন</span>
+            <span>{{ theme.currentLang() === 'bn' ? 'অনুরোধ জমা দিন' : 'Submit Request' }}</span>
           </button>
         </div>
       </div>

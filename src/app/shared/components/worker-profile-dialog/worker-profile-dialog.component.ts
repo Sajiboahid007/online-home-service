@@ -5,6 +5,7 @@ import { RatingStarsComponent } from '../rating-stars/rating-stars.component';
 import { BnNumberPipe } from '../../pipes/bn-number.pipe';
 import { TakaPipe } from '../../pipes/taka.pipe';
 import { AuthService } from '../../../core/services/auth.service';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-worker-profile-dialog',
@@ -15,6 +16,7 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class WorkerProfileDialogComponent {
   private auth = inject(AuthService);
+  private notification = inject(NotificationService);
 
   @Input() worker: WorkerProfile | null = null;
   public visible = signal<boolean>(false);
@@ -34,8 +36,13 @@ export class WorkerProfileDialogComponent {
 
   public toggleFav(): void {
     if (this.worker) {
-      this.auth.toggleFavoriteWorker(this.worker.uid);
+      const isNowFav = this.auth.toggleFavoriteWorker(this.worker.uid);
       this.isFav.set(this.auth.isFavoriteWorker(this.worker.uid));
+      if (isNowFav) {
+        this.notification.notify(`"${this.worker.name}" প্রিয় তালিকায় যোগ করা হয়েছে`, 'info', 'প্রিয় কারিগর');
+      } else {
+        this.notification.notify(`"${this.worker.name}" প্রিয় তালিকা থেকে সরানো হয়েছে`, 'info', 'প্রিয় কারিগর');
+      }
     }
   }
 

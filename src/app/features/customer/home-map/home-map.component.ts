@@ -16,6 +16,7 @@ import { TakaPipe } from '../../../shared/pipes/taka.pipe';
 import { DoorstepPin, DoorstepPinPickerComponent } from '../../../shared/components/doorstep-pin-picker/doorstep-pin-picker.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ThemeService } from '../../../core/services/theme.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Map as MapLibreMap, Marker } from 'maplibre-gl';
 
 const NEARBY_RADIUS_KM = 30;
@@ -38,6 +39,7 @@ export class HomeMapComponent implements AfterViewInit, OnDestroy {
   private authService = inject(AuthService);
   private router = inject(Router);
   private themeService = inject(ThemeService);
+  private notificationService = inject(NotificationService);
 
   // True when the UI language is English (used to show category nameEn)
   public isEn = computed(() => this.themeService.currentLang() === 'en');
@@ -266,7 +268,12 @@ export class HomeMapComponent implements AfterViewInit, OnDestroy {
   }
 
   public toggleFavorite(worker: WorkerProfile): void {
-    this.authService.toggleFavoriteWorker(worker.uid);
+    const isNowFav = this.authService.toggleFavoriteWorker(worker.uid);
+    if (isNowFav) {
+      this.notificationService.notify(`"${worker.name}" প্রিয় তালিকায় যোগ করা হয়েছে`, 'info', 'প্রিয় কারিগর');
+    } else {
+      this.notificationService.notify(`"${worker.name}" প্রিয় তালিকা থেকে সরানো হয়েছে`, 'info', 'প্রিয় কারিগর');
+    }
   }
 
   public setBookingMode(mode: 'instant' | 'scheduled' | 'bulk_labor'): void {

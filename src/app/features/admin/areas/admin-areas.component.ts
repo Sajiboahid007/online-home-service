@@ -1,9 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ConfirmationService } from 'primeng/api';
 import { AreaService } from '../../../core/services/area.service';
 import { AuditLogService } from '../../../core/services/audit-log.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { exportToCsv } from '../../../core/utils/csv-exporter';
 import { Area } from '../../../core/models/area.model';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
@@ -16,9 +18,11 @@ import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
   styleUrls: ['./admin-areas.component.scss']
 })
 export class AdminAreasComponent {
+  public theme = inject(ThemeService);
   private areaService = inject(AreaService);
   private auditLog = inject(AuditLogService);
   private auth = inject(AuthService);
+  private confirmation = inject(ConfirmationService);
 
   public areas = this.areaService.areas;
 
@@ -97,9 +101,18 @@ export class AdminAreasComponent {
   }
 
   public deleteArea(id: string): void {
-    if (confirm('আপনি কি এই এলাকা মুছে ফেলতে চান?')) {
-      this.areaService.deleteArea(id);
-    }
+    this.confirmation.confirm({
+      header: 'এলাকা মুছে ফেলার নিশ্চিতকরণ (Confirm Area Deletion)',
+      message: 'আপনি কি নিশ্চিতভাবে এই এলাকা মুছে ফেলতে চান?\nAre you sure you want to delete this operational area?',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'মুছুন / Delete',
+      rejectLabel: 'বাতিল / Cancel',
+      acceptButtonStyleClass: 'p-button-danger',
+      rejectButtonStyleClass: 'p-button-text',
+      accept: () => {
+        this.areaService.deleteArea(id);
+      }
+    });
   }
 
   public exportCsv(): void {

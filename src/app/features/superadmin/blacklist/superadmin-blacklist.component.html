@@ -1,21 +1,21 @@
 <div class="sa-blacklist-page">
   <div class="page-header">
     <div>
-      <h2>ব্যান রুলস ও ব্ল্যাকলিস্ট ব্যবস্থাপনা (Ban Rules & Blacklist)</h2>
-      <p class="subtitle">স্বয়ংক্রিয় সাসপেনশন শর্তাবলী, স্থায়ী ব্ল্যাকলিস্ট রেকর্ড এবং আবেদন (Appeals) রিভিউ</p>
+      <h2>{{ theme.currentLang() === 'bn' ? 'ব্যান রুলস ও ব্ল্যাকলিস্ট ব্যবস্থাপনা' : 'Ban Rules & Blacklist Management' }}</h2>
+      <p class="subtitle">{{ theme.currentLang() === 'bn' ? 'স্বয়ংক্রিয় সাসপেনশন শর্তাবলী, স্থায়ী ব্ল্যাকলিস্ট রেকর্ড এবং আবেদন রিভিউ' : 'Automatic suspension rules, permanent blacklist records and appeals desk' }}</p>
     </div>
   </div>
 
   <!-- Tabs -->
   <div class="tabs-header">
     <button class="tab-btn" [class.active]="activeTab() === 'rules'" (click)="activeTab.set('rules')">
-      <i class="pi pi-sliders-h"></i> অটো-ব্যান শর্তাবলী (Ban Rules)
+      <i class="pi pi-sliders-h"></i> {{ theme.currentLang() === 'bn' ? 'অটো-ব্যান শর্তাবলী' : 'Ban Rules' }}
     </button>
     <button class="tab-btn" [class.active]="activeTab() === 'blacklist'" (click)="activeTab.set('blacklist')">
-      <i class="pi pi-ban"></i> ব্ল্যাকলিস্ট রেকর্ডস ({{ blacklist().length }})
+      <i class="pi pi-ban"></i> {{ theme.currentLang() === 'bn' ? 'ব্ল্যাকলিস্ট রেকর্ডস' : 'Blacklist Records' }} ({{ blacklist().length }})
     </button>
     <button class="tab-btn" [class.active]="activeTab() === 'appeals'" (click)="activeTab.set('appeals')">
-      <i class="pi pi-envelope"></i> ইউজার আপিল ডেস্ক ({{ pendingAppealsCount() }} পেন্ডিং)
+      <i class="pi pi-envelope"></i> {{ theme.currentLang() === 'bn' ? 'ইউজার আপিল ডেস্ক' : 'User Appeals Desk' }} ({{ pendingAppealsCount() }})
     </button>
   </div>
 

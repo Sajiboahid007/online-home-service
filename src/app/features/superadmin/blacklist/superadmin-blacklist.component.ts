@@ -1,10 +1,12 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ConfirmationService } from 'primeng/api';
 import { SettingsService } from '../../../core/services/settings.service';
 import { ReportService } from '../../../core/services/report.service';
 import { AuditLogService } from '../../../core/services/audit-log.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { BlacklistType } from '../../../core/models/blacklist.model';
 
 @Component({
@@ -15,10 +17,12 @@ import { BlacklistType } from '../../../core/models/blacklist.model';
   styleUrls: ['./superadmin-blacklist.component.scss']
 })
 export class SuperadminBlacklistComponent {
+  public theme = inject(ThemeService);
   private settingsService = inject(SettingsService);
   private reportService = inject(ReportService);
   private auditLogService = inject(AuditLogService);
   private notificationService = inject(NotificationService);
+  private confirmation = inject(ConfirmationService);
 
   public activeTab = signal<'rules' | 'blacklist' | 'appeals'>('rules');
 
@@ -106,11 +110,20 @@ export class SuperadminBlacklistComponent {
   }
 
   public removeBlacklist(id: string): void {
-    if (confirm('আপনি কি নিশ্চিতভাবে এই এন্ট্রিটি ব্ল্যাকলিস্ট থেকে অপসারণ করতে চান?')) {
-      this.reportService.removeFromBlacklist(id);
-      this.auditLogService.logAction('REMOVE_BLACKLIST', 'blacklist', id);
-      this.notificationService.notify('ব্ল্যাকলিস্ট থেকে অপসারণ সম্পন্ন', 'info');
-    }
+    this.confirmation.confirm({
+      header: 'ব্ল্যাকলিস্ট অপসারণের নিশ্চিতকরণ (Confirm Removal)',
+      message: 'আপনি কি নিশ্চিতভাবে এই এন্ট্রিটি ব্ল্যাকলিস্ট থেকে অপসারণ করতে চান?\nAre you sure you want to remove this entry from blacklist?',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'অপসারণ / Remove',
+      rejectLabel: 'বাতিল / Cancel',
+      acceptButtonStyleClass: 'p-button-danger',
+      rejectButtonStyleClass: 'p-button-text',
+      accept: () => {
+        this.reportService.removeFromBlacklist(id);
+        this.auditLogService.logAction('REMOVE_BLACKLIST', 'blacklist', id);
+        this.notificationService.notify('ব্ল্যাকলিস্ট থেকে অপসারণ সম্পন্ন', 'info');
+      }
+    });
   }
 
   public handleAppeal(appealId: string, approved: boolean): void {

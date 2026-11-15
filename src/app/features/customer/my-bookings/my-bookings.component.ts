@@ -2,6 +2,7 @@ import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { ConfirmationService } from 'primeng/api';
 import { JobService } from '../../../core/services/job.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ReviewService } from '../../../core/services/review.service';
@@ -28,6 +29,7 @@ export class MyBookingsComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private confirmation = inject(ConfirmationService);
 
   public activeTab = signal<FilterTab>('all');
   public currentUser = this.authService.currentUser;
@@ -79,9 +81,18 @@ export class MyBookingsComponent implements OnInit {
     if (event) {
       event.stopPropagation();
     }
-    if (confirm(`আপনি কি নিশ্চিত যে "${job.categoryName}" এর এই রিকোয়েস্টটি (#${job.id}) স্থায়ীভাবে মুছে ফেলতে চান?`)) {
-      this.jobService.deleteJob(job.id);
-    }
+    this.confirmation.confirm({
+      header: 'বুকিং মুছে ফেলার নিশ্চিতকরণ (Confirm Delete)',
+      message: `আপনি কি নিশ্চিত যে "${job.categoryName}" এর এই রিকোয়েস্টটি (#${job.id}) স্থায়ীভাবে মুছে ফেলতে চান?\nAre you sure you want to delete this booking request?`,
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'মুছুন / Delete',
+      rejectLabel: 'বাতিল / Cancel',
+      acceptButtonStyleClass: 'p-button-danger',
+      rejectButtonStyleClass: 'p-button-text',
+      accept: () => {
+        this.jobService.deleteJob(job.id);
+      }
+    });
   }
 
   // Filtered jobs
