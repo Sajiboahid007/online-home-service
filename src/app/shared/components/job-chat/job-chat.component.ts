@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, signal, computed, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, signal, computed, ViewChild, ElementRef, OnInit, OnDestroy, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatService, EnhancedChatMessage } from '../../../core/services/chat.service';
@@ -12,7 +12,7 @@ import { BnNumberPipe } from '../../pipes/bn-number.pipe';
   templateUrl: './job-chat.component.html',
   styleUrl: './job-chat.component.scss'
 })
-export class JobChatComponent implements AfterViewChecked {
+export class JobChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   @Input({ required: true }) jobId!: string;
   @Input({ required: true }) currentUserId!: string;
   @Input({ required: true }) currentUserName!: string;
@@ -34,9 +34,15 @@ export class JobChatComponent implements AfterViewChecked {
 
   private recordingInterval: any = null;
   private shouldScrollToBottom: boolean = true;
+  private lastMsgCount: number = 0;
 
   public messages = computed(() => {
-    return this.chatService.getMessagesForJob(this.jobId);
+    const list = this.chatService.getMessagesForJob(this.jobId);
+    if (list.length !== this.lastMsgCount) {
+      this.lastMsgCount = list.length;
+      this.shouldScrollToBottom = true;
+    }
+    return list;
   });
 
   public quickPresets = computed(() => {
@@ -44,6 +50,23 @@ export class JobChatComponent implements AfterViewChecked {
       ? this.chatService.customerPresets
       : this.chatService.workerPresets;
   });
+
+  ngOnInit(): void {
+    // Lock background page scroll so scrolling is trapped inside the chat modal
+    document.body.classList.add('modal-open');
+    this.chatService.activeChatJobId.set(this.jobId);
+    this.chatService.markAsRead(this.jobId);
+  }
+
+  ngOnDestroy(): void {
+    // Restore background page scrolling
+    document.body.classList.remove('modal-open');
+    this.chatService.activeChatJobId.set(null);
+    if (this.recordingInterval) {
+      clearInterval(this.recordingInterval);
+      this.recordingInterval = null;
+    }
+  }
 
   ngAfterViewChecked(): void {
     if (this.shouldScrollToBottom) {

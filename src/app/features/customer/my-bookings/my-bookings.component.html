@@ -255,9 +255,9 @@
         <div class="modal-header">
           <div class="modal-title-wrap">
             <span class="modal-icon">⭐</span>
-            <h3 class="modal-title">কাজের অভিজ্ঞতা ও রিভিউ</h3>
+            <h3 class="modal-title">{{ theme.currentLang() === 'bn' ? 'কাজের অভিজ্ঞতা ও রিভিউ' : 'Work experience and reviews' }}</h3>
           </div>
-          <button class="close-btn" (click)="closeReview()">✕</button>
+          <button type="button" class="close-btn" (click)="closeReview()" [attr.aria-label]="theme.currentLang() === 'bn' ? 'বন্ধ করুন' : 'Close'">✕</button>
         </div>
 
         <div class="review-modal-body">
@@ -273,14 +273,14 @@
               />
               <div>
                 <h4 class="r-name">{{ job.workerName }}</h4>
-                <span class="r-service">সার্ভিস: {{ job.categoryName }} (#{{ job.id }})</span>
+                <span class="r-service">{{ theme.currentLang() === 'bn' ? 'সার্ভিস: ' : 'Service: ' }}{{ job.categoryName }} (#{{ job.id }})</span>
               </div>
             </div>
           }
 
           <!-- Star Rating -->
           <div class="rating-picker-section">
-            <label class="rating-label">রেটিং দিন:</label>
+            <label class="rating-label">{{ theme.currentLang() === 'bn' ? 'রেটিং দিন:' : 'Rate:' }}</label>
             <div class="stars-row">
               @for (star of [1, 2, 3, 4, 5]; track star) {
                 <button
@@ -296,21 +296,21 @@
             <span class="star-rating-hint">
               {{
                 reviewStars() === 5
-                  ? 'অসাধারণ (৫.০)'
+                  ? (theme.currentLang() === 'bn' ? 'অসাধারণ (৫.০)' : 'Excellent (5.0)')
                   : reviewStars() === 4
-                    ? 'ভালো (৪.০)'
+                    ? (theme.currentLang() === 'bn' ? 'ভালো (৪.০)' : 'Good (4.0)')
                     : reviewStars() === 3
-                      ? 'মোটামুটি (৩.০)'
-                      : 'উন্নতি প্রয়োজন'
+                      ? (theme.currentLang() === 'bn' ? 'মোটামুটি (৩.০)' : 'Average (3.0)')
+                      : (theme.currentLang() === 'bn' ? 'উন্নতি প্রয়োজন' : 'Needs improvement')
               }}
             </span>
           </div>
 
           <!-- Tags -->
           <div class="tags-section">
-            <label class="tags-label">দ্রুত প্রশংসা ট্যাগ যুক্ত করুন:</label>
+            <label class="tags-label">{{ theme.currentLang() === 'bn' ? 'দ্রুত প্রশংসা ট্যাগ যুক্ত করুন:' : 'Add a quick compliment tag:' }}</label>
             <div class="tags-cloud">
-              @for (tag of availableTags; track tag) {
+              @for (tag of availableTags(); track tag) {
                 <button
                   type="button"
                   class="tag-pill"
@@ -325,11 +325,11 @@
 
           <!-- Comment textarea -->
           <div class="comment-section">
-            <label class="comment-label">আপনার মূল্যবান মন্তব্য লিখুন</label>
+            <label class="comment-label">{{ theme.currentLang() === 'bn' ? 'আপনার মূল্যবান মন্তব্য লিখুন' : 'Write your valuable comments.' }}</label>
             <textarea
               class="comment-textarea"
               rows="3"
-              placeholder="কর্মীর ব্যবহার ও কাজের গুণগত মান সম্পর্কে সংক্ষেপে লিখুন..."
+              [placeholder]="theme.currentLang() === 'bn' ? 'কর্মীর ব্যবহার ও কাজের গুণগত মান সম্পর্কে সংক্ষেপে লিখুন...' : 'Write briefly about the worker behavior and work quality...'"
               [ngModel]="reviewComment()"
               (ngModelChange)="reviewComment.set($event)"
             ></textarea>
@@ -337,14 +337,14 @@
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn-cancel" (click)="closeReview()">বাতিল</button>
+          <button type="button" class="btn-cancel" (click)="closeReview()">{{ theme.currentLang() === 'bn' ? 'বাতিল' : 'Cancel' }}</button>
           <button
             type="button"
             class="btn-primary"
             [disabled]="isSubmittingReview()"
             (click)="submitReview()"
           >
-            <span>জমা দিন ও ধন্যবাদ জানান</span>
+            <span>{{ isSubmittingReview() ? (theme.currentLang() === 'bn' ? 'সংরক্ষণ হচ্ছে...' : 'Submitting...') : (theme.currentLang() === 'bn' ? 'জমা দিন ও ধন্যবাদ জানান' : 'Submit and thank you.') }}</span>
           </button>
         </div>
       </div>

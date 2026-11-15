@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, OnInit } from '@angular/core';
+import { Component, computed, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +7,7 @@ import { JobService } from '../../../core/services/job.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ReviewService } from '../../../core/services/review.service';
 import { CategoryService } from '../../../core/services/category.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { Job, JobStatus } from '../../../core/models/job.model';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
@@ -22,7 +23,8 @@ type FilterTab = 'all' | 'active' | 'completed' | 'cancelled';
   templateUrl: './my-bookings.component.html',
   styleUrl: './my-bookings.component.scss'
 })
-export class MyBookingsComponent implements OnInit {
+export class MyBookingsComponent implements OnInit, OnDestroy {
+  public theme = inject(ThemeService);
   private jobService = inject(JobService);
   private authService = inject(AuthService);
   private reviewService = inject(ReviewService);
@@ -38,9 +40,15 @@ export class MyBookingsComponent implements OnInit {
   public showReviewModal = signal<boolean>(false);
   public reviewingJob = signal<Job | null>(null);
   public reviewStars = signal<number>(5);
-  public reviewComment = signal<string>('খুব ভালো সার্ভিস পেয়েছি। সময়মতো এসেছেন এবং কাজ নিখুঁত হয়েছে।');
+  public reviewComment = signal<string>('খুব সুন্দরভাবে কাজটি সম্পন্ন করেছেন, ব্যবহারে আমি সন্তুষ্ট।');
   public reviewTags = signal<string[]>(['সময়মতো এসেছে', 'কাজ নিখুঁত']);
-  public availableTags = ['সময়মতো এসেছে', 'ভদ্র আচরণ', 'কাজ নিখুঁত', 'ন্যায্য মূল্য', 'দক্ষ কারিগর', 'পরিষ্কার-পরিচ্ছন্ন'];
+  
+  public availableTags = computed(() => {
+    return this.theme.currentLang() === 'bn'
+      ? ['সময়মতো এসেছে', 'ভদ্র আচরণ', 'কাজ নিখুঁত', 'ন্যায্য মূল্য', 'দক্ষ কারিগর', 'পরিষ্কার-পরিচ্ছন্ন']
+      : ['Arrived on time', 'Polite behavior', 'The work is perfect', 'Fair price', 'Skilled craftsman', 'Clean and tidy'];
+  });
+
   public isSubmittingReview = signal<boolean>(false);
 
   // Customer's job list (inclusive for active customer, demo customer, and test jobs)
@@ -159,14 +167,23 @@ export class MyBookingsComponent implements OnInit {
   public openReview(job: Job): void {
     this.reviewingJob.set(job);
     this.reviewStars.set(5);
-    this.reviewComment.set('খুব সুন্দরভাবে কাজটি সম্পন্ন করেছেন, ব্যবহারে আমি সন্তুষ্ট।');
-    this.reviewTags.set(['সময়মতো এসেছে', 'কাজ নিখুঁত']);
+    const isBn = this.theme.currentLang() === 'bn';
+    this.reviewComment.set(isBn 
+      ? 'খুব সুন্দরভাবে কাজটি সম্পন্ন করেছেন, ব্যবহারে আমি সন্তুষ্ট।' 
+      : 'The work was completed wonderfully, and I am satisfied with the service.');
+    this.reviewTags.set(isBn ? ['সময়মতো এসেছে', 'কাজ নিখুঁত'] : ['Arrived on time', 'The work is perfect']);
     this.showReviewModal.set(true);
+    document.body.classList.add('modal-open');
   }
 
   public closeReview(): void {
     this.showReviewModal.set(false);
     this.reviewingJob.set(null);
+    document.body.classList.remove('modal-open');
+  }
+
+  ngOnDestroy(): void {
+    document.body.classList.remove('modal-open');
   }
 
   public toggleTag(tag: string): void {

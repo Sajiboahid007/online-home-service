@@ -6,6 +6,7 @@ import { JobService } from '../../../core/services/job.service';
 import { WorkerService } from '../../../core/services/worker.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { JobChatComponent } from '../../../shared/components/job-chat/job-chat.component';
+import { ChatService } from '../../../core/services/chat.service';
 import { Job, JobStatus } from '../../../core/models/job.model';
 import { WorkerProfile } from '../../../core/models/worker.model';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
@@ -26,6 +27,8 @@ import { Map as MapLibreMap, Marker } from 'maplibre-gl';
 export class WorkerActiveJobComponent implements OnInit, OnDestroy {
   public jobId = signal<string>('');
   public showChatModal = signal<boolean>(false);
+  public chatService = inject(ChatService);
+  public unreadChatCount = computed(() => this.chatService.getUnreadCount(this.jobId()));
   
   // OTP state
   public otpDigit1 = signal<string>('');
@@ -325,6 +328,7 @@ export class WorkerActiveJobComponent implements OnInit, OnDestroy {
 
   public openChat(): void {
     this.showChatModal.set(true);
+    this.chatService.markAsRead(this.jobId());
   }
 
   public closeChat(): void {

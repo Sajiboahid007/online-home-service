@@ -7,7 +7,6 @@ import { AuthService } from '../../../core/services/auth.service';
 import { WorkerService } from '../../../core/services/worker.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { ThemeService } from '../../../core/services/theme.service';
-import { ImageUploaderComponent } from '../../../shared/components/image-uploader/image-uploader.component';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
 import { User } from '../../../core/models/user.model';
@@ -16,7 +15,7 @@ import { WorkerProfile } from '../../../core/models/worker.model';
 @Component({
   selector: 'app-customer-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ImageUploaderComponent, BnNumberPipe, TakaPipe],
+  imports: [CommonModule, FormsModule, RouterModule, BnNumberPipe, TakaPipe],
   templateUrl: './customer-profile.component.html',
   styleUrls: ['./customer-profile.component.scss']
 })
@@ -31,8 +30,6 @@ export class CustomerProfileComponent implements OnInit {
   public name = signal<string>('');
   public phone = signal<string>('');
   public email = signal<string>('');
-  public photoURL = signal<string>('');
-  public avatarImgError = signal<boolean>(false);
 
   public favoriteWorkers = computed(() => {
     const user = this.auth.currentUser();
@@ -68,7 +65,6 @@ export class CustomerProfileComponent implements OnInit {
       this.name.set(user.name || '');
       this.phone.set(user.phone || '');
       this.email.set(user.email || '');
-      this.photoURL.set(user.photoURL || '');
 
       if (user.emergencyContact) {
         this.emergencyName.set(user.emergencyContact.name);
@@ -154,7 +150,6 @@ export class CustomerProfileComponent implements OnInit {
       name: this.name(),
       phone: this.phone(),
       email: this.email(),
-      photoURL: this.photoURL(),
       emergencyContact: {
         name: this.emergencyName(),
         phone: this.emergencyPhone(),
@@ -162,6 +157,9 @@ export class CustomerProfileComponent implements OnInit {
       },
       savedAddresses: this.savedAddresses()
     };
+
+    // Remove photoURL so no image is stored in the database
+    delete updatedUser.photoURL;
 
     this.auth.setUser(updatedUser);
     this.successMessage.set('প্রোফাইল সফলভাবে আপডেট হয়েছে!');

@@ -138,6 +138,9 @@
               <button type="button" class="btn-chat-worker" (click)="openChat()">
                 <span class="pi pi-comments"></span>
                 <span>ইন-অ্যাপ চ্যাট</span>
+                @if (unreadChatCount() > 0) {
+                  <span class="chat-unread-badge">{{ unreadChatCount() }}</span>
+                }
               </button>
               <button type="button" class="btn-share-trip" (click)="openShare()">
                 <span class="pi pi-share-alt"></span>

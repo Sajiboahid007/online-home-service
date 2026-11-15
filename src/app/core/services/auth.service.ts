@@ -43,9 +43,19 @@ export class AuthService {
     if (savedUser) {
       try {
         const user: User = JSON.parse(savedUser);
+        // Strip out any base64 image string so database/storage remains clean
+        if (user.photoURL && user.photoURL.startsWith('data:image')) {
+          delete user.photoURL;
+          localStorage.setItem('kajkhoj_user', JSON.stringify(user));
+        }
         this.currentUserSignal.set(user);
         if (savedWorker) {
-          this.currentWorkerSignal.set(JSON.parse(savedWorker));
+          const worker: WorkerProfile = JSON.parse(savedWorker);
+          if (worker.photoURL && worker.photoURL.startsWith('data:image')) {
+            delete (worker as any).photoURL;
+            localStorage.setItem('kajkhoj_worker', JSON.stringify(worker));
+          }
+          this.currentWorkerSignal.set(worker);
         }
       } catch (e) {
         localStorage.removeItem('kajkhoj_user');
@@ -118,20 +128,34 @@ export class AuthService {
   }
 
   public setUser(user: User, worker: WorkerProfile | null = null): void {
-    this.currentUserSignal.set(user);
-    this.currentWorkerSignal.set(worker);
+    const cleanUser = { ...user };
+    if (cleanUser.photoURL && cleanUser.photoURL.startsWith('data:image')) {
+      delete cleanUser.photoURL;
+    }
 
-    localStorage.setItem('kajkhoj_user', JSON.stringify(user));
-    if (worker) {
-      localStorage.setItem('kajkhoj_worker', JSON.stringify(worker));
+    let cleanWorker = worker ? { ...worker } : null;
+    if (cleanWorker?.photoURL && cleanWorker.photoURL.startsWith('data:image')) {
+      cleanWorker.photoURL = '';
+    }
+
+    this.currentUserSignal.set(cleanUser);
+    this.currentWorkerSignal.set(cleanWorker);
+
+    localStorage.setItem('kajkhoj_user', JSON.stringify(cleanUser));
+    if (cleanWorker) {
+      localStorage.setItem('kajkhoj_worker', JSON.stringify(cleanWorker));
     } else {
       localStorage.removeItem('kajkhoj_worker');
     }
   }
 
   public updateWorkerProfile(worker: WorkerProfile): void {
-    this.currentWorkerSignal.set(worker);
-    localStorage.setItem('kajkhoj_worker', JSON.stringify(worker));
+    const cleanWorker = { ...worker };
+    if (cleanWorker.photoURL && cleanWorker.photoURL.startsWith('data:image')) {
+      cleanWorker.photoURL = '';
+    }
+    this.currentWorkerSignal.set(cleanWorker);
+    localStorage.setItem('kajkhoj_worker', JSON.stringify(cleanWorker));
   }
 
   public getGuestFavorites(): string[] {

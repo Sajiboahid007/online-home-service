@@ -1,13 +1,15 @@
 .job-chat-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  z-index: 1000;
+  z-index: 2100;
   display: flex;
   align-items: flex-end;
   justify-content: center;
   padding: 0;
+  overscroll-behavior: contain;
+  touch-action: none;
 
   @media (min-width: 640px) {
     align-items: center;
@@ -18,7 +20,7 @@
 .job-chat-card {
   width: 100%;
   max-width: 480px;
-  height: 82vh;
+  height: 85vh;
   max-height: 640px;
   background: #ffffff;
   border-radius: 20px 20px 0 0;
@@ -27,6 +29,7 @@
   overflow: hidden;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
   animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  overscroll-behavior: contain;
 
   @media (min-width: 640px) {
     border-radius: 20px;
@@ -47,6 +50,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-shrink: 0;
 
   .partner-meta {
     display: flex;
@@ -132,12 +136,29 @@
 /* Messages Thread */
 .messages-thread {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
   padding: 14px 16px;
   background: #f8fafc;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
 
   .chat-security-banner {
     background: #f0fdf4;
@@ -326,6 +347,7 @@
   background: #ffffff;
   border-top: 1px solid #e2e8f0;
   padding: 8px 12px;
+  flex-shrink: 0;
 
   .presets-scroll {
     display: flex;
@@ -422,6 +444,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 
   .btn-voice-record {
     width: 38px;

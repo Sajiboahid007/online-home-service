@@ -7,6 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { WorkerService } from '../../../core/services/worker.service';
 import { ReportService } from '../../../core/services/report.service';
 import { JobChatComponent } from '../../../shared/components/job-chat/job-chat.component';
+import { ChatService } from '../../../core/services/chat.service';
 import { Job, JobStatus } from '../../../core/models/job.model';
 import { WorkerProfile } from '../../../core/models/worker.model';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
@@ -51,6 +52,9 @@ export class JobTrackingComponent implements OnInit, OnDestroy {
   public showShareModal = signal<boolean>(false);
   public showReportModal = signal<boolean>(false);
   public shareCopied = signal<boolean>(false);
+
+  public chatService = inject(ChatService);
+  public unreadChatCount = computed(() => this.chatService.getUnreadCount(this.jobId()));
 
   // Dispute form state
   public reportType = signal<string>('overcharge');
@@ -123,6 +127,7 @@ export class JobTrackingComponent implements OnInit, OnDestroy {
   // In-App Chat
   public openChat(): void {
     this.showChatModal.set(true);
+    this.chatService.markAsRead(this.jobId());
   }
 
   public closeChat(): void {

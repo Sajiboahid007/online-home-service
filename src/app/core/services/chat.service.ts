@@ -1,5 +1,7 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { ChatMessage } from '../models/job.model';
+import { ToastService } from './toast.service';
+import { NotificationService } from './notification.service';
 
 export interface VoiceNoteMeta {
   durationSec: number;
@@ -16,6 +18,9 @@ export interface EnhancedChatMessage extends ChatMessage {
   providedIn: 'root'
 })
 export class ChatService {
+  private toastService = inject(ToastService);
+  private notificationService = inject(NotificationService);
+
   private messagesSignal = signal<Record<string, EnhancedChatMessage[]>>({
     'job_demo_101': [
       {
@@ -60,6 +65,13 @@ export class ChatService {
 
   public messages = this.messagesSignal.asReadonly();
 
+  // Active chat modal tracking
+  public activeChatJobId = signal<string | null>(null);
+
+  // Unread message count per job
+  private unreadCountsSignal = signal<Record<string, number>>({});
+  public unreadCounts = this.unreadCountsSignal.asReadonly();
+
   // Quick reply presets
   public customerPresets = [
     'আমি বাসায় আছি, চলে আসুন',
@@ -97,6 +109,48 @@ export class ChatService {
     return this.messagesSignal()[jobId] || [];
   }
 
+  public getUnreadCount(jobId: string): number {
+    return this.unreadCountsSignal()[jobId] || 0;
+  }
+
+  public markAsRead(jobId: string): void {
+    this.unreadCountsSignal.update(counts => {
+      if (!counts[jobId]) return counts;
+      const copy = { ...counts };
+      delete copy[jobId];
+      return copy;
+    });
+  }
+
+  /**
+   * Plays a pleasant two-tone Web Audio chime when a new message arrives.
+   */
+  public playChatChime(): void {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+
+      const now = ctx.currentTime;
+      osc.frequency.setValueAtTime(587.33, now); // D5
+      osc.frequency.setValueAtTime(880.00, now + 0.1); // A5
+
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.35);
+    } catch (e) {}
+  }
+
   public sendMessage(
     jobId: string,
     senderId: string,
@@ -119,6 +173,10 @@ export class ChatService {
     });
 
     this.saveToStorage();
+
+    // Trigger realistic partner simulation in demo mode
+    this.triggerPartnerSimulation(jobId, text, senderRole);
+
     return newMsg;
   }
 
@@ -150,6 +208,79 @@ export class ChatService {
     });
 
     this.saveToStorage();
+
+    this.triggerPartnerSimulation(jobId, 'ভয়েস বার্তা পাঠানো হয়েছে', senderRole);
+
     return newMsg;
+  }
+
+  /**
+   * Simulates a real-time partner response with chime, toast, and notification
+   */
+  private triggerPartnerSimulation(jobId: string, userText: string, userRole: 'customer' | 'worker'): void {
+    setTimeout(() => {
+      let replyText = '';
+      let replySenderName = '';
+      let replySenderId = '';
+      let replyRole: 'customer' | 'worker';
+
+      if (userRole === 'customer') {
+        replySenderName = 'মোঃ রহিম উদ্দিন';
+        replySenderId = 'worker_rahim_1';
+        replyRole = 'worker';
+
+        const lower = userText.toLowerCase();
+        if (lower.includes('where') || lower.includes('কোথায়') || lower.includes('কতক্ষণ') || lower.includes('late') || lower.includes('time')) {
+          replyText = 'জি স্যার, আমি কাছাকাছি চলে এসেছি। ইনশাআল্লাহ ৩-৪ মিনিটের মধ্যে পৌঁছে কল দিচ্ছি।';
+        } else if (lower.includes('গেট') || lower.includes('open') || lower.includes('door') || lower.includes('বাসা') || lower.includes('home')) {
+          replyText = 'জি ধন্যবাদ স্যার, গেটের সামনে এসে বেল বাজাচ্ছি।';
+        } else if (lower.includes('টুলস') || lower.includes('সামগ্রী') || lower.includes('parts') || lower.includes('কাজ')) {
+          replyText = 'জি স্যার, প্রয়োজনীয় সকল টুলস ও স্পেয়ার পার্টস সাথে নিয়ে এসেছি।';
+        } else {
+          replyText = 'জি স্যার বুঝতে পেরেছি, আমি যথাসময়ে উপস্থিত হচ্ছি।';
+        }
+      } else {
+        replySenderName = 'তানভীর আহমেদ';
+        replySenderId = 'user_customer_demo_1';
+        replyRole = 'customer';
+        replyText = 'ঠিক আছে ভাই, গেট খোলা আছে। আপনি দ্রুত চলে আসুন।';
+      }
+
+      const partnerMsg: EnhancedChatMessage = {
+        id: `msg_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        senderId: replySenderId,
+        senderName: replySenderName,
+        senderRole: replyRole,
+        text: replyText,
+        createdAt: new Date().toISOString()
+      };
+
+      this.messagesSignal.update(store => {
+        const list = store[jobId] ? [...store[jobId], partnerMsg] : [partnerMsg];
+        return { ...store, [jobId]: list };
+      });
+      this.saveToStorage();
+
+      // 1. Play audio notification chime
+      this.playChatChime();
+
+      // 2. Visible Toast Alert
+      this.toastService.info(partnerMsg.text, `💬 ${partnerMsg.senderName}`);
+
+      // 3. System Notification
+      this.notificationService.notify(
+        `${partnerMsg.senderName}: "${partnerMsg.text}"`,
+        'info',
+        'নতুন চ্যাট বার্তা'
+      );
+
+      // 4. Update unread count if modal is currently closed
+      if (this.activeChatJobId() !== jobId) {
+        this.unreadCountsSignal.update(c => ({
+          ...c,
+          [jobId]: (c[jobId] || 0) + 1
+        }));
+      }
+    }, 2000);
   }
 }
