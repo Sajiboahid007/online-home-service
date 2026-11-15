@@ -2,12 +2,12 @@
   <!-- Page Header -->
   <div class="page-header">
     <div class="header-info">
-      <h2 class="page-title">আমার সেবাসমূহ ও বুকিং</h2>
-      <p class="page-sub">আপনার বর্তমান ও পূর্ববর্তী সকল হোম সার্ভিসের বিস্তারিত তালিকা</p>
+      <h2 class="page-title">{{ theme.currentLang() === 'bn' ? 'আমার সেবাসমূহ ও বুকিং' : 'My Services & Bookings' }}</h2>
+      <p class="page-sub">{{ theme.currentLang() === 'bn' ? 'আপনার বর্তমান ও পূর্ববর্তী সকল হোম সার্ভিসের বিস্তারিত তালিকা' : 'Detailed list of all your current and previous home services' }}</p>
     </div>
 
     <a routerLink="/customer/home" class="btn-primary btn-new-request">
-      <span>⚡ নতুন কর্মী খুঁজুন</span>
+      <span>{{ theme.currentLang() === 'bn' ? '⚡ নতুন কর্মী খুঁজুন' : '⚡ Find New Worker' }}</span>
     </a>
   </div>
 
@@ -20,7 +20,7 @@
         [class.active]="activeTab() === 'all'"
         (click)="activeTab.set('all')"
       >
-        <span>সব বুকিং</span>
+        <span>{{ theme.currentLang() === 'bn' ? 'সব বুকিং' : 'All Bookings' }}</span>
         <span class="tab-count badge badge-neutral">{{ customerJobs().length | bnNumber }}</span>
       </button>
 
@@ -30,7 +30,7 @@
         [class.active]="activeTab() === 'active'"
         (click)="activeTab.set('active')"
       >
-        <span>চলমান কাজ</span>
+        <span>{{ theme.currentLang() === 'bn' ? 'চলমান কাজ' : 'Ongoing Jobs' }}</span>
       </button>
 
       <button
@@ -39,7 +39,7 @@
         [class.active]="activeTab() === 'completed'"
         (click)="activeTab.set('completed')"
       >
-        <span>সম্পন্ন কাজ</span>
+        <span>{{ theme.currentLang() === 'bn' ? 'সম্পন্ন কাজ' : 'Completed Jobs' }}</span>
       </button>
 
       <button
@@ -48,7 +48,7 @@
         [class.active]="activeTab() === 'cancelled'"
         (click)="activeTab.set('cancelled')"
       >
-        <span>বাতিলকৃত</span>
+        <span>{{ theme.currentLang() === 'bn' ? 'বাতিলকৃত' : 'Cancelled' }}</span>
       </button>
     </div>
   </div>
@@ -58,10 +58,12 @@
     @if (filteredJobs().length === 0) {
       <div class="empty-bookings card">
         <span class="empty-icon">📂</span>
-        <h3>এই তালিকায় কোনো বুকিং নেই</h3>
+        <h3>{{ theme.currentLang() === 'bn' ? 'এই তালিকায় কোনো বুকিং নেই' : 'No bookings in this list' }}</h3>
         <p>
-          আপনার কোনো বুকিং রেকর্ড এই ফিল্টারের সাথে মেলেনি। প্রয়োজনমতো যেকোনো দক্ষ কারিগর অবিলম্বে ডেকে
-          নিন।
+          {{ theme.currentLang() === 'bn' 
+            ? 'আপনার কোনো বুকিং রেকর্ড এই ফিল্টারের সাথে মেলেনি। প্রয়োজনমতো যেকোনো দক্ষ কারিগর অবিলম্বে ডেকে নিন।'
+            : 'No booking records matched this filter. Call any skilled craftsman immediately as needed.'
+          }}
         </p>
         <div
           style="
@@ -85,13 +87,13 @@
               cursor: pointer;
             "
           >
-            সব বুকিং দেখুন
+            {{ theme.currentLang() === 'bn' ? 'সব বুকিং দেখুন' : 'View all bookings' }}
           </button>
           <a
             routerLink="/customer/create-request"
             class="btn-primary"
             style="padding: 8px 16px; border-radius: 8px; text-decoration: none"
-            >নতুন রিকোয়েস্ট তৈরি করুন</a
+            >{{ theme.currentLang() === 'bn' ? 'নতুন রিকোয়েস্ট তৈরি করুন' : 'Create new request' }}</a
           >
         </div>
       </div>
@@ -108,7 +110,7 @@
               <span class="bcard-cat-icon">{{ getCategoryIcon(job.categoryId) }}</span>
               <div>
                 <h4 class="bcard-cat-name">{{ job.categoryName }}</h4>
-                <span class="bcard-id">আইডি: #{{ job.id }}</span>
+                <span class="bcard-id">{{ theme.currentLang() === 'bn' ? 'আইডি: #' : 'ID: #' }}{{ job.id }}</span>
               </div>
             </div>
 
@@ -135,7 +137,7 @@
                   [alt]="job.workerName"
                 />
                 <div class="worker-meta">
-                  <span class="wm-label">নিয়োজিত কর্মী</span>
+                  <span class="wm-label">{{ theme.currentLang() === 'bn' ? 'নিয়োজিত কর্মী' : 'Assigned Worker' }}</span>
                   <strong class="wm-name">{{ job.workerName }}</strong>
                   <span class="wm-phone"
                     >📞 {{ job.workerPhone || '01712345678' | maskPhone }}</span
@@ -145,24 +147,24 @@
             } @else {
               <div class="bcard-worker unassigned">
                 <span class="clock-icon">⏳</span>
-                <span class="wm-name">কর্মী অনুসন্ধানাধীন...</span>
+                <span class="wm-name">{{ theme.currentLang() === 'bn' ? 'কর্মী অনুসন্ধানাধীন...' : 'Searching for worker...' }}</span>
               </div>
             }
 
             <div class="bcard-info-item">
-              <span class="bii-label">অর্ডারের তারিখ</span>
+              <span class="bii-label">{{ theme.currentLang() === 'bn' ? 'অর্ডারের তারিখ' : 'Order Date' }}</span>
               <span class="bii-val">{{ job.timeline.createdAt | timeAgo }}</span>
             </div>
 
             <div class="bcard-info-item">
-              <span class="bii-label">স্থান</span>
+              <span class="bii-label">{{ theme.currentLang() === 'bn' ? 'স্থান' : 'Location' }}</span>
               <span class="bii-val address-truncate">{{
                 job.location.address || 'সাভার, ঢাকা'
               }}</span>
             </div>
 
             <div class="bcard-price-box">
-              <span class="bp-label">মোট প্রদেয়</span>
+              <span class="bp-label">{{ theme.currentLang() === 'bn' ? 'মোট প্রদেয়' : 'Total Amount' }}</span>
               <span class="bp-val">{{ job.finalPrice || job.estimatedPrice | taka }}</span>
             </div>
           </div>
@@ -177,11 +179,13 @@
               [attr.aria-disabled]="!isJobActive(job)"
               (click)="viewTracking(job)"
               [title]="
-                isJobActive(job) ? 'লাইভ ট্র্যাকিং ও বিস্তারিত' : 'কাজটি সক্রিয় নয় — ট্র্যাকিং নিষ্ক্রিয়'
+                isJobActive(job)
+                  ? (theme.currentLang() === 'bn' ? 'লাইভ ট্র্যাকিং ও বিস্তারিত' : 'Live Tracking & Details')
+                  : (theme.currentLang() === 'bn' ? 'কাজটি সক্রিয় নয় — ট্র্যাকিং নিষ্ক্রিয়' : 'Job is not active — Tracking disabled')
               "
             >
               <span class="pi pi-compass"></span>
-              <span>{{ isJobActive(job) ? 'ট্র্যাকিং ও বিস্তারিত' : 'ট্র্যাকিং নিষ্ক্রিয়' }}</span>
+              <span>{{ isJobActive(job) ? (theme.currentLang() === 'bn' ? 'ট্র্যাকিং ও বিস্তারিত' : 'Live Tracking') : (theme.currentLang() === 'bn' ? 'ট্র্যাকিং নিষ্ক্রিয়' : 'Inactive') }}</span>
             </button>
 
             @if (job.status.includes('cancelled')) {
@@ -204,26 +208,26 @@
                 "
               >
                 <span class="pi pi-refresh"></span>
-                <span>পুনরায় চালু করুন</span>
+                <span>{{ theme.currentLang() === 'bn' ? 'পুনরায় চালু করুন' : 'Reopen Job' }}</span>
               </button>
             }
 
             @if (job.status === 'completed' || job.status === 'paid') {
               <button type="button" class="btn-action-review" (click)="openReview(job)">
                 <span class="pi pi-star-fill"></span>
-                <span>রিভিউ দিন</span>
+                <span>{{ theme.currentLang() === 'bn' ? 'রিভিউ দিন' : 'Leave a review' }}</span>
               </button>
             }
 
             @if (job.status === 'reviewed') {
-              <span class="reviewed-done-tag">⭐ রিভিউ প্রদান করা হয়েছে</span>
+              <span class="reviewed-done-tag">⭐ {{ theme.currentLang() === 'bn' ? 'রিভিউ প্রদান করা হয়েছে' : 'Review submitted' }}</span>
             }
 
             <button
               type="button"
               class="btn-action-delete"
               (click)="deleteJob(job, $event)"
-              title="অর্ডার ডিলিট করুন"
+              [title]="theme.currentLang() === 'bn' ? 'অর্ডার ডিলিট করুন' : 'Delete booking'"
               style="
                 background: transparent;
                 color: #dc2626;
@@ -240,7 +244,7 @@
               "
             >
               <span class="pi pi-trash"></span>
-              <span>মুছে ফেলুন</span>
+              <span>{{ theme.currentLang() === 'bn' ? 'মুছে ফেলুন' : 'Delete booking' }}</span>
             </button>
           </div>
         </div>

@@ -101,12 +101,15 @@ export class AdminAreasComponent {
   }
 
   public deleteArea(id: string): void {
+    const isBn = this.theme.currentLang() === 'bn';
     this.confirmation.confirm({
-      header: 'এলাকা মুছে ফেলার নিশ্চিতকরণ (Confirm Area Deletion)',
-      message: 'আপনি কি নিশ্চিতভাবে এই এলাকা মুছে ফেলতে চান?\nAre you sure you want to delete this operational area?',
+      header: isBn ? 'এলাকা মুছুন' : 'Delete Area',
+      message: isBn
+        ? 'আপনি কি এই এলাকাটি মুছে ফেলতে চান?'
+        : 'Are you sure you want to delete this area?',
       icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'মুছুন / Delete',
-      rejectLabel: 'বাতিল / Cancel',
+      acceptLabel: isBn ? 'মুছুন' : 'Delete',
+      rejectLabel: isBn ? 'বাতিল' : 'Cancel',
       acceptButtonStyleClass: 'p-button-danger',
       rejectButtonStyleClass: 'p-button-text',
       accept: () => {

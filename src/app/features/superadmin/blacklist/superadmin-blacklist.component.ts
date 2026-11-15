@@ -110,18 +110,24 @@ export class SuperadminBlacklistComponent {
   }
 
   public removeBlacklist(id: string): void {
+    const isBn = this.theme.currentLang() === 'bn';
     this.confirmation.confirm({
-      header: 'ব্ল্যাকলিস্ট অপসারণের নিশ্চিতকরণ (Confirm Removal)',
-      message: 'আপনি কি নিশ্চিতভাবে এই এন্ট্রিটি ব্ল্যাকলিস্ট থেকে অপসারণ করতে চান?\nAre you sure you want to remove this entry from blacklist?',
+      header: isBn ? 'ব্ল্যাকলিস্ট থেকে অপসারণ' : 'Remove from Blacklist',
+      message: isBn
+        ? 'আপনি কি এই এন্ট্রিটি ব্ল্যাকলিস্ট থেকে অপসারণ করতে চান?'
+        : 'Are you sure you want to remove this entry from the blacklist?',
       icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'অপসারণ / Remove',
-      rejectLabel: 'বাতিল / Cancel',
+      acceptLabel: isBn ? 'অপসারণ' : 'Remove',
+      rejectLabel: isBn ? 'বাতিল' : 'Cancel',
       acceptButtonStyleClass: 'p-button-danger',
       rejectButtonStyleClass: 'p-button-text',
       accept: () => {
         this.reportService.removeFromBlacklist(id);
         this.auditLogService.logAction('REMOVE_BLACKLIST', 'blacklist', id);
-        this.notificationService.notify('ব্ল্যাকলিস্ট থেকে অপসারণ সম্পন্ন', 'info');
+        this.notificationService.notify(
+          isBn ? 'ব্ল্যাকলিস্ট থেকে অপসারণ সম্পন্ন' : 'Removed from blacklist successfully',
+          'info'
+        );
       }
     });
   }

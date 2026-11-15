@@ -89,12 +89,15 @@ export class MyBookingsComponent implements OnInit, OnDestroy {
     if (event) {
       event.stopPropagation();
     }
+    const isBn = this.theme.currentLang() === 'bn';
     this.confirmation.confirm({
-      header: 'বুকিং মুছে ফেলার নিশ্চিতকরণ (Confirm Delete)',
-      message: `আপনি কি নিশ্চিত যে "${job.categoryName}" এর এই রিকোয়েস্টটি (#${job.id}) স্থায়ীভাবে মুছে ফেলতে চান?\nAre you sure you want to delete this booking request?`,
+      header: isBn ? 'বুকিং মুছুন' : 'Delete Booking',
+      message: isBn
+        ? 'আপনি কি এই বুকিংটি মুছে ফেলতে চান?'
+        : 'Are you sure you want to delete this booking?',
       icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'মুছুন / Delete',
-      rejectLabel: 'বাতিল / Cancel',
+      acceptLabel: isBn ? 'মুছুন' : 'Delete',
+      rejectLabel: isBn ? 'বাতিল' : 'Cancel',
       acceptButtonStyleClass: 'p-button-danger',
       rejectButtonStyleClass: 'p-button-text',
       accept: () => {
@@ -148,19 +151,20 @@ export class MyBookingsComponent implements OnInit, OnDestroy {
   }
 
   public getStatusText(status: JobStatus): string {
+    const isBn = this.theme.currentLang() === 'bn';
     switch (status) {
-      case 'searching': return '🔍 কর্মী খোঁজা হচ্ছে';
-      case 'pending': return 'অপেক্ষমাণ';
-      case 'accepted': return 'অর্ডার গৃহীত';
-      case 'on_the_way': return 'কর্মী পথে রয়েছেন';
-      case 'arrived': return 'উপস্থিত হয়েছেন';
-      case 'in_progress': return 'কাজ চলছে';
-      case 'completed': return 'কাজ সম্পন্ন';
-      case 'paid': return 'পরিশোধিত';
-      case 'reviewed': return 'রিভিউ সম্পন্ন';
-      case 'cancelled_by_customer': return 'বাতিল (কাস্টমার)';
-      case 'cancelled_by_worker': return 'বাতিল (কর্মী)';
-      default: return 'প্রক্রিয়াধীন';
+      case 'searching': return isBn ? '🔍 কর্মী খোঁজা হচ্ছে' : '🔍 Searching for worker';
+      case 'pending': return isBn ? 'অপেক্ষমাণ' : 'Pending';
+      case 'accepted': return isBn ? 'অর্ডার গৃহীত' : 'Order accepted';
+      case 'on_the_way': return isBn ? 'কর্মী পথে রয়েছেন' : 'Worker on the way';
+      case 'arrived': return isBn ? 'উপস্থিত হয়েছেন' : 'Arrived at location';
+      case 'in_progress': return isBn ? 'কাজ চলছে' : 'Work in progress';
+      case 'completed': return isBn ? 'কাজ সম্পন্ন' : 'Work completed';
+      case 'paid': return isBn ? 'পরিশোধিত' : 'Paid';
+      case 'reviewed': return isBn ? 'রিভিউ সম্পন্ন' : 'Reviewed';
+      case 'cancelled_by_customer': return isBn ? 'বাতিল (কাস্টমার)' : 'Cancelled (Customer)';
+      case 'cancelled_by_worker': return isBn ? 'বাতিল (কর্মী)' : 'Cancelled (Worker)';
+      default: return isBn ? 'প্রক্রিয়াধীন' : 'Processing';
     }
   }
 
