@@ -118,10 +118,10 @@
                 </td>
                 <td>
                   <div class="actions">
-                    <button (click)="warnUser(cust)" class="btn-action warn" title="সতর্কবার্তা পাঠান">
+                    <button type="button" (click)="openWarnModal(cust, false)" class="btn-action warn" title="সতর্কবার্তা পাঠান">
                       <i class="pi pi-exclamation-circle"></i>
                     </button>
-                    <button (click)="banUser(cust)" class="btn-action ban" title="ব্যান করুন">
+                    <button type="button" (click)="openBanModal(cust, false)" class="btn-action ban" title="ব্যান করুন">
                       <i class="pi pi-ban"></i>
                     </button>
                   </div>
@@ -191,7 +191,7 @@
                       {{ worker.commissionDue | taka }}
                     </strong>
                     @if (worker.commissionDue > 0) {
-                      <button type="button" class="btn-xs-waive" (click)="waiveDue(worker)" title="কমিশন মওকুফ করুন" style="background: none; border: 1px solid var(--border-color); border-radius: 4px; font-size: 10px; padding: 2px 5px; cursor: pointer;">
+                      <button type="button" class="btn-xs-waive" (click)="openWaiveModal(worker)" title="কমিশন মওকুফ করুন" style="background: none; border: 1px solid var(--border-color); border-radius: 4px; font-size: 10px; padding: 2px 5px; cursor: pointer;">
                         মওকুফ
                       </button>
                     }
@@ -210,10 +210,10 @@
                 </td>
                 <td>
                   <div class="actions">
-                    <button (click)="warnWorker(worker)" class="btn-action warn" title="সতর্কবার্তা পাঠান">
+                    <button type="button" (click)="openWarnModal(worker, true)" class="btn-action warn" title="সতর্কবার্তা পাঠান">
                       <i class="pi pi-exclamation-circle"></i>
                     </button>
-                    <button (click)="banWorker(worker)" class="btn-action ban" title="সাসপেন্ড / ব্যান করুন">
+                    <button type="button" (click)="openBanModal(worker, true)" class="btn-action ban" title="সাসপেন্ড / ব্যান করুন">
                       <i class="pi pi-ban"></i>
                     </button>
                   </div>
@@ -271,6 +271,189 @@
             }
           </tbody>
         </table>
+      </div>
+    </div>
+  }
+
+  <!-- 1. WARNING NOTICE MODAL -->
+  @if (showWarnModal()) {
+    <div class="modal-backdrop" (click)="closeWarnModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()" style="max-width: 480px;">
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">⚠️</span>
+            <h3 class="modal-title">{{ theme.currentLang() === 'bn' ? 'সতর্কবার্তা প্রেরণ (Send Warning Notice)' : 'Send Warning Notice' }}</h3>
+          </div>
+          <button type="button" class="close-btn" (click)="closeWarnModal()">✕</button>
+        </div>
+
+        <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+          <div style="background: #fefce8; border: 1px solid #fef08a; border-radius: 8px; padding: 12px; font-size: 13px;">
+            প্রাপক: <strong>{{ selectedUser()?.name || selectedWorker()?.name }}</strong> 
+            ({{ selectedUser()?.phone || selectedWorker()?.phone }}) • 
+            <span class="badge badge-info">{{ selectedWorker() ? 'ওয়ার্কার' : 'কাস্টমার' }}</span>
+          </div>
+
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12.5px; font-weight: 700;">সতর্কবার্তার বিবরণ / মেসেজ:</label>
+            <textarea 
+              class="form-control" 
+              rows="4" 
+              [ngModel]="warnMessage()" 
+              (ngModelChange)="warnMessage.set($event)"
+              placeholder="সতর্কবার্তা বিস্তারিত লিখুন..." 
+              style="width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 13px; font-family: inherit; line-height: 1.5;"></textarea>
+            <span style="font-size: 11.5px; color: var(--text-secondary);">এই বার্তাটি ব্যবহারকারীর ইন-অ্যাপ নোটিফিকেশন এবং নিবন্ধিত মোবাইল নম্বরে পাঠানো হবে।</span>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; background: #f8fafc; border-top: 1px solid var(--border-color);">
+          <button type="button" class="btn-outline" (click)="closeWarnModal()">{{ theme.currentLang() === 'bn' ? 'বাতিল' : 'Cancel' }}</button>
+          <button type="button" (click)="confirmSendWarning()" style="background: #eab308; color: #713f12; border: none; padding: 8px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="pi pi-send"></i>
+            <span>{{ theme.currentLang() === 'bn' ? 'সতর্কবার্তা পাঠান' : 'Send Warning' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- 2. BAN / SUSPEND MODAL -->
+  @if (showBanModal()) {
+    <div class="modal-backdrop" (click)="closeBanModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()" style="max-width: 480px;">
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">🚫</span>
+            <h3 class="modal-title">{{ theme.currentLang() === 'bn' ? 'ব্যবহারকারী সাসপেন্ড বা ব্যান' : 'Suspend / Ban Account' }}</h3>
+          </div>
+          <button type="button" class="close-btn" (click)="closeBanModal()">✕</button>
+        </div>
+
+        <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+          <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 12px; font-size: 13px; color: #9f1239;">
+            লক্ষ্য: <strong>{{ selectedUser()?.name || selectedWorker()?.name }}</strong> 
+            ({{ selectedUser()?.phone || selectedWorker()?.phone }})
+          </div>
+
+          @if (selectedWorker()) {
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-size: 12.5px; font-weight: 700;">শাস্তিমূলক পদক্ষেপের ধরন:</label>
+              <div style="display: flex; gap: 10px;">
+                <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer;">
+                  <input type="radio" name="bType" value="suspend" [checked]="banType() === 'suspend'" (change)="banType.set('suspend')" />
+                  <span>সাময়িক বরখাস্ত (Suspension)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer;">
+                  <input type="radio" name="bType" value="permanent" [checked]="banType() === 'permanent'" (change)="banType.set('permanent')" />
+                  <span>স্থায়ী ব্যান ও ব্ল্যাকলিস্ট</span>
+                </label>
+              </div>
+            </div>
+
+            @if (banType() === 'suspend') {
+              <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+                <label style="font-size: 12.5px; font-weight: 700;">সাসপেনশন সময়কাল (দিন):</label>
+                <select class="form-control" [ngModel]="suspendDays()" (ngModelChange)="suspendDays.set($event)" style="padding: 9px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 13.5px;">
+                  <option [value]="3">৩ দিন সাময়িক বরখাস্ত</option>
+                  <option [value]="7">৭ দিন সাময়িক বরখাস্ত</option>
+                  <option [value]="14">১৪ দিন সাময়িক বরখাস্ত</option>
+                  <option [value]="30">৩০ দিন সাময়িক বরখাস্ত</option>
+                </select>
+              </div>
+            }
+          }
+
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12.5px; font-weight: 700;">ব্যান / সাসপেনশনের প্রাথমিক কারণ:</label>
+            <select class="form-control" [ngModel]="banReason()" (ngModelChange)="banReason.set($event)" style="padding: 9px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 13.5px;">
+              <option value="গ্রাহকের সাথে দুর্ব্যবহার বা অসদাচরণ">গ্রাহকের সাথে দুর্ব্যবহার বা অসদাচরণ</option>
+              <option value="অতিরিক্ত ভাড়া দাবি বা ভুয়া বিলিং">অতিরিক্ত ভাড়া দাবি বা ভুয়া বিলিং</option>
+              <option value="বারংবার কাজ গ্রহণ করে বাতিল করা">বারংবার কাজ গ্রহণ করে বাতিল করা</option>
+              <option value="জাল পরিচয়পত্র বা ভুয়া অ্যাকাউন্ট">জাল পরিচয়পত্র বা ভুয়া অ্যাকাউন্ট</option>
+              <option value="প্ল্যাটফর্ম নিরাপত্তা নীতিমালা গুরুতর লঙ্ঘন">প্ল্যাটফর্ম নিরাপত্তা নীতিমালা গুরুতর লঙ্ঘন</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12.5px; font-weight: 700;">অতিরিক্ত নোট (ঐচ্ছিক):</label>
+            <textarea 
+              class="form-control" 
+              rows="2" 
+              [ngModel]="customBanNote()" 
+              (ngModelChange)="customBanNote.set($event)"
+              placeholder="প্রশাসনিক সিদ্ধান্তের বিস্তারিত কারণ..." 
+              style="width: 100%; padding: 8px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 13px; font-family: inherit;"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; background: #f8fafc; border-top: 1px solid var(--border-color);">
+          <button type="button" class="btn-outline" (click)="closeBanModal()">{{ theme.currentLang() === 'bn' ? 'বাতিল' : 'Cancel' }}</button>
+          <button type="button" (click)="confirmBanAction()" style="background: #ef4444; color: #ffffff; border: none; padding: 8px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="pi pi-ban"></i>
+            <span>{{ banType() === 'permanent' || selectedUser() ? 'স্থায়ী ব্যান নিশ্চিত করুন' : 'সাসপেনশন কার্যকর করুন' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- 3. WAIVE COMMISSION MODAL -->
+  @if (showWaiveModal() && selectedWorker(); as w) {
+    <div class="modal-backdrop" (click)="closeWaiveModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()" style="max-width: 440px;">
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">💸</span>
+            <h3 class="modal-title">{{ theme.currentLang() === 'bn' ? 'বকেয়া কমিশন মওকুফ' : 'Waive Due Commission' }}</h3>
+          </div>
+          <button type="button" class="close-btn" (click)="closeWaiveModal()">✕</button>
+        </div>
+
+        <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; font-size: 13px;">
+            কারিগর: <strong>{{ w.name }}</strong> ({{ w.phone }})
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+              <span>বর্তমান বকেয়া কমিশন:</span>
+              <strong style="color: #dc2626; font-size: 16px;">{{ w.commissionDue | taka }}</strong>
+            </div>
+          </div>
+
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 13px; font-weight: 700;">মওকুফের পরিমাণ (টাকা):</label>
+            <input 
+              type="number" 
+              class="form-control" 
+              [ngModel]="waiveAmount()" 
+              (ngModelChange)="waiveAmount.set($event)"
+              min="1" 
+              [max]="w.commissionDue"
+              style="padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 16px; font-weight: 700;" />
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <button 
+              type="button" 
+              (click)="waiveAmount.set(w.commissionDue)"
+              style="flex: 1; background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; padding: 7px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
+              সম্পূর্ণ মওকুফ ({{ w.commissionDue | taka }})
+            </button>
+            <button 
+              type="button" 
+              (click)="waiveAmount.set(Math.round(w.commissionDue / 2))"
+              style="flex: 1; background: #f8fafc; border: 1px solid #cbd5e1; color: #334155; padding: 7px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
+              ৫০% মওকুফ
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; background: #f8fafc; border-top: 1px solid var(--border-color);">
+          <button type="button" class="btn-outline" (click)="closeWaiveModal()">{{ theme.currentLang() === 'bn' ? 'বাতিল' : 'Cancel' }}</button>
+          <button type="button" (click)="confirmWaive()" style="background: #16a34a; color: #ffffff; border: none; padding: 8px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="pi pi-check"></i>
+            <span>মওকুফ নিশ্চিত করুন</span>
+          </button>
+        </div>
       </div>
     </div>
   }

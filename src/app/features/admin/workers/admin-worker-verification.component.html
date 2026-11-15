@@ -62,15 +62,71 @@
           </div>
 
           <div class="kyc-actions">
-            <button (click)="reject(worker.uid)" class="btn-reject">
+            <button type="button" (click)="openRejectModal(worker)" class="btn-reject">
               <i class="pi pi-times"></i> বাতিল করুন
             </button>
-            <button (click)="approve(worker.uid)" class="btn-approve">
+            <button type="button" (click)="approve(worker)" class="btn-approve">
               <i class="pi pi-check"></i> অনুমোদন দিন (Verify)
             </button>
           </div>
         </div>
       }
+    </div>
+  }
+
+  <!-- Worker Rejection Modal Dialog -->
+  @if (showRejectModal() && selectedWorker(); as worker) {
+    <div class="modal-backdrop" (click)="closeRejectModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()" style="max-width: 480px;">
+        <div class="modal-header">
+          <div class="modal-title-wrap" style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">⚠️</span>
+            <h3 class="modal-title" style="margin: 0; font-size: 16px; font-weight: 700;">ওয়ার্কার আবেদন বাতিল (Reject Verification)</h3>
+          </div>
+          <button type="button" class="close-btn" (click)="closeRejectModal()">✕</button>
+        </div>
+
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px; padding: 18px 22px;">
+          <p style="margin: 0; font-size: 13.5px; color: var(--text-secondary); line-height: 1.5;">
+            ওয়ার্কার <strong>{{ worker.name }}</strong> ({{ worker.phone }})-এর আবেদনটি বাতিল করতে কারণ উল্লেখ করুন:
+          </p>
+
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12.5px; font-weight: 700; color: var(--text-primary);">বাতিলের প্রাথমিক কারণ</label>
+            <select 
+              class="form-control" 
+              [ngModel]="rejectReason()" 
+              (ngModelChange)="rejectReason.set($event)" 
+              style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 13.5px;">
+              <option value="NID কার্ডের তথ্য পরিষ্কার নয় বা অস্পষ্ট">NID কার্ডের তথ্য পরিষ্কার নয় বা অস্পষ্ট</option>
+              <option value="লাইভ সেলফির সাথে NID ছবির অমিল">লাইভ সেলফির সাথে NID ছবির অমিল</option>
+              <option value="ঠিকানা বা হোম লোকেশন অসম্পূর্ণ">ঠিকানা বা হোম লোকেশন অসম্পূর্ণ</option>
+              <option value="জাল বা ডুপ্লিকেট ডকুমেন্ট জমা দেওয়া হয়েছে">জাল বা ডুপ্লিকেট ডকুমেন্ট জমা দেওয়া হয়েছে</option>
+              <option value="অনুপযুক্ত স্কিল বা অভিজ্ঞতার প্রমাণ নেই">অনুপযুক্ত স্কিল বা অভিজ্ঞতার প্রমাণ নেই</option>
+              <option value="অন্যান্য অনিয়ম">অন্যান্য অনিয়ম</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12.5px; font-weight: 700; color: var(--text-primary);">অতিরিক্ত নোট / ওয়ার্কারের করণীয় (ঐচ্ছিক)</label>
+            <textarea 
+              class="form-control" 
+              rows="3" 
+              [ngModel]="customRejectNote()"
+              (ngModelChange)="customRejectNote.set($event)"
+              placeholder="যেমন: দয়া করে পরিষ্কার আলোতে NID কার্ডের দুই পাশের ছবি পুনরায় আপলোড করুন..." 
+              style="width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 13px;"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 12px 22px; background: #f8fafc; border-top: 1px solid var(--border-color);">
+          <button type="button" class="btn-outline" (click)="closeRejectModal()" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #fff; cursor: pointer; font-weight: 600;">ফিরে যান</button>
+          <button type="button" (click)="confirmReject()" style="background: #ef4444; color: #ffffff; border: none; padding: 8px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="pi pi-times-circle"></i>
+            <span>বাতিল নিশ্চিত করুন</span>
+          </button>
+        </div>
+      </div>
     </div>
   }
 </div>

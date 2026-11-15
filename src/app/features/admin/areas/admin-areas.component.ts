@@ -5,6 +5,7 @@ import { ConfirmationService } from 'primeng/api';
 import { AreaService } from '../../../core/services/area.service';
 import { AuditLogService } from '../../../core/services/audit-log.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { exportToCsv } from '../../../core/utils/csv-exporter';
 import { Area } from '../../../core/models/area.model';
@@ -23,6 +24,7 @@ export class AdminAreasComponent {
   private auditLog = inject(AuditLogService);
   private auth = inject(AuthService);
   private confirmation = inject(ConfirmationService);
+  private toast = inject(ToastService);
 
   public areas = this.areaService.areas;
 
@@ -31,6 +33,11 @@ export class AdminAreasComponent {
   public newUpazila = signal<string>('সাভার');
   public newRadius = signal<number>(5);
   public newSurge = signal<number>(1.0);
+
+  // Surge Multiplier Modal
+  public showSurgeModal = signal<boolean>(false);
+  public selectedSurgeArea = signal<Area | null>(null);
+  public surgeValue = signal<number>(1.0);
 
   public toggleActive(area: Area): void {
     const updated = { ...area, isActive: !area.isActive };
@@ -45,26 +52,56 @@ export class AdminAreasComponent {
       targetType: 'area',
       reason: `জোন ${area.zoneName} ${updated.isActive ? 'সক্রিয়' : 'নিষ্ক্রিয়'} করা হলো`
     });
+
+    const isBn = this.theme.currentLang() === 'bn';
+    this.toast.info(
+      isBn 
+        ? `জোন "${area.zoneName}" ${updated.isActive ? 'সক্রিয়' : 'নিষ্ক্রিয়'} করা হয়েছে।` 
+        : `Zone "${area.zoneName}" is now ${updated.isActive ? 'active' : 'inactive'}.`
+    );
   }
 
-  public adjustSurge(area: Area): void {
-    const input = prompt(`সার্জ মাল্টিপ্লায়ার সেট করুন (${area.zoneName}):`, area.surgeMultiplier.toString());
-    if (input) {
-      const val = parseFloat(input);
-      if (!isNaN(val) && val >= 1.0 && val <= 3.0) {
-        this.areaService.updateArea({ ...area, surgeMultiplier: val });
+  public openSurgeModal(area: Area): void {
+    this.selectedSurgeArea.set(area);
+    this.surgeValue.set(area.surgeMultiplier || 1.0);
+    this.showSurgeModal.set(true);
+  }
 
-        this.auditLog.logAction({
-          actorId: this.auth.currentUser()?.uid || 'admin',
-          actorName: this.auth.currentUser()?.name || 'অ্যাডমিন',
-          actorRole: 'admin',
-          action: 'surge_multiplier_updated',
-          targetId: area.id,
-          targetType: 'area',
-          reason: `সার্জ মাল্টিপ্লায়ার পরিবর্তন: ${area.surgeMultiplier}x -> ${val}x`
-        });
-      }
+  public closeSurgeModal(): void {
+    this.showSurgeModal.set(false);
+    this.selectedSurgeArea.set(null);
+  }
+
+  public confirmSurge(): void {
+    const area = this.selectedSurgeArea();
+    if (!area) return;
+
+    const val = Number(this.surgeValue());
+    if (isNaN(val) || val < 1.0 || val > 3.0) {
+      this.toast.warn(this.theme.currentLang() === 'bn' ? 'সার্জ মাল্টিপ্লায়ার ১.০ থেকে ৩.০-এর মধ্যে হতে হবে।' : 'Surge multiplier must be between 1.0 and 3.0.');
+      return;
     }
+
+    this.areaService.updateArea({ ...area, surgeMultiplier: val });
+
+    this.auditLog.logAction({
+      actorId: this.auth.currentUser()?.uid || 'admin',
+      actorName: this.auth.currentUser()?.name || 'অ্যাডমিন',
+      actorRole: 'admin',
+      action: 'surge_multiplier_updated',
+      targetId: area.id,
+      targetType: 'area',
+      reason: `সার্জ মাল্টিপ্লায়ার পরিবর্তন: ${area.surgeMultiplier}x -> ${val}x`
+    });
+
+    const isBn = this.theme.currentLang() === 'bn';
+    this.toast.success(
+      isBn
+        ? `জোন "${area.zoneName}"-এর সার্জ মাল্টিপ্লায়ার ${val}x নির্ধারণ করা হয়েছে!`
+        : `Surge multiplier for "${area.zoneName}" set to ${val}x!`
+    );
+
+    this.closeSurgeModal();
   }
 
   public createArea(): void {

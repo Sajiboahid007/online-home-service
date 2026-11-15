@@ -1,47 +1,54 @@
 <div class="admin-page-container">
   <div class="page-header">
     <div>
-      <h2>লেনদেন ও উত্তোলন ব্যবস্থাপনা (Transactions & Withdrawals)</h2>
-      <p class="subtitle">কমিশন সংগ্রহ, বকেয়া পরিশোধ এবং কারিগরদের উত্তোলন অনুরোধ অনুমোদন</p>
+      <h2>{{ theme.currentLang() === 'bn' ? 'লেনদেন ও উত্তোলন ব্যবস্থাপনা' : 'Transactions & Withdrawals' }}</h2>
+      <p class="subtitle">{{ theme.currentLang() === 'bn' ? 'কমিশন সংগ্রহ, বকেয়া পরিশোধ এবং কারিগরদের উত্তোলন অনুরোধ অনুমোদন' : 'Commission collection, due payments, and worker withdrawal approvals' }}</p>
     </div>
     <button class="btn-outline-sm" (click)="exportCsv()">
-      <i class="pi pi-download"></i> CSV ডাউনলোড
+      <i class="pi pi-download"></i> {{ theme.currentLang() === 'bn' ? 'CSV ডাউনলোড' : 'Export CSV' }}
     </button>
   </div>
 
   <!-- Withdrawal Queue -->
   <div class="card mb-4" *ngIf="pendingWithdrawals().length > 0">
     <div class="d-flex align-items-center justify-content-between mb-3">
-      <h3 class="m-0 text-orange"><i class="pi pi-bell"></i> অপেক্ষমাণ উত্তোলন অনুরোধসমূহ ({{ pendingWithdrawals().length | bnNumber }})</h3>
-      <span class="badge badge-warning">রিভিউ আবশ্যক</span>
+      <h3 class="m-0 text-orange"><i class="pi pi-bell"></i> {{ theme.currentLang() === 'bn' ? 'অপেক্ষমাণ উত্তোলন অনুরোধসমূহ' : 'Pending Withdrawal Requests' }} ({{ pendingWithdrawals().length | bnNumber }})</h3>
+      <span class="badge badge-warning">{{ theme.currentLang() === 'bn' ? 'রিভিউ আবশ্যক' : 'Review Required' }}</span>
     </div>
 
     <div class="table-wrap">
       <table class="admin-table">
         <thead>
           <tr>
-            <th>অনুরোধ আইডি</th>
-            <th>কারিগর আইডি</th>
-            <th>পরিমাণ</th>
-            <th>পদ্ধতি</th>
-            <th>বিবরণ</th>
-            <th>অনুরোধের সময়</th>
-            <th>অ্যাকশন</th>
+            <th>{{ theme.currentLang() === 'bn' ? 'অনুরোধ আইডি' : 'Request ID' }}</th>
+            <th>{{ theme.currentLang() === 'bn' ? 'কারিগর' : 'Worker' }}</th>
+            <th>{{ theme.currentLang() === 'bn' ? 'পরিমাণ' : 'Amount' }}</th>
+            <th>{{ theme.currentLang() === 'bn' ? 'পদ্ধতি' : 'Method' }}</th>
+            <th>{{ theme.currentLang() === 'bn' ? 'বিবরণ' : 'Description' }}</th>
+            <th>{{ theme.currentLang() === 'bn' ? 'অনুরোধের সময়' : 'Requested At' }}</th>
+            <th>{{ theme.currentLang() === 'bn' ? 'অ্যাকশন' : 'Actions' }}</th>
           </tr>
         </thead>
         <tbody>
           @for (tx of pendingWithdrawals(); track tx.id) {
             <tr>
               <td><code>#{{ tx.id }}</code></td>
-              <td><strong>{{ tx.workerId }}</strong></td>
+              <td>
+                <strong>{{ getWorkerName(tx.workerId) }}</strong>
+                <div style="font-size: 11px; color: var(--text-secondary);">{{ tx.workerId }}</div>
+              </td>
               <td><span class="text-success font-bold">{{ tx.amount | taka }}</span></td>
               <td><span class="badge badge-info">{{ tx.method | uppercase }}</span></td>
               <td>{{ tx.description }}</td>
               <td>{{ tx.createdAt | date:'short' }}</td>
               <td>
                 <div class="action-btn-group">
-                  <button class="btn-sm btn-primary" (click)="approve(tx.id)">অনুমোদন দিন</button>
-                  <button class="btn-sm btn-danger" (click)="reject(tx.id)">প্রত্যাখ্যান</button>
+                  <button type="button" class="btn-sm btn-primary" (click)="openApproveModal(tx)">
+                    {{ theme.currentLang() === 'bn' ? 'অনুমোদন দিন' : 'Approve' }}
+                  </button>
+                  <button type="button" class="btn-sm btn-danger" (click)="openRejectModal(tx)">
+                    {{ theme.currentLang() === 'bn' ? 'প্রত্যাখ্যান' : 'Reject' }}
+                  </button>
                 </div>
               </td>
             </tr>
@@ -54,19 +61,19 @@
   <!-- All Transactions History -->
   <div class="card table-card">
     <div class="p-3 border-bottom">
-      <h3 class="m-0">সকল লেনদেনের খতিয়ান</h3>
+      <h3 class="m-0">{{ theme.currentLang() === 'bn' ? 'সকল লেনদেনের খতিয়ান' : 'All Transactions History' }}</h3>
     </div>
     <div class="table-wrap">
       <table class="admin-table">
         <thead>
           <tr>
-            <th>ট্রানজ্যাকশন আইডি</th>
-            <th>ধরন (Type)</th>
-            <th>পরিমাণ</th>
-            <th>মেথড</th>
-            <th>স্ট্যাটাস</th>
-            <th>বিবরণ</th>
-            <th>তারিখ</th>
+            <th>{{ theme.currentLang() === 'bn' ? 'ট্রানজ্যাকশন আইডি' : 'Transaction ID' }}</th>
+            <th>{{ theme.currentLang() === 'bn' ? 'ধরন' : 'Type' }}</th>
+            <th>{{ theme.currentLang() === 'bn' ? 'পরিমাণ' : 'Amount' }}</th>
+            <th>{{ theme.currentLang() === 'bn' ? 'মেথড' : 'Method' }}</th>
+            <th>{{ theme.currentLang() === 'bn' ? 'স্ট্যাটাস' : 'Status' }}</th>
+            <th>{{ theme.currentLang() === 'bn' ? 'বিবরণ' : 'Description' }}</th>
+            <th>{{ theme.currentLang() === 'bn' ? 'তারিখ' : 'Date' }}</th>
           </tr>
         </thead>
         <tbody>
@@ -93,4 +100,124 @@
       </table>
     </div>
   </div>
+
+  <!-- APPROVE WITHDRAWAL MODAL DIALOG -->
+  @if (showApproveModal() && selectedTx(); as tx) {
+    <div class="modal-backdrop" (click)="closeApproveModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()" style="max-width: 500px;">
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">💰</span>
+            <h3 class="modal-title">{{ theme.currentLang() === 'bn' ? 'উত্তোলন অনুমোদন ও অর্থ প্রেরণ' : 'Approve & Process Withdrawal' }}</h3>
+          </div>
+          <button type="button" class="close-btn" (click)="closeApproveModal()">✕</button>
+        </div>
+
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px; padding: 20px;">
+          <div style="background: #f8fafc; border: 1.5px solid var(--border-color); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 12.5px; color: var(--text-secondary);">অনুরোধ আইডি:</span>
+              <code style="font-weight: 700;">#{{ tx.id }}</code>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 12.5px; color: var(--text-secondary);">কারিগর:</span>
+              <strong>{{ getWorkerName(tx.workerId) }} ({{ tx.workerId }})</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 12.5px; color: var(--text-secondary);">উত্তোলনের পরিমাণ:</span>
+              <strong style="color: #16a34a; font-size: 18px;">{{ tx.amount | taka }}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 12.5px; color: var(--text-secondary);">পদ্ধতি:</span>
+              <span class="badge badge-info">{{ tx.method | uppercase }}</span>
+            </div>
+            <div style="font-size: 12.5px; color: var(--text-secondary); border-top: 1px dashed var(--border-color); padding-top: 6px;">
+              বিবরণ: <strong>{{ tx.description }}</strong>
+            </div>
+          </div>
+
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 13px; font-weight: 700; color: var(--text-primary);">
+              {{ tx.method | uppercase }} লেনদেন ট্রানজ্যাকশন আইডি (TrxID) / রেফারেন্স:
+            </label>
+            <input 
+              type="text" 
+              class="form-control" 
+              [ngModel]="trxRef()" 
+              (ngModelChange)="trxRef.set($event)"
+              placeholder="যেমন: TRX9876543210" 
+              style="width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: monospace; font-size: 14px; font-weight: 700;" />
+            <span style="font-size: 11.5px; color: var(--text-secondary);">কারিগরকে পাঠানো ব্যাংক/বিকাশ/নগদ স্টেটমেন্টের ট্রানজ্যাকশন রেফারেন্স নম্বর।</span>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; background: #f8fafc; border-top: 1px solid var(--border-color);">
+          <button type="button" class="btn-outline" (click)="closeApproveModal()" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #fff; cursor: pointer; font-weight: 600;">{{ theme.currentLang() === 'bn' ? 'বাতিল' : 'Cancel' }}</button>
+          <button type="button" (click)="confirmApprove()" style="background: #16a34a; color: #ffffff; border: none; padding: 8px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="pi pi-check"></i>
+            <span>{{ theme.currentLang() === 'bn' ? 'অনুমোদন নিশ্চিত করুন' : 'Confirm & Mark Paid' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- REJECT WITHDRAWAL MODAL DIALOG -->
+  @if (showRejectModal() && selectedTx(); as tx) {
+    <div class="modal-backdrop" (click)="closeRejectModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()" style="max-width: 480px;">
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">⚠️</span>
+            <h3 class="modal-title">{{ theme.currentLang() === 'bn' ? 'উত্তোলন অনুরোধ প্রত্যাখ্যান (Reject)' : 'Reject Withdrawal Request' }}</h3>
+          </div>
+          <button type="button" class="close-btn" (click)="closeRejectModal()">✕</button>
+        </div>
+
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px; padding: 20px;">
+          <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; padding: 12px; font-size: 13px; color: #9f1239;">
+            অনুরোধ: <strong>#{{ tx.id }}</strong> • কারিগর: <strong>{{ getWorkerName(tx.workerId) }}</strong> • পরিমাণ: <strong>{{ tx.amount | taka }}</strong>
+          </div>
+
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12.5px; font-weight: 700; color: var(--text-primary);">প্রত্যাখ্যানের প্রাথমিক কারণ:</label>
+            <select 
+              class="form-control" 
+              [ngModel]="rejectReason()" 
+              (ngModelChange)="rejectReason.set($event)"
+              style="width: 100%; padding: 9px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 13.5px; font-family: inherit;">
+              <option value="অ্যাকাউন্ট নম্বরে অমিল বা ভুল নম্বর">অ্যাকাউন্ট নম্বরে অমিল বা ভুল নম্বর</option>
+              <option value="অপর্যাপ্ত ওয়ালেট ব্যালেন্স বা হিসাব অমিল">অপর্যাপ্ত ওয়ালেট ব্যালেন্স বা হিসাব অমিল</option>
+              <option value="বকেয়া কমিশন সীমা অতিক্রম করেছে">বকেয়া কমিশন সীমা অতিক্রম করেছে</option>
+              <option value="সন্দেহজনক কার্যকলাপ বা নিরাপত্তা কারণে স্থগিত">সন্দেহজনক কার্যকলাপ বা নিরাপত্তা কারণে স্থগিত</option>
+              <option value="অন্যান্য কারণ">অন্যান্য কারণ</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12.5px; font-weight: 700; color: var(--text-primary);">বিস্তারিত নোট (ঐচ্ছিক):</label>
+            <textarea 
+              class="form-control" 
+              rows="3" 
+              [ngModel]="customRejectNote()"
+              (ngModelChange)="customRejectNote.set($event)"
+              placeholder="কারিগরকে কী করতে হবে সংক্ষেপে লিখুন (যেমন: বিকাশ পার্সোনাল নম্বর সঠিকভাবে প্রদান করুন)..."
+              style="width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 13px; font-family: inherit;"></textarea>
+          </div>
+
+          <p style="margin: 0; font-size: 12px; color: var(--text-secondary); background: #f8fafc; padding: 8px 10px; border-radius: 6px;">
+            ℹ️ <strong>নোট:</strong> অনুরোধটি প্রত্যাখ্যান করলে উত্তোলনের অর্থ ({{ tx.amount | taka }}) স্বয়ংক্রিয়ভাবে কারিগরের ওয়ালেটে রিফান্ড হয়ে যাবে।
+          </p>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; background: #f8fafc; border-top: 1px solid var(--border-color);">
+          <button type="button" class="btn-outline" (click)="closeRejectModal()" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #fff; cursor: pointer; font-weight: 600;">{{ theme.currentLang() === 'bn' ? 'ফিরে যান' : 'Cancel' }}</button>
+          <button type="button" (click)="confirmReject()" style="background: #ef4444; color: #ffffff; border: none; padding: 8px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="pi pi-times-circle"></i>
+            <span>{{ theme.currentLang() === 'bn' ? 'প্রত্যাখ্যান নিশ্চিত করুন' : 'Confirm Rejection' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

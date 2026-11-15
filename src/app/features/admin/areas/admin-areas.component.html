@@ -40,7 +40,7 @@
                   <span class="surge-val" [class.high]="area.surgeMultiplier > 1.0">
                     {{ area.surgeMultiplier }}x
                   </span>
-                  <button class="btn-xs" (click)="adjustSurge(area)" [title]="theme.currentLang() === 'bn' ? 'সার্জ পরিবর্তন' : 'Change surge multiplier'">
+                  <button class="btn-xs" (click)="openSurgeModal(area)" [title]="theme.currentLang() === 'bn' ? 'সার্জ পরিবর্তন' : 'Change surge multiplier'">
                     <i class="pi pi-bolt"></i>
                   </button>
                 </div>
@@ -86,6 +86,65 @@
         <div class="modal-actions mt-3">
           <button type="button" class="btn-outline" (click)="showCreateModal.set(false)">{{ theme.currentLang() === 'bn' ? 'বাতিল' : 'Cancel' }}</button>
           <button type="button" class="btn-primary" (click)="createArea()">{{ theme.currentLang() === 'bn' ? 'তৈরি করুন' : 'Create Zone' }}</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Surge Multiplier Modal -->
+  @if (showSurgeModal() && selectedSurgeArea(); as area) {
+    <div class="modal-backdrop" (click)="closeSurgeModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()" style="max-width: 440px;">
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">⚡</span>
+            <h3 class="modal-title">{{ theme.currentLang() === 'bn' ? 'সার্জ মাল্টিপ্লায়ার সমন্বয়' : 'Adjust Surge Multiplier' }}</h3>
+          </div>
+          <button type="button" class="close-btn" (click)="closeSurgeModal()">✕</button>
+        </div>
+
+        <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+          <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-size: 13px;">
+            জোন: <strong>{{ area.zoneName }}</strong> ({{ area.upazila }})
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">
+              বর্তমান মাল্টিপ্লায়ার: <strong>{{ area.surgeMultiplier }}x</strong>
+            </div>
+          </div>
+
+          <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 13px; font-weight: 700;">নতুন সার্জ মাল্টিপ্লায়ার (১.০x — ৩.০x):</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <input 
+                type="number" 
+                class="input-field" 
+                step="0.1" 
+                min="1.0" 
+                max="3.0" 
+                [ngModel]="surgeValue()" 
+                (ngModelChange)="surgeValue.set($event)"
+                style="flex: 1; padding: 10px; font-size: 16px; font-weight: 700;" />
+              <span style="font-size: 18px; font-weight: 800; color: #f59e0b;">{{ surgeValue() }}x</span>
+            </div>
+            <span style="font-size: 11.5px; color: var(--text-secondary);">
+              বৃষ্টি, ঝড় বা পিক আওয়ারে চাহিদার ভিত্তিতে স্বয়ংক্রিয় ভাড়ার গুণক। স্বাভাবিক সময়ে ১.০x রাখুন।
+            </span>
+          </div>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            @for (val of [1.0, 1.2, 1.5, 2.0]; track val) {
+              <button 
+                type="button" 
+                (click)="surgeValue.set(val)"
+                style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                {{ val }}x
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; background: #f8fafc; border-top: 1px solid var(--border-color);">
+          <button type="button" class="btn-outline" (click)="closeSurgeModal()">{{ theme.currentLang() === 'bn' ? 'বাতিল' : 'Cancel' }}</button>
+          <button type="button" class="btn-primary" (click)="confirmSurge()">{{ theme.currentLang() === 'bn' ? 'সংরক্ষণ করুন' : 'Save Changes' }}</button>
         </div>
       </div>
     </div>

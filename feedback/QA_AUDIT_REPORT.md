@@ -50,14 +50,22 @@ Below is the exhaustive matrix of every modal in the system, its opening trigger
 | 24 | **Admin Confirm Delete Area Dialog** | [admin-areas.component.ts](file:///C:/unversity/online-home-service/src/app/features/admin/areas/admin-areas.component.ts) | Click trash icon on area row | ✅ Verified | "Cancel" button, backdrop, ESC | Clean concise bilingual confirmation |
 | 25 | **Admin SOS Alert Resolution Modal** | [admin-reports.component.ts](file:///C:/unversity/online-home-service/src/app/features/admin/reports/admin-reports.component.ts) | Click "সমাধান করুন ও বন্ধ করুন" | ✅ Verified (Fixed) | "বাতিল" button, `✕` button | Caller details, resolution note textarea |
 | 26 | **Admin Dispute Review & Action Modal** | [admin-reports.component.ts](file:///C:/unversity/online-home-service/src/app/features/admin/reports/admin-reports.component.ts) | Click "রিপোর্ট পর্যালোচনা" | ✅ Verified (Fixed) | "বন্ধ করুন", `✕` button | Investigation & resolution action buttons |
-| 27 | **SuperAdmin Create Admin Modal** | [superadmin-admins.component.ts](file:///C:/unversity/online-home-service/src/app/features/superadmin/admins/superadmin-admins.component.ts) | Click "+ নতুন অ্যাডমিন যোগ করুন" | ✅ Verified | "বাতিল" button, backdrop click | Full name, phone, zone selector |
-| 28 | **SuperAdmin Delete Admin Dialog** | [superadmin-admins.component.ts](file:///C:/unversity/online-home-service/src/app/features/superadmin/admins/superadmin-admins.component.ts) | Click trash icon on admin row | ✅ Verified | "Cancel" button, backdrop, ESC | Localized PrimeNG confirmation |
-| 29 | **SuperAdmin Category Modal** | [superadmin-categories.component.ts](file:///C:/unversity/online-home-service/src/app/features/superadmin/categories/superadmin-categories.component.ts) | Click "+ নতুন ক্যাটাগরি" or Edit | ✅ Verified | "বাতিল" button, backdrop click | Name En/Bn, base fare, commission % |
-| 30 | **SuperAdmin Delete Category Dialog** | [superadmin-categories.component.ts](file:///C:/unversity/online-home-service/src/app/features/superadmin/categories/superadmin-categories.component.ts) | Click trash icon on category | ✅ Verified | "Cancel" button, backdrop, ESC | Localized PrimeNG confirmation |
-| 31 | **SuperAdmin Coupon Modal** | [superadmin-coupons.component.ts](file:///C:/unversity/online-home-service/src/app/features/superadmin/coupons/superadmin-coupons.component.ts) | Click "+ নতুন কুপন যোগ করুন" | ✅ Verified | "বাতিল" button, backdrop click | Code, discount %, max cap, dates |
-| 32 | **SuperAdmin Delete Coupon Dialog** | [superadmin-coupons.component.ts](file:///C:/unversity/online-home-service/src/app/features/superadmin/coupons/superadmin-coupons.component.ts) | Click trash icon on coupon | ✅ Verified | "Cancel" button, backdrop, ESC | Localized PrimeNG confirmation |
-| 33 | **SuperAdmin Blacklist Entry Modal** | [superadmin-blacklist.component.ts](file:///C:/unversity/online-home-service/src/app/features/superadmin/blacklist/superadmin-blacklist.component.ts) | Click "+ নতুন ব্ল্যাকলিস্ট এন্ট্রি" | ✅ Verified | "বাতিল" button, backdrop click | Phone/NID input, reason, type |
-| 34 | **SuperAdmin Remove Blacklist Dialog** | [superadmin-blacklist.component.ts](file:///C:/unversity/online-home-service/src/app/features/superadmin/blacklist/superadmin-blacklist.component.ts) | Click "অপসারণ" button | ✅ Verified | "Cancel" button, backdrop, ESC | Localized PrimeNG confirmation |
+| 27 | **Admin Surge Multiplier Modal** | [admin-areas.component.ts](file:///C:/unversity/online-home-service/src/app/features/admin/areas/admin-areas.component.ts) | Click bolt icon on area row | ✅ Verified (Added) | "বাতিল" button, `✕` button | Quick presets (1.0x-2.0x), input validation |
+| 28 | **Admin Edit Pricing Matrix Modal** | [admin-pricing-matrix.component.ts](file:///C:/unversity/online-home-service/src/app/features/admin/pricing/admin-pricing-matrix.component.ts) | Click "এডিট" on category row | ✅ Verified (Added) | "বাতিল" button, `✕` button | Commission %, Base fare, Min/Max budget, Visit charge |
+| 29 | **Admin Approve Withdrawal Modal** | [admin-transactions.component.ts](file:///C:/unversity/online-home-service/src/app/features/admin/transactions/admin-transactions.component.ts) | Click "অনুমোদন দিন" on withdrawal | ✅ Verified (Added) | "বাতিল" button, `✕` button | Worker details, TrxID input, confirmation |
+| 30 | **Admin Reject Withdrawal Modal** | [admin-transactions.component.ts](file:///C:/unversity/online-home-service/src/app/features/admin/transactions/admin-transactions.component.ts) | Click "প্রত্যাখ্যান" on withdrawal | ✅ Verified (Added) | "ফিরে যান", `✕` button | Reason dropdown, custom notes, auto-refund notice |
+| 31 | **Admin Send Warning Notice Modal** | [admin-users-list.component.ts](file:///C:/unversity/online-home-service/src/app/features/admin/users/admin-users-list.component.ts) | Click warning icon on user/worker | ✅ Verified (Added) | "বাতিল" button, `✕` button | Target info, warning textarea, in-app notification |
+| 32 | **Admin Suspend / Ban Modal** | [admin-users-list.component.ts](file:///C:/unversity/online-home-service/src/app/features/admin/users/admin-users-list.component.ts) | Click ban icon on user/worker | ✅ Verified (Added) | "বাতিল" button, `✕` button | Days dropdown, reason selector, permanent blacklist |
+| 33 | **Admin Waive Commission Modal** | [admin-users-list.component.ts](file:///C:/unversity/online-home-service/src/app/features/admin/users/admin-users-list.component.ts) | Click "মওকুফ" on worker row | ✅ Verified (Added) | "বাতিল" button, `✕` button | Amount input, 100% / 50% quick buttons |
+| 34 | **Admin Worker KYC Rejection Modal** | [admin-worker-verification.component.ts](file:///C:/unversity/online-home-service/src/app/features/admin/workers/admin-worker-verification.component.ts) | Click "বাতিল করুন" on pending worker | ✅ Verified (Added) | "ফিরে যান", `✕` button | NID/Selfie reason dropdown, custom instructions |
+| 35 | **SuperAdmin Create Admin Modal** | [superadmin-admins.component.ts](file:///C:/unversity/online-home-service/src/app/features/superadmin/admins/superadmin-admins.component.ts) | Click "+ নতুন অ্যাডমিন যোগ করুন" | ✅ Verified | "বাতিল" button, backdrop click | Full name, phone, zone selector |
+| 36 | **SuperAdmin Delete Admin Dialog** | [superadmin-admins.component.ts](file:///C:/unversity/online-home-service/src/app/features/superadmin/admins/superadmin-admins.component.ts) | Click trash icon on admin row | ✅ Verified | "Cancel" button, backdrop, ESC | Localized PrimeNG confirmation |
+| 37 | **SuperAdmin Category Modal** | [superadmin-categories.component.ts](file:///C:/unversity/online-home-service/src/app/features/superadmin/categories/superadmin-categories.component.ts) | Click "+ নতুন ক্যাটাগরি" or Edit | ✅ Verified | "বাতিল" button, backdrop click | Name En/Bn, base fare, commission % |
+| 38 | **SuperAdmin Delete Category Dialog** | [superadmin-categories.component.ts](file:///C:/unversity/online-home-service/src/app/features/superadmin/categories/superadmin-categories.component.ts) | Click trash icon on category | ✅ Verified | "Cancel" button, backdrop, ESC | Localized PrimeNG confirmation |
+| 39 | **SuperAdmin Coupon Modal** | [superadmin-coupons.component.ts](file:///C:/unversity/online-home-service/src/app/features/superadmin/coupons/superadmin-coupons.component.ts) | Click "+ নতুন কুপন যোগ করুন" | ✅ Verified | "বাতিল" button, backdrop click | Code, discount %, max cap, dates |
+| 40 | **SuperAdmin Delete Coupon Dialog** | [superadmin-coupons.component.ts](file:///C:/unversity/online-home-service/src/app/features/superadmin/coupons/superadmin-coupons.component.ts) | Click trash icon on coupon | ✅ Verified | "Cancel" button, backdrop, ESC | Localized PrimeNG confirmation |
+| 41 | **SuperAdmin Blacklist Entry Modal** | [superadmin-blacklist.component.ts](file:///C:/unversity/online-home-service/src/app/features/superadmin/blacklist/superadmin-blacklist.component.ts) | Click "+ নতুন ব্ল্যাকলিস্ট এন্ট্রি" | ✅ Verified | "বাতিল" button, backdrop click | Phone/NID input, reason, type |
+| 42 | **SuperAdmin Remove Blacklist Dialog** | [superadmin-blacklist.component.ts](file:///C:/unversity/online-home-service/src/app/features/superadmin/blacklist/superadmin-blacklist.component.ts) | Click "অপসারণ" button | ✅ Verified | "Cancel" button, backdrop, ESC | Localized PrimeNG confirmation |
 
 ---
 
@@ -91,6 +99,16 @@ Below is the exhaustive matrix of every modal in the system, its opening trigger
 - **Root Cause**: The worker demo entries had `label` set to profession + name (e.g., `'প্লাম্বার রহিম'`, `'ইলেকট্রিশিয়ান করিম'`).
 - **Resolution**: Stripped all professional prefixes so the chip buttons exclusively show their real personal names (`মো: রহিম উদ্দিন`, `করিম মিয়া`, etc.).
 
+### Issue 5: Native Browser `alert()`, `confirm()`, and `prompt()` Used Instead of In-App Modals
+- **Location**:
+  - `src/app/features/admin/workers/admin-worker-verification.component.ts` & `.html`
+  - `src/app/features/admin/jobs/admin-jobs.component.ts`
+- **Root Cause**: Admin KYC worker verification and job actions relied on intrusive, blocking native browser `alert()`, `confirm()`, and `prompt()` popups rather than modern, styled Angular modals and PrimeNG confirmation dialogs.
+- **Resolution**:
+  - **Worker Verification KYC Approval**: Replaced raw browser `alert()` with a themed PrimeNG `confirmation.confirm()` dialog (`Approve Worker Verification`) and a non-blocking `ToastService.success()` alert.
+  - **Worker Verification KYC Rejection**: Built a custom in-app modal (`showRejectModal`) with structured rejection reason dropdowns (`NID কার্ডের তথ্য পরিষ্কার নয়`, `সেলফির সাথে অমিল`, `জাল ডকুমেন্ট`, etc.), custom note textarea, and `ToastService.warn()` notifications.
+  - **Admin Jobs Cancel & Refund**: Converted native `confirm()` and `alert()` calls in `cancelJob()` and `refundJob()` to localized `ConfirmationService.confirm()` modals and feedback toasts.
+
 ---
 
 ## 4. Documentation Consolidation
@@ -108,8 +126,30 @@ As requested, all repository `.md` files have been centralized into the root `fe
 
 ---
 
-## 5. Verification & Build Results
+## 5. Admin Panel Action Modal Audit & Implementation
+
+In accordance with the QA audit requirement to check all admin actions and ensure every action that alters state or confirms an operation uses an in-app modal instead of missing dialogs or native browser popups:
+
+| Admin Section | Action | Modal Type / Implementation |
+|---|---|---|
+| **Withdrawals / Transactions** (`admin-transactions`) | Approve Withdrawal | In-app modal with transaction summary, payment method, TRX/Reference input, and confirmation |
+| **Withdrawals / Transactions** (`admin-transactions`) | Reject Withdrawal | In-app modal with rejection reason picker, custom note textarea, and due refund control |
+| **User & Worker Management** (`admin-users-list`) | Send Warning | In-app modal with recipient info, warning reason picker, and custom message input |
+| **User & Worker Management** (`admin-users-list`) | Ban / Suspend Entity | In-app modal with ban type toggle (Permanent / Temporary Suspend), duration selector (7/14/30 days), and reason textarea |
+| **User & Worker Management** (`admin-users-list`) | Waive Commission Due | In-app modal with worker info, current due balance, and customizable waiver amount |
+| **Coverage & Surge Areas** (`admin-areas`) | Surge Multiplier Adjustment | In-app modal with area details, number input (1.0x - 3.0x), and live calculation preview |
+| **Pricing Matrix** (`admin-pricing-matrix`) | Edit Service Pricing | In-app modal with base price, visit charge, min/max bounds, and platform commission rate (%) |
+| **Worker KYC Verification** (`admin-worker-verification`) | Approve Verification | PrimeNG confirmation dialog with audit log & toast alert |
+| **Worker KYC Verification** (`admin-worker-verification`) | Reject Verification | In-app modal with rejection reasons dropdown and custom feedback note |
+| **Emergency SOS & Reports** (`admin-reports`) | Resolve SOS Incident | In-app modal with action resolution note and status update |
+| **Dispute & Fraud Reports** (`admin-reports`) | Investigate / Resolve | In-app modal with investigation findings, resolution text, and status update |
+| **Job Management** (`admin-jobs`) | Cancel Job / Refund | PrimeNG confirmation dialog with audit logging & toast feedback |
+
+---
+
+## 6. Verification & Build Results
 
 - **Build Tool**: Angular CLI 21 (`ng build`)
 - **Compilation Status**: `SUCCESS (Exit Code 0)`
-- **Bundle Output**: 1.82 MB initial bundle, all 48 lazy chunks generated with zero errors.
+- **Bundle Output**: 1.82 MB initial bundle, all lazy chunks generated with zero errors.
+- **Raw Alert/Confirm/Prompt Check**: 0 remaining in `src/app/features/admin/`.

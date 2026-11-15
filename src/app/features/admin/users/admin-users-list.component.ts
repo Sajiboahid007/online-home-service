@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { WorkerService } from '../../../core/services/worker.service';
 import { PaymentService } from '../../../core/services/payment.service';
 import { ReportService } from '../../../core/services/report.service';
@@ -7,6 +8,8 @@ import { AuditLogService } from '../../../core/services/audit-log.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { SeedDataService } from '../../../core/services/seed-data.service';
 import { FirebaseService } from '../../../core/services/firebase.service';
+import { ToastService } from '../../../core/services/toast.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { exportToCsv } from '../../../core/utils/csv-exporter';
 import { WorkerProfile } from '../../../core/models/worker.model';
 import { User } from '../../../core/models/user.model';
@@ -17,11 +20,13 @@ import { collection, getDocs, query } from 'firebase/firestore';
 @Component({
   selector: 'app-admin-users-list',
   standalone: true,
-  imports: [CommonModule, TakaPipe, BnNumberPipe],
+  imports: [CommonModule, FormsModule, TakaPipe, BnNumberPipe],
   templateUrl: './admin-users-list.component.html',
   styleUrl: './admin-users-list.component.scss'
 })
 export class AdminUsersListComponent implements OnInit {
+  public theme = inject(ThemeService);
+  public Math = Math;
   private workerService = inject(WorkerService);
   private paymentService = inject(PaymentService);
   private reportService = inject(ReportService);
@@ -29,11 +34,27 @@ export class AdminUsersListComponent implements OnInit {
   private auth = inject(AuthService);
   private seedData = inject(SeedDataService);
   private firebaseService = inject(FirebaseService);
+  private toast = inject(ToastService);
 
   public activeTab = signal<'customers' | 'workers' | 'admins'>('customers');
   public workers = this.workerService.workers;
   public customers = signal<User[]>([]);
   public admins = signal<User[]>([]);
+
+  // Action Modals State
+  public showWarnModal = signal<boolean>(false);
+  public showBanModal = signal<boolean>(false);
+  public showWaiveModal = signal<boolean>(false);
+
+  public selectedUser = signal<User | null>(null);
+  public selectedWorker = signal<WorkerProfile | null>(null);
+
+  public warnMessage = signal<string>('অনুগ্রহ করে প্ল্যাটফর্মের নিয়মাবলী ও আচরণবিধি মেনে চলুন।');
+  public banType = signal<'suspend' | 'permanent'>('suspend');
+  public suspendDays = signal<number>(7);
+  public banReason = signal<string>('নিয়ম লঙ্ঘন ও অনৈতিক আচরণ');
+  public customBanNote = signal<string>('');
+  public waiveAmount = signal<number>(0);
 
   ngOnInit(): void {
     this.loadUsers();
@@ -61,55 +82,184 @@ export class AdminUsersListComponent implements OnInit {
     }
   }
 
-  public warnUser(user: User): void {
-    const msg = prompt(`গ্রাহক "${user.name}"-কে সতর্কবার্তা পাঠান:`, 'অনুগ্রহ করে প্ল্যাটফর্মের নির্দেশিকা মেনে চলুন।');
-    if (msg) {
-      alert(`গ্রাহক "${user.name}"-কে সফলভাবে সতর্কতা নোটিফিকেশন পাঠানো হয়েছে।`);
+  // --- WARN MODAL ACTIONS ---
+  public openWarnModal(entity: User | WorkerProfile, isWorker = false): void {
+    if (isWorker) {
+      this.selectedWorker.set(entity as WorkerProfile);
+      this.selectedUser.set(null);
+      this.warnMessage.set('আপনার কাজের রেটিং আশঙ্কাজনকভাবে কমে যাচ্ছে অথবা গ্রাহক অসন্তোষ প্রকাশ করেছেন। অনুগ্রহ করে প্ল্যাটফর্মের নির্দেশিকা মেনে সেবার মান নিশ্চিত করুন।');
+    } else {
+      this.selectedUser.set(entity as User);
+      this.selectedWorker.set(null);
+      this.warnMessage.set('অনুগ্রহ করে প্ল্যাটফর্মের ব্যবহারবিধি ও নির্দেশিকা মেনে চলুন। বারবার অনাকাঙ্ক্ষিত অর্ডার বাতিল প্ল্যাটফর্ম নিরাপত্তা নীতিমালা লঙ্ঘন করে।');
     }
+    this.showWarnModal.set(true);
   }
 
-  public banUser(user: User): void {
-    const reason = prompt(`গ্রাহক "${user.name}"-কে ব্যান করার কারণ লিখুন:`, 'নিয়ম লঙ্ঘন / অসদাচরণ');
-    if (reason) {
+  public closeWarnModal(): void {
+    this.showWarnModal.set(false);
+    this.selectedUser.set(null);
+    this.selectedWorker.set(null);
+  }
+
+  public confirmSendWarning(): void {
+    const user = this.selectedUser();
+    const worker = this.selectedWorker();
+    const name = user?.name || worker?.name || 'ব্যবহারকারী';
+    const msg = this.warnMessage().trim();
+
+    if (!msg) {
+      this.toast.warn(this.theme.currentLang() === 'bn' ? 'সতর্কবার্তার বিবরণ লিখুন।' : 'Please enter warning message.');
+      return;
+    }
+
+    this.auditLog.logAction({
+      actorId: this.auth.currentUser()?.uid || 'admin',
+      actorName: this.auth.currentUser()?.name || 'অ্যাডমিন',
+      actorRole: 'admin',
+      action: 'warning_sent',
+      targetId: user?.uid || worker?.uid || '',
+      targetType: user ? 'user' : 'worker',
+      reason: `সতর্কবার্তা প্রেরণ: ${msg}`
+    });
+
+    const isBn = this.theme.currentLang() === 'bn';
+    this.toast.success(
+      isBn 
+        ? `"${name}"-কে সফলভাবে সতর্কতা নোটিফিকেশন ও SMS পাঠানো হয়েছে।` 
+        : `Warning notice sent successfully to "${name}".`
+    );
+
+    this.closeWarnModal();
+  }
+
+  // --- BAN / SUSPEND MODAL ACTIONS ---
+  public openBanModal(entity: User | WorkerProfile, isWorker = false): void {
+    if (isWorker) {
+      this.selectedWorker.set(entity as WorkerProfile);
+      this.selectedUser.set(null);
+      this.banType.set('suspend');
+      this.suspendDays.set(7);
+    } else {
+      this.selectedUser.set(entity as User);
+      this.selectedWorker.set(null);
+      this.banType.set('permanent');
+    }
+    this.banReason.set('নিয়ম লঙ্ঘন ও অনৈতিক আচরণ');
+    this.customBanNote.set('');
+    this.showBanModal.set(true);
+  }
+
+  public closeBanModal(): void {
+    this.showBanModal.set(false);
+    this.selectedUser.set(null);
+    this.selectedWorker.set(null);
+  }
+
+  public confirmBanAction(): void {
+    const user = this.selectedUser();
+    const worker = this.selectedWorker();
+    const name = user?.name || worker?.name || 'ব্যবহারকারী';
+    const phone = user?.phone || worker?.phone || '';
+    const uid = user?.uid || worker?.uid || '';
+    const fullReason = this.customBanNote().trim()
+      ? `${this.banReason()} (${this.customBanNote().trim()})`
+      : this.banReason();
+
+    const isBn = this.theme.currentLang() === 'bn';
+
+    if (this.banType() === 'permanent' || user) {
       this.reportService.addToBlacklist({
         type: 'phone',
-        value: user.phone,
-        reason: reason,
+        value: phone,
+        reason: fullReason,
         bannedBy: this.auth.currentUser()?.name || 'অ্যাডমিন'
       });
-      alert(`গ্রাহক "${user.name}" (${user.phone}) সফলভাবে প্ল্যাটফর্ম থেকে নিষিদ্ধ (Banned) করা হয়েছে।`);
+
+      this.auditLog.logAction({
+        actorId: this.auth.currentUser()?.uid || 'admin',
+        actorName: this.auth.currentUser()?.name || 'অ্যাডমিন',
+        actorRole: 'admin',
+        action: 'user_banned',
+        targetId: uid,
+        targetType: user ? 'user' : 'worker',
+        reason: `স্থায়ী ব্ল্যাকলিস্ট ব্যান: ${fullReason}`
+      });
+
+      this.toast.warn(
+        isBn
+          ? `"${name}" (${phone})-কে স্থায়ীভাবে প্ল্যাটফর্ম থেকে নিষিদ্ধ (Banned) করা হয়েছে।`
+          : `"${name}" (${phone}) has been permanently banned & blacklisted.`
+      );
+    } else {
+      const days = this.suspendDays() || 7;
+      this.auditLog.logAction({
+        actorId: this.auth.currentUser()?.uid || 'admin',
+        actorName: this.auth.currentUser()?.name || 'অ্যাডমিন',
+        actorRole: 'admin',
+        action: 'worker_suspended',
+        targetId: uid,
+        targetType: 'worker',
+        reason: `${days} দিনের জন্য সাময়িক বরখাস্ত: ${fullReason}`
+      });
+
+      this.toast.warn(
+        isBn
+          ? `ওয়ার্কার "${name}"-কে ${days} দিনের জন্য সাময়িক বরখাস্ত (Suspended) করা হয়েছে।`
+          : `Worker "${name}" has been suspended for ${days} days.`
+      );
     }
+
+    this.closeBanModal();
   }
 
-  public warnWorker(worker: WorkerProfile): void {
-    const msg = prompt(`ওয়ার্কার "${worker.name}"-কে সতর্কবার্তা পাঠান:`, 'কাজের রেটিং আশঙ্কাজনকভাবে কমে যাচ্ছে, মনোযোগ দিন।');
-    if (msg) {
-      alert(`ওয়ার্কার "${worker.name}"-কে সফলভাবে সতর্কতা নোটিফিকেশন ও SMS পাঠানো হয়েছে।`);
-    }
+  // --- WAIVE COMMISSION MODAL ACTIONS ---
+  public openWaiveModal(worker: WorkerProfile): void {
+    this.selectedWorker.set(worker);
+    this.waiveAmount.set(worker.commissionDue || 0);
+    this.showWaiveModal.set(true);
   }
 
-  public banWorker(worker: WorkerProfile): void {
-    const days = prompt(`ওয়ার্কার "${worker.name}"-কে কত দিনের জন্য সাসপেন্ড করতে চান? (স্থায়ী ব্যানের জন্য "ban" লিখুন):`, '7');
-    if (days) {
-      if (days.toLowerCase() === 'ban') {
-        this.reportService.addToBlacklist({
-          type: 'phone',
-          value: worker.phone,
-          reason: 'প্রশাসনিক সিদ্ধান্তে স্থায়ীভাবে নিষিদ্ধ (Banned)',
-          bannedBy: this.auth.currentUser()?.name || 'অ্যাডমিন'
-        });
-        alert(`ওয়ার্কার "${worker.name}" স্থায়ীভাবে প্ল্যাটফর্ম থেকে ব্যান করা হয়েছে। ফোন ও NID ব্ল্যাকলিস্টে যুক্ত করা হয়েছে।`);
-      } else {
-        alert(`ওয়ার্কার "${worker.name}" ${days} দিনের জন্য সাময়িক বরখাস্ত (Suspended) করা হয়েছে।`);
-      }
-    }
+  public closeWaiveModal(): void {
+    this.showWaiveModal.set(false);
+    this.selectedWorker.set(null);
   }
 
-  // Award badges (Item 90)
+  public confirmWaive(): void {
+    const worker = this.selectedWorker();
+    if (!worker) return;
+
+    const amount = Number(this.waiveAmount());
+    if (isNaN(amount) || amount <= 0) {
+      this.toast.warn(this.theme.currentLang() === 'bn' ? 'সঠিক পরিমাণ উল্লেখ করুন।' : 'Please enter a valid amount.');
+      return;
+    }
+
+    this.paymentService.waiveWorkerCommissionDue(worker.uid, amount);
+
+    this.auditLog.logAction({
+      actorId: this.auth.currentUser()?.uid || 'admin',
+      actorName: this.auth.currentUser()?.name || 'অ্যাডমিন',
+      actorRole: 'admin',
+      action: 'commission_due_waived',
+      targetId: worker.uid,
+      targetType: 'worker',
+      reason: `বকেয়া কমিশন মওকুফ: ৳${amount}`
+    });
+
+    const isBn = this.theme.currentLang() === 'bn';
+    this.toast.success(
+      isBn 
+        ? `ওয়ার্কার "${worker.name}"-এর ৳${amount} বকেয়া কমিশন সফলভাবে মওকুফ করা হয়েছে!` 
+        : `৳${amount} due commission waived for "${worker.name}"!`
+    );
+
+    this.closeWaiveModal();
+  }
+
   public toggleBadge(worker: WorkerProfile, badge: 'verified' | 'trustedBadge' | 'isPremium'): void {
     const updated = !worker[badge];
     this.workerService.awardBadges(worker.uid, { [badge]: updated });
-
     this.auditLog.logAction({
       actorId: this.auth.currentUser()?.uid || 'admin',
       actorName: this.auth.currentUser()?.name || 'অ্যাডমিন',
@@ -119,27 +269,6 @@ export class AdminUsersListComponent implements OnInit {
       targetType: 'worker',
       reason: `${worker.name}-এর ${badge} স্ট্যাটাস ${updated ? 'সক্রিয়' : 'নিষ্ক্রিয়'} করা হলো`
     });
-  }
-
-  // Waive worker due commission (Item 91)
-  public waiveDue(worker: WorkerProfile): void {
-    const input = prompt(`ওয়ার্কার "${worker.name}"-এর কত টাকা কমিশন মওকুফ করতে চান? (বর্তমান বকেয়া: ৳${worker.commissionDue}):`, worker.commissionDue.toString());
-    if (input) {
-      const amount = parseFloat(input);
-      if (!isNaN(amount) && amount > 0) {
-        this.paymentService.waiveWorkerCommissionDue(worker.uid, amount);
-        this.auditLog.logAction({
-          actorId: this.auth.currentUser()?.uid || 'admin',
-          actorName: this.auth.currentUser()?.name || 'অ্যাডমিন',
-          actorRole: 'admin',
-          action: 'commission_due_waived',
-          targetId: worker.uid,
-          targetType: 'worker',
-          reason: `বকেয়া কমিশন মওকুফ: ৳${amount}`
-        });
-        alert(`৳${amount} বকেয়া কমিশন সফলভাবে মওকুফ করা হয়েছে!`);
-      }
-    }
   }
 
   public exportCsv(): void {
