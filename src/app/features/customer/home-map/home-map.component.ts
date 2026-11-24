@@ -267,8 +267,8 @@ export class HomeMapComponent implements AfterViewInit, OnDestroy {
     return this.authService.isFavoriteWorker(workerId);
   }
 
-  public toggleFavorite(worker: WorkerProfile): void {
-    const isNowFav = this.authService.toggleFavoriteWorker(worker.uid);
+  public async toggleFavorite(worker: WorkerProfile): Promise<void> {
+    const isNowFav = await this.authService.toggleFavoriteWorker(worker.uid);
     if (isNowFav) {
       this.notificationService.notify(`"${worker.name}" প্রিয় তালিকায় যোগ করা হয়েছে`, 'info', 'প্রিয় কারিগর');
     } else {

@@ -978,7 +978,7 @@ export class SeedDataService {
       },
       rating: 4.9,
       ratingCount: 12,
-      favoriteWorkers: ['worker_rahim_1'],
+      favoriteWorkers: [],
       savedAddresses: [
         { id: 'addr_1', label: 'বাসা', address: 'বাড়ি #১২, রোড #৩, নিউ মার্কেট রোড, সাভার বাজার', lat: 23.8230, lng: 90.2660 }
       ],
@@ -1000,7 +1000,7 @@ export class SeedDataService {
       },
       rating: 4.8,
       ratingCount: 8,
-      favoriteWorkers: ['worker_rahim_1', 'worker_korim_2'],
+      favoriteWorkers: [],
       savedAddresses: [
         { id: 'addr_2', label: 'বাসা', address: 'বাড়ি #৪৫, রোড #২, সাভার থানা রোড, সাভার বাজার', lat: 23.8245, lng: 90.2685 }
       ],
@@ -1022,7 +1022,7 @@ export class SeedDataService {
       },
       rating: 5.0,
       ratingCount: 15,
-      favoriteWorkers: ['worker_rahim_1'],
+      favoriteWorkers: [],
       savedAddresses: [
         { id: 'addr_3', label: 'বাসা', address: 'ফ্ল্যাট ৪বি, স্বপ্ননীল টাওয়ার, সাভার বাসস্ট্যান্ড মোড়', lat: 23.8260, lng: 90.2640 }
       ],
@@ -1044,7 +1044,7 @@ export class SeedDataService {
       },
       rating: 4.7,
       ratingCount: 9,
-      favoriteWorkers: ['worker_kalam_5'],
+      favoriteWorkers: [],
       savedAddresses: [
         { id: 'addr_4', label: 'বাসা', address: 'হাউজ ১৭, ব্লক সি, শিমুলতলা, সাভার', lat: 23.8310, lng: 90.2710 }
       ],
@@ -1066,7 +1066,7 @@ export class SeedDataService {
       },
       rating: 4.9,
       ratingCount: 14,
-      favoriteWorkers: ['worker_shakil_3'],
+      favoriteWorkers: [],
       savedAddresses: [
         { id: 'addr_5', label: 'বাসা', address: 'পল্লী বিদ্যুৎ রোড, আশুলিয়া, সাভার', lat: 23.9318, lng: 90.2917 }
       ],
@@ -1088,7 +1088,7 @@ export class SeedDataService {
       },
       rating: 4.8,
       ratingCount: 11,
-      favoriteWorkers: ['worker_anwar_4'],
+      favoriteWorkers: [],
       savedAddresses: [
         { id: 'addr_6', label: 'বাসা', address: 'হেমায়েতপুর বাসস্ট্যান্ড সংলগ্ন, সাভার', lat: 23.7915, lng: 90.2741 }
       ],
@@ -1110,7 +1110,7 @@ export class SeedDataService {
       },
       rating: 5.0,
       ratingCount: 20,
-      favoriteWorkers: ['worker_salim_7'],
+      favoriteWorkers: [],
       savedAddresses: [
         { id: 'addr_7', label: 'বাসা', address: 'রোড #৬, ব্লক #ডি, সেকশন #১০, মিরপুর, ঢাকা', lat: 23.8071, lng: 90.3686 }
       ],

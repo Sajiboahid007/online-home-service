@@ -25,6 +25,11 @@ export class WorkerService {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.some(w => w.uid === 'worker_kalam_5')) {
+          const rahim = parsed.find((w: any) => w.uid === 'worker_rahim_1');
+          if (rahim && !rahim.photoURL) {
+            rahim.photoURL = 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=150';
+            localStorage.setItem('kajkhoj_workers', JSON.stringify(parsed));
+          }
           this.workersSignal.set(parsed);
           return;
         }

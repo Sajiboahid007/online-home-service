@@ -401,7 +401,13 @@
             @for (w of favoriteWorkers(); track w.uid) {
               <div class="fav-worker-item">
                 <div class="fwi-avatar-wrap">
-                  <img [src]="w.photoURL" [alt]="w.name" class="fwi-avatar" />
+                  @if (w.photoURL) {
+                    <img [src]="w.photoURL" [alt]="w.name" class="fwi-avatar" (error)="onWorkerAvatarImgError($event)" />
+                  } @else {
+                    <div class="fwi-avatar-initials">
+                      {{ getWorkerInitials(w.name) }}
+                    </div>
+                  }
                   <span class="status-dot" [class.online]="w.isOnline && !w.isBusy" [class.busy]="w.isBusy" [class.offline]="!w.isOnline"></span>
                 </div>
 
@@ -426,7 +432,7 @@
                   <button type="button" class="btn-book-fav" [disabled]="!w.isOnline || w.isBusy" (click)="bookFavoriteWorker(w)">
                     {{ (w.isBusy ? 'ব্যস্ত' : 'আবার ডাকুন') | t }}
                   </button>
-                  <button type="button" class="btn-remove-fav" (click)="removeFavorite(w.uid); $event.stopPropagation()" [title]="'প্রিয় তালিকা থেকে সরান' | t" aria-label="প্রিয় তালিকা থেকে সরান">
+                  <button type="button" class="btn-remove-fav" (click)="promptRemoveFavorite(w); $event.stopPropagation()" [title]="'প্রিয় তালিকা থেকে সরান' | t" aria-label="প্রিয় তালিকা থেকে সরান">
                     🗑️
                   </button>
                 </div>
@@ -437,6 +443,36 @@
 
         <div class="modal-footer">
           <button class="btn-cancel" (click)="closeFavorites()">{{ 'বন্ধ করুন' | t }}</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Delete Favorite Confirmation Modal -->
+  @if (workerToDelete()) {
+    <div class="modal-backdrop delete-fav-backdrop" (click)="cancelDeleteFavorite()">
+      <div class="modal-card delete-fav-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-icon">⚠️</span>
+            <h3 class="modal-title">{{ 'প্রিয় তালিকা থেকে অপসারণ' | t }}</h3>
+          </div>
+          <button class="close-btn" (click)="cancelDeleteFavorite()">✕</button>
+        </div>
+
+        <div class="modal-body-content">
+          <p class="delete-msg">
+            {{ 'আপনি কি নিশ্চিত যে' | t }} <strong>{{ workerToDelete()?.name }}</strong>-{{ 'কে আপনার প্রিয় তালিকা থেকে অপসারণ করতে চান?' | t }}
+          </p>
+        </div>
+
+        <div class="delete-modal-actions">
+          <button type="button" class="btn-cancel" (click)="cancelDeleteFavorite()">
+            {{ 'বাতিল' | t }}
+          </button>
+          <button type="button" class="btn-danger-confirm" (click)="confirmDeleteFavorite()">
+            <i class="pi pi-trash"></i> {{ 'অপসারণ করুন' | t }}
+          </button>
         </div>
       </div>
     </div>

@@ -91,17 +91,9 @@
             (click)="toggleProfileDropdown(); $event.stopPropagation()"
             [attr.aria-expanded]="showProfileDropdown()">
             <div class="avatar-wrapper">
-              @if (currentWorker()?.photoURL && !workerAvatarError()) {
-                <img 
-                  [src]="currentWorker()?.photoURL" 
-                  [alt]="currentWorker()?.name" 
-                  class="profile-avatar"
-                  (error)="onWorkerAvatarError()" />
-              } @else {
-                <div class="avatar-initials-badge worker-initials">
-                  {{ workerInitials() }}
-                </div>
-              }
+              <div class="avatar-initials-badge worker-initials">
+                {{ workerInitials() }}
+              </div>
               <span class="status-indicator-dot" [class.online]="currentWorker()?.isOnline"></span>
             </div>
             <div class="profile-meta">
@@ -120,17 +112,9 @@
           @if (showProfileDropdown()) {
             <div class="profile-dropdown-menu" (click)="$event.stopPropagation()">
               <div class="menu-user-header">
-                @if (currentWorker()?.photoURL && !workerAvatarError()) {
-                  <img 
-                    [src]="currentWorker()?.photoURL" 
-                    [alt]="currentWorker()?.name" 
-                    class="menu-avatar"
-                    (error)="onWorkerAvatarError()" />
-                } @else {
-                  <div class="avatar-initials-badge worker-initials menu-initials">
-                    {{ workerInitials() }}
-                  </div>
-                }
+                <div class="avatar-initials-badge worker-initials menu-initials">
+                  {{ workerInitials() }}
+                </div>
                 <div class="menu-user-details">
                   <div class="name-line">
                     <strong class="user-fullname">{{ currentWorker()?.name }}</strong>
@@ -287,13 +271,9 @@
     <aside class="mobile-drawer">
       <div class="drawer-header">
         <div class="drawer-user">
-          @if (currentWorker()?.photoURL && !workerAvatarError()) {
-            <img [src]="currentWorker()?.photoURL" class="drawer-avatar" alt="User Avatar" (error)="onWorkerAvatarError()" />
-          } @else {
-            <div class="drawer-avatar-initials">
-              {{ workerInitials() }}
-            </div>
-          }
+          <div class="drawer-avatar-initials">
+            {{ workerInitials() }}
+          </div>
           <div>
             <h4>{{ currentWorker()?.name }}</h4>
             <span class="worker-category">{{ currentWorker()?.skills?.[0] || ('কারিগর' | t) }}</span>

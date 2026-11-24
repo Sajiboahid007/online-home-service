@@ -12,7 +12,6 @@ import { Job } from '../../../core/models/job.model';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
 import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
-import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 export interface ProfessionalJobScenario {
   id: string;
@@ -35,7 +34,7 @@ export interface ProfessionalJobScenario {
 @Component({
   selector: 'app-worker-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, Select, BnNumberPipe, TakaPipe, TimeAgoPipe, TranslatePipe],
+  imports: [CommonModule, RouterModule, FormsModule, Select, BnNumberPipe, TakaPipe, TimeAgoPipe],
   templateUrl: './worker-dashboard.component.html',
   styleUrl: './worker-dashboard.component.scss'
 })

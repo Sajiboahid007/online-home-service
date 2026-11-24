@@ -4,7 +4,7 @@ import { User, UserRole } from '../models/user.model';
 import { WorkerProfile } from '../models/worker.model';
 import { SeedDataService } from './seed-data.service';
 import { FirebaseService } from './firebase.service';
-import { doc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, updateDoc, setDoc, getDoc } from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root'
@@ -49,6 +49,7 @@ export class AuthService {
           localStorage.setItem('kajkhoj_user', JSON.stringify(user));
         }
         this.currentUserSignal.set(user);
+        this.syncLiveUserFromFirestore(user.uid);
         if (savedWorker) {
           const worker: WorkerProfile = JSON.parse(savedWorker);
           if (worker.photoURL && worker.photoURL.startsWith('data:image')) {
@@ -189,52 +190,45 @@ export class AuthService {
    * Explicitly and idempotently removes a worker from the favorite list.
    * Never toggles it back on even if pressed repeatedly.
    */
-  public removeFavoriteWorker(workerId: string): boolean {
+  public async removeFavoriteWorker(workerId: string): Promise<boolean> {
     let user = this.currentUserSignal();
 
-    if (!user) {
-      // If user is guest, remove from guest favorites and update default customer seed data
-      const currentGuest = this.getGuestFavorites();
-      const updatedGuest = currentGuest.filter(id => id !== workerId);
-      this.setGuestFavorites(updatedGuest);
+    // 1. Remove from guest favorites in localStorage
+    const currentGuest = this.getGuestFavorites().filter(id => id !== workerId);
+    this.setGuestFavorites(currentGuest);
 
+    // 2. Remove from ALL default demo users in seedData so demo switches never resurrect it
+    this.seedData.defaultUsers.forEach(u => {
+      if (u.favoriteWorkers && u.favoriteWorkers.includes(workerId)) {
+        u.favoriteWorkers = u.favoriteWorkers.filter(id => id !== workerId);
+      }
+    });
+
+    if (user) {
+      const currentFavs = user.favoriteWorkers || [];
+      const updatedFavs = currentFavs.filter(id => id !== workerId);
+      const updatedUser: User = {
+        ...user,
+        favoriteWorkers: updatedFavs
+      };
+
+      // 3. Save to signal and localStorage ('kajkhoj_user')
+      this.setUser(updatedUser, this.currentWorkerSignal());
+
+      // 4. Synchronize to Firestore live document in database permanently
+      await this.syncFavoritesToFirestore(user.uid, updatedFavs);
+    } else {
+      // Guest mode: ALSO sync guest favorites to default customer in Firestore if applicable!
       const defaultCust = this.seedData.defaultUsers.find(u => u.uid === 'user_customer_demo_1');
       if (defaultCust) {
-        defaultCust.favoriteWorkers = (defaultCust.favoriteWorkers || []).filter(id => id !== workerId);
-        // Also initialize session with this demo customer so changes persist across the portal
-        this.setUser({ ...defaultCust, favoriteWorkers: defaultCust.favoriteWorkers }, null);
+        await this.syncFavoritesToFirestore(defaultCust.uid, defaultCust.favoriteWorkers || []);
       }
-      return true;
     }
-
-    const currentFavs = user.favoriteWorkers || [];
-    const updatedFavs = currentFavs.filter(id => id !== workerId);
-
-    const updatedUser: User = {
-      ...user,
-      favoriteWorkers: updatedFavs
-    };
-
-    // 1. Update in-memory seedData defaultUsers so demo re-logins will not bring back the deleted worker
-    const seedUser = this.seedData.defaultUsers.find(u => u.uid === user!.uid || u.phone === user!.phone);
-    if (seedUser) {
-      seedUser.favoriteWorkers = [...updatedFavs];
-    }
-
-    // 2. Save session & localStorage
-    this.setUser(updatedUser, this.currentWorkerSignal());
-
-    // 3. Clear guest favorites as well
-    const guestFavs = this.getGuestFavorites().filter(id => id !== workerId);
-    this.setGuestFavorites(guestFavs);
-
-    // 4. Synchronize to Firestore live document if available
-    this.syncFavoritesToFirestore(user.uid, updatedFavs);
 
     return true;
   }
 
-  public toggleFavoriteWorker(workerId: string): boolean {
+  public async toggleFavoriteWorker(workerId: string): Promise<boolean> {
     let user = this.currentUserSignal();
 
     if (!user) {
@@ -243,6 +237,7 @@ export class AuthService {
       if (defaultCust) {
         user = { ...defaultCust };
         this.currentUserSignal.set(user);
+        this.syncLiveUserFromFirestore(user.uid);
         localStorage.setItem('kajkhoj_user', JSON.stringify(user));
       } else {
         const guest = this.getGuestFavorites();
@@ -277,26 +272,52 @@ export class AuthService {
     this.setGuestFavorites(updatedFavs);
 
     // 4. Synchronize to Firestore
-    this.syncFavoritesToFirestore(user.uid, updatedFavs);
+    await this.syncFavoritesToFirestore(user.uid, updatedFavs);
 
     return !isFav;
   }
 
-  private async syncFavoritesToFirestore(uid: string, favs: string[]): Promise<void> {
+  public async syncFavoritesToFirestore(uid: string, favs: string[]): Promise<boolean> {
     try {
       if (this.firebaseService?.db) {
         const userRef = doc(this.firebaseService.db, 'users', uid);
-        await updateDoc(userRef, { favoriteWorkers: favs });
-      }
-    } catch {
-      try {
-        if (this.firebaseService?.db) {
-          const userRef = doc(this.firebaseService.db, 'users', uid);
+        try {
+          await updateDoc(userRef, { favoriteWorkers: favs });
+          return true;
+        } catch {
           await setDoc(userRef, { favoriteWorkers: favs }, { merge: true });
+          return true;
         }
-      } catch (err) {
-        console.warn('Firestore favorite sync skipped:', err);
       }
+    } catch (err) {
+      console.warn('Firestore live favorite sync failed:', err);
+    }
+    return false;
+  }
+
+  private async syncLiveUserFromFirestore(uid: string): Promise<void> {
+    try {
+      if (this.firebaseService?.db) {
+        const userRef = doc(this.firebaseService.db, 'users', uid);
+        const snap = await getDoc(userRef);
+        if (snap.exists()) {
+          const remoteData = snap.data() as Partial<User>;
+          const current = this.currentUserSignal();
+          if (current && current.uid === uid) {
+            const merged: User = {
+              ...current,
+              ...remoteData,
+              favoriteWorkers: Array.isArray(remoteData.favoriteWorkers)
+                ? remoteData.favoriteWorkers
+                : (current.favoriteWorkers || [])
+            };
+            this.currentUserSignal.set(merged);
+            localStorage.setItem('kajkhoj_user', JSON.stringify(merged));
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Live user sync from Firestore skipped:', e);
     }
   }
 

@@ -46,10 +46,10 @@ export class WorkerProfilePageComponent implements OnInit {
     this.router.navigate(['/customer/home']);
   }
 
-  public toggleFavorite(): void {
+  public async toggleFavorite(): Promise<void> {
     const w = this.worker();
     if (w) {
-      const isNowFav = this.auth.toggleFavoriteWorker(w.uid);
+      const isNowFav = await this.auth.toggleFavoriteWorker(w.uid);
       this.isFav.set(this.auth.isFavoriteWorker(w.uid));
       if (isNowFav) {
         this.notificationService.notify(`"${w.name}" প্রিয় তালিকায় যোগ করা হয়েছে`, 'info', 'প্রিয় কারিগর');

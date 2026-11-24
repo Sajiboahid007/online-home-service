@@ -33,10 +33,7 @@ export class CustomerProfileComponent implements OnInit {
 
   public favoriteWorkers = computed(() => {
     const user = this.auth.currentUser();
-    const guest = this.auth.getGuestFavorites();
-    const favIds = user?.favoriteWorkers && user.favoriteWorkers.length > 0
-      ? user.favoriteWorkers
-      : (guest.length > 0 ? guest : (user?.favoriteWorkers || []));
+    const favIds = user ? (user.favoriteWorkers || []) : this.auth.getGuestFavorites();
     return this.workerService.workers().filter(w => favIds.includes(w.uid));
   });
 
@@ -54,6 +51,7 @@ export class CustomerProfileComponent implements OnInit {
 
   public savedAddresses = signal<{ id: string; label: string; address: string; lat: number; lng: number }[]>([]);
   public showAddAddress = signal<boolean>(false);
+  public workerToDelete = signal<WorkerProfile | null>(null);
   public newAddressLabel = signal<string>('বাসা');
   public newAddressText = signal<string>('');
 
@@ -112,29 +110,59 @@ export class CustomerProfileComponent implements OnInit {
     });
   }
 
-  public removeFavorite(workerId: string): void {
+  public promptRemoveFavorite(worker: WorkerProfile): void {
+    this.workerToDelete.set(worker);
+  }
+
+  public cancelDeleteFavorite(): void {
+    this.workerToDelete.set(null);
+  }
+
+  public async confirmDeleteFavorite(): Promise<void> {
+    const worker = this.workerToDelete();
+    if (!worker) return;
     const isBn = this.theme.currentLang() === 'bn';
-    this.confirmation.confirm({
-      header: isBn ? 'প্রিয় তালিকা থেকে অপসারণ' : 'Remove Favorite',
-      message: isBn
-        ? 'আপনি কি নিশ্চিত যে এই কারিগরকে আপনার প্রিয় তালিকা থেকে অপসারণ করতে চান?'
-        : 'Are you sure you want to remove this worker from your favorites list?',
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: isBn ? 'অপসারণ' : 'Remove',
-      rejectLabel: isBn ? 'বাতিল' : 'Cancel',
-      acceptButtonStyleClass: 'p-button-danger',
-      rejectButtonStyleClass: 'p-button-text',
-      accept: () => {
-        const success = this.auth.removeFavoriteWorker(workerId);
-        if (success) {
-          this.notification.notify(
-            isBn ? 'প্রিয় তালিকা থেকে সফলভাবে সরানো হয়েছে' : 'Removed from favorites successfully',
-            'info',
-            isBn ? 'প্রিয় কারিগর' : 'Favorite Worker'
-          );
-        }
+    const success = await this.auth.removeFavoriteWorker(worker.uid);
+    if (success) {
+      this.notification.notify(
+        isBn ? 'প্রিয় তালিকা থেকে সফলভাবে সরানো হয়েছে' : 'Removed from favorites successfully',
+        'info',
+        isBn ? 'প্রিয় কারিগর' : 'Favorite Worker'
+      );
+    }
+    this.workerToDelete.set(null);
+  }
+
+  public removeFavorite(workerId: string): void {
+    const worker = this.workerService.getWorkerById(workerId);
+    if (worker) {
+      this.promptRemoveFavorite(worker);
+    } else {
+      this.auth.removeFavoriteWorker(workerId);
+    }
+  }
+
+  public getWorkerInitials(name?: string): string {
+    if (!name) return '🔧';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+
+  public onWorkerAvatarImgError(event: Event): void {
+    const target = event.target as HTMLElement;
+    if (target) {
+      target.style.display = 'none';
+      const parent = target.parentElement;
+      if (parent && !parent.querySelector('.pf-avatar-initials')) {
+        const fallback = document.createElement('div');
+        fallback.className = 'pf-avatar pf-avatar-initials';
+        fallback.innerText = '🔧';
+        parent.insertBefore(fallback, target);
       }
-    });
+    }
   }
 
   public viewWorker(workerId: string): void {

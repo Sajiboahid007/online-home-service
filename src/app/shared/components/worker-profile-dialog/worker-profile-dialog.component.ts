@@ -34,9 +34,9 @@ export class WorkerProfileDialogComponent {
     this.visible.set(false);
   }
 
-  public toggleFav(): void {
+  public async toggleFav(): Promise<void> {
     if (this.worker) {
-      const isNowFav = this.auth.toggleFavoriteWorker(this.worker.uid);
+      const isNowFav = await this.auth.toggleFavoriteWorker(this.worker.uid);
       this.isFav.set(this.auth.isFavoriteWorker(this.worker.uid));
       if (isNowFav) {
         this.notification.notify(`"${this.worker.name}" প্রিয় তালিকায় যোগ করা হয়েছে`, 'info', 'প্রিয় কারিগর');

@@ -127,7 +127,13 @@
         <div class="profile-fav-list">
           @for (w of favoriteWorkers(); track w.uid) {
             <div class="profile-fav-item">
-              <img [src]="w.photoURL" [alt]="w.name" class="pf-avatar" />
+              @if (w.photoURL) {
+                <img [src]="w.photoURL" [alt]="w.name" class="pf-avatar" (error)="onWorkerAvatarImgError($event)" />
+              } @else {
+                <div class="pf-avatar pf-avatar-initials">
+                  {{ getWorkerInitials(w.name) }}
+                </div>
+              }
               <div class="pf-info">
                 <div class="pf-name-row">
                   <h4>{{ w.name }}</h4>
@@ -150,7 +156,7 @@
                 <button type="button" class="btn-outline-sm" (click)="viewWorker(w.uid)">
                   প্রোফাইল
                 </button>
-                <button type="button" class="btn-delete-fav" (click)="removeFavorite(w.uid); $event.stopPropagation()" title="প্রিয় তালিকা থেকে সরান">
+                <button type="button" class="btn-delete-fav" (click)="promptRemoveFavorite(w); $event.stopPropagation()" title="প্রিয় তালিকা থেকে সরান">
                   <i class="pi pi-trash"></i> মুছুন
                 </button>
               </div>
@@ -169,4 +175,34 @@
       <i class="pi pi-save"></i> পরিবর্তনসমূহ সংরক্ষণ করুন
     </button>
   </div>
+
+  <!-- Delete Favorite Confirmation Modal -->
+  @if (workerToDelete()) {
+    <div class="modal-backdrop delete-fav-backdrop" (click)="cancelDeleteFavorite()">
+      <div class="modal-card delete-fav-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-icon">⚠️</span>
+            <h3 class="modal-title">প্রিয় তালিকা থেকে অপসারণ</h3>
+          </div>
+          <button class="close-btn" (click)="cancelDeleteFavorite()">✕</button>
+        </div>
+
+        <div class="modal-body-content">
+          <p class="delete-msg">
+            আপনি কি নিশ্চিত যে <strong>{{ workerToDelete()?.name }}</strong>-কে আপনার প্রিয় তালিকা থেকে অপসারণ করতে চান?
+          </p>
+        </div>
+
+        <div class="delete-modal-actions">
+          <button type="button" class="btn-cancel" (click)="cancelDeleteFavorite()">
+            বাতিল
+          </button>
+          <button type="button" class="btn-danger-confirm" (click)="confirmDeleteFavorite()">
+            <i class="pi pi-trash"></i> অপসারণ করুন
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>
