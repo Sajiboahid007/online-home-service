@@ -80,19 +80,29 @@
       </div>
 
       <div class="addresses-list">
-        @for (addr of savedAddresses(); track addr.id) {
-          <div class="address-item">
-            <div class="addr-icon">
-              <i class="pi" [ngClass]="addr.label === 'বাসা' ? 'pi-home' : addr.label === 'অফিস' ? 'pi-building' : 'pi-map-marker'"></i>
-            </div>
-            <div class="addr-details">
-              <strong>{{ addr.label }}</strong>
-              <p>{{ addr.address }}</p>
-            </div>
-            <button class="delete-btn" (click)="deleteAddress(addr.id)" title="মুছুন">
-              <i class="pi pi-trash"></i>
-            </button>
+        @if (savedAddresses().length === 0) {
+          <div class="empty-fav-box">
+            <p class="empty-text">
+              {{ theme.currentLang() === 'en'
+                ? 'No saved addresses yet. Click "+ Add New Address" above to save your home or office address.'
+                : 'কোনো সংরক্ষিত ঠিকানা নেই। আপনার বাসা বা অফিসের ঠিকানা সংরক্ষণ করতে উপরে "+ নতুন ঠিকানা যোগ করুন" বাটনে ক্লিক করুন।' }}
+            </p>
           </div>
+        } @else {
+          @for (addr of savedAddresses(); track addr.id) {
+            <div class="address-item">
+              <div class="addr-icon">
+                <i class="pi" [ngClass]="addr.label === 'বাসা' ? 'pi-home' : addr.label === 'অফিস' ? 'pi-building' : 'pi-map-marker'"></i>
+              </div>
+              <div class="addr-details">
+                <strong>{{ addr.label }}</strong>
+                <p>{{ addr.address }}</p>
+              </div>
+              <button class="delete-btn" (click)="deleteAddress(addr.id)" title="মুছুন">
+                <i class="pi pi-trash"></i>
+              </button>
+            </div>
+          }
         }
       </div>
 

@@ -70,11 +70,7 @@ export class CustomerProfileComponent implements OnInit {
         this.emergencyRelation.set(user.emergencyContact.relation);
       }
 
-      const defaultAddrs = [
-        { id: 'addr_1', label: 'বাসা', address: 'বাসা ১২, রোড ৩, সাভার নিউ মার্কেট এরিয়া', lat: 23.8230, lng: 90.2660 },
-        { id: 'addr_2', label: 'অফিস', address: 'সাভার বাসস্ট্যান্ড সেন্ট্রাল প্লাজা', lat: 23.8245, lng: 90.2689 }
-      ];
-      this.savedAddresses.set(user.savedAddresses || defaultAddrs);
+      this.savedAddresses.set(Array.isArray(user.savedAddresses) ? [...user.savedAddresses] : []);
     }
   }
 
@@ -173,23 +169,32 @@ export class CustomerProfileComponent implements OnInit {
     const currentUser = this.auth.currentUser();
     if (!currentUser) return;
 
+    const trimmedEmergencyName = this.emergencyName().trim();
+    const trimmedEmergencyPhone = this.emergencyPhone().trim();
+    const hasEmergencyContact = !!(trimmedEmergencyName || trimmedEmergencyPhone);
+
     const updatedUser: User = {
       ...currentUser,
-      name: this.name(),
-      phone: this.phone(),
-      email: this.email(),
-      emergencyContact: {
-        name: this.emergencyName(),
-        phone: this.emergencyPhone(),
-        relation: this.emergencyRelation()
-      },
+      name: this.name().trim() || currentUser.name,
+      phone: this.phone().trim(),
+      email: this.email().trim() || undefined,
+      emergencyContact: hasEmergencyContact
+        ? {
+            name: trimmedEmergencyName,
+            phone: trimmedEmergencyPhone,
+            relation: this.emergencyRelation()
+          }
+        : undefined,
       savedAddresses: this.savedAddresses()
     };
 
-    // Remove photoURL so no image is stored in the database
-    delete updatedUser.photoURL;
+    // Strip only base64 data URI images so database/storage remains clean while keeping external SSO avatars
+    if (updatedUser.photoURL?.startsWith('data:image')) {
+      delete updatedUser.photoURL;
+    }
 
     this.auth.setUser(updatedUser);
+    void this.auth.syncGoogleUserToFirestore(updatedUser);
     this.successMessage.set('প্রোফাইল সফলভাবে আপডেট হয়েছে!');
     setTimeout(() => this.successMessage.set(null), 3000);
   }
