@@ -1,7 +1,47 @@
 import { Injectable, signal, effect } from '@angular/core';
-import { EN_DICTIONARY } from '../i18n';
+import { EN_DICTIONARY, BN_REVERSE_DICTIONARY } from '../i18n';
+import { localizeDigits } from '../../shared/pipes/bn-number.pipe';
 
 export type Language = 'bn' | 'en';
+
+const BANGLA_PHRASE_REPLACEMENTS: Array<[RegExp, string]> = [
+  [/সাভার বাজার/g, 'Savar Bazar'],
+  [/সাভার থানা রোড/g, 'Savar Thana Road'],
+  [/ব্যাংক কলোনি/g, 'Bank Colony'],
+  [/ব্যাংক টাউন/g, 'Bank Town'],
+  [/নামাবাজার/g, 'Namabazar'],
+  [/হেমায়েতপুর/g, 'Hemayetpur'],
+  [/আশুলিয়া/g, 'Ashulia'],
+  [/ডিইপিজেড/g, 'DEPZ'],
+  [/মিরপুর/g, 'Mirpur'],
+  [/শিমুলতলা/g, 'Shimultala'],
+  [/থানা রোড/g, 'Thana Road'],
+  [/নিউ মার্কেট/g, 'New Market'],
+  [/বাসস্ট্যান্ড/g, 'Bus Stand'],
+  [/গোলচত্বর/g, 'Circle'],
+  [/সাভার/g, 'Savar'],
+  [/ঢাকা/g, 'Dhaka'],
+  [/বাড়ি/g, 'House'],
+  [/বাসা/g, 'House'],
+  [/হাউজ/g, 'House'],
+  [/ফ্ল্যাট/g, 'Flat'],
+  [/রোড/g, 'Road'],
+  [/লেন/g, 'Lane'],
+  [/ব্লক/g, 'Block'],
+  [/সেকশন/g, 'Section'],
+  [/এলাকা/g, 'Area'],
+  [/এরিয়া/g, 'Area'],
+  [/জোন/g, 'Zone'],
+  [/মোড়/g, 'More'],
+  [/মো[:ঃ]/g, 'Md.'],
+  [/প্লাম্বার/g, 'Plumber'],
+  [/ইলেকট্রিশিয়ান/g, 'Electrician'],
+  [/টেকনিশিয়ান/g, 'Technician'],
+  [/কারিগর/g, 'Worker'],
+  [/টি কাজ/g, 'jobs'],
+  [/কাজ/g, 'Job'],
+  [/সার্ভিস/g, 'Service'],
+];
 
 @Injectable({
   providedIn: 'root'
@@ -103,14 +143,34 @@ export class ThemeService {
   }
 
   /**
-   * Translate a named key (e.g. 'home') or a Bangla source string.
-   * Bangla source strings are looked up in EN_DICTIONARY; anything missing stays in Bangla.
+   * Translate a named key (e.g. 'home'), a Bangla source string, or an English value
+   * bidirectionally between Bangla and English.
    */
   public t(key: string): string {
+    if (!key) return '';
     const lang = this.currentLang();
-    const item = this.translations[key];
+    const trimmed = key.trim();
+    const item = this.translations[trimmed] || this.translations[key];
     if (item) return item[lang] || item.bn;
-    if (lang === 'en') return EN_DICTIONARY[key] ?? key;
+
+    if (lang === 'en') {
+      const exact = EN_DICTIONARY[key] ?? EN_DICTIONARY[trimmed];
+      if (exact) return exact;
+
+      // Phrase-level fallback for dynamic Bangla addresses/labels
+      if (/[\u0980-\u09FF]/.test(key)) {
+        let out = localizeDigits(key, 'en');
+        for (const [pattern, replacement] of BANGLA_PHRASE_REPLACEMENTS) {
+          out = out.replace(pattern, replacement);
+        }
+        return out;
+      }
+      return localizeDigits(key, 'en');
+    }
+
+    // In Bangla mode, convert known English dictionary strings back to Bangla if needed
+    const rev = BN_REVERSE_DICTIONARY[trimmed];
+    if (rev) return rev;
     return key;
   }
 }
