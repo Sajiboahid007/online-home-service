@@ -17,10 +17,11 @@ service firebase.storage {
       allow write: if isOwner(uid) && request.resource.size < 5 * 1024 * 1024 && request.resource.contentType.matches('image/.*');
     }
 
-    // Job pictures (fault photos, after-work verification)
+    // Job pictures (fault photos, after-work verification): create-only by signed-in users, never overwrite existing files
     match /jobs/{jobId}/{allPaths=**} {
       allow read: if signedIn();
-      allow write: if signedIn() && request.resource.size < 5 * 1024 * 1024 && request.resource.contentType.matches('image/.*');
+      allow create: if signedIn() && request.resource.size < 5 * 1024 * 1024 && request.resource.contentType.matches('image/.*');
+      allow update, delete: if isAdmin();
     }
   }
 }

@@ -10,7 +10,8 @@
     "jobTracking": {
       "$jobId": {
         ".read": "auth != null",
-        ".write": "auth != null"
+        ".write": "auth != null && (auth.token.role === 'admin' || auth.token.role === 'superadmin' || (!data.exists() || data.child('workerId').val() === auth.uid))",
+        ".validate": "newData.hasChildren(['jobId', 'workerLocation', 'updatedAt'])"
       }
     }
   }

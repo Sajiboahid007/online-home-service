@@ -8,6 +8,10 @@ service cloud.firestore {
     function isAdmin()     { return signedIn() && (role() == 'admin' || role() == 'superadmin'); }
     function isOwner(uid)  { return signedIn() && request.auth.uid == uid; }
     function notBanned()   { return request.auth.token.banned != true; }
+    function isJobParticipant(jobId) {
+      let job = get(/databases/$(database)/documents/jobs/$(jobId)).data;
+      return signedIn() && (job.customerId == request.auth.uid || job.workerId == request.auth.uid);
+    }
 
     // Users collection
     match /users/{uid} {
@@ -22,7 +26,16 @@ service cloud.firestore {
     // Worker public profile - visible to all authenticated users
     match /workers/{uid} {
       allow read: if signedIn();
-      allow create: if isOwner(uid);
+      allow create: if isAdmin() ||
+        (isOwner(uid) && notBanned()
+          && request.resource.data.uid == uid
+          && request.resource.data.verified == false
+          && request.resource.data.verificationStatus == 'pending'
+          && request.resource.data.trustedBadge == false
+          && request.resource.data.isPremium == false
+          && request.resource.data.walletBalance == 0
+          && request.resource.data.commissionDue == 0
+          && request.resource.data.totalJobs == 0);
       allow update: if isAdmin() ||
         (isOwner(uid) && notBanned() && !request.resource.data.diff(resource.data).affectedKeys()
           .hasAny(['verified', 'verificationStatus', 'rating', 'ratingCount', 'totalJobs',
@@ -43,33 +56,43 @@ service cloud.firestore {
       allow create: if role() == 'customer' && notBanned()
                     && request.resource.data.customerId == request.auth.uid
                     && request.resource.data.status == 'pending';
-      // Transitions and assignments handled securely
-      allow update: if isAdmin() || 
-        (signedIn() && (resource.data.customerId == request.auth.uid || resource.data.workerId == request.auth.uid));
+      // Transitions and assignments handled securely without tampering financial/OTP fields
+      allow update: if isAdmin() ||
+        (signedIn() && notBanned()
+          && (resource.data.customerId == request.auth.uid || resource.data.workerId == request.auth.uid)
+          && !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['customerId', 'startOtp', 'completionOtp', 'commission', 'platformFee', 'workerEarning', 'paymentStatus']));
 
       // Offers subcollection
       match /offers/{workerId} {
-        allow read: if isAdmin() || isOwner(workerId) || (resource.data != null && resource.data.customerId == request.auth.uid);
-        allow write: if isAdmin() || isOwner(workerId);
+        allow read: if isAdmin() || isOwner(workerId) || isJobParticipant(jobId);
+        allow create, delete: if isAdmin();
+        allow update: if isAdmin() ||
+          (isOwner(workerId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']));
       }
 
       // Bids subcollection
       match /bids/{workerId} {
-        allow read: if signedIn();
+        allow read: if isAdmin() || isOwner(workerId) || isJobParticipant(jobId);
         allow write: if isOwner(workerId) || isAdmin();
       }
 
-      // Messages subcollection (chat)
+      // Messages subcollection (chat) - restricted to job participants & admins
       match /messages/{msgId} {
-        allow read: if signedIn();
-        allow create: if signedIn();
+        allow read: if isAdmin() || isJobParticipant(jobId);
+        allow create: if (isAdmin() || isJobParticipant(jobId)) && notBanned()
+          && request.resource.data.senderId == request.auth.uid;
       }
     }
 
     // Reviews
     match /reviews/{id} {
       allow read: if signedIn();
-      allow write: if signedIn();
+      allow create: if signedIn() && notBanned()
+        && request.resource.data.reviewerId == request.auth.uid
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5;
+      allow update, delete: if isAdmin();
     }
 
     // Financial Transactions
