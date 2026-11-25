@@ -6,8 +6,22 @@
         স্বাগতম, {{ currentWorker()?.name }}! 👋
       </h1>
       <p class="welcome-sub">
-        {{ currentWorker()?.skills?.[0] || 'প্লাম্বার ও ফিটিং টেকনিশিয়ান' }} • সাভার জোন
+        {{ currentWorker()?.skills?.[0] || 'পেশাদার কারিগর ও টেকনিশিয়ান' }} • {{ workerAreaName() }}
       </p>
+      @if (workerCategories().length > 0) {
+        <div class="worker-chosen-categories">
+          <span class="chosen-cat-label">নির্বাচিত সার্ভিস:</span>
+          @for (cat of workerCategories(); track cat.id) {
+            <span class="chosen-cat-pill">
+              <span>{{ cat.icon }}</span>
+              <span>{{ cat.nameBn }}</span>
+            </span>
+          }
+          <a routerLink="/worker/edit-profile" class="edit-cat-link" title="ক্যাটাগরি পরিবর্তন করুন">
+            <i class="pi pi-pencil"></i>
+          </a>
+        </div>
+      }
     </div>
 
     <div class="header-right">
@@ -17,7 +31,7 @@
         </div>
         <div class="simulator-input-row">
           <p-select
-            [options]="professionalScenarios"
+            [options]="availableScenarios()"
             [(ngModel)]="selectedScenario"
             optionLabel="label"
             placeholder="কাজের রিকোয়েস্ট নির্বাচন করুন..."
@@ -170,7 +184,7 @@
           <span class="lightning-badge">⚡</span>
           <div>
             <h2 class="section-title">উন্মুক্ত কাজের রিকোয়েস্ট ({{ openWorkRequests().length | bnNumber }}টি নতুন চাহিদা)</h2>
-            <p class="section-sub">যে প্লাম্বার প্রথমে 'কাজটি নিন' চাপবেন, তিনিই সরাসরি কাজ পাবেন (First Grab)।</p>
+            <p class="section-sub">যে কারিগর প্রথমে 'কাজটি নিন' চাপবেন, তিনিই সরাসরি কাজ পাবেন (First Grab)।</p>
           </div>
         </div>
         <a routerLink="/worker/job-board" class="btn-all-board">জব বোর্ডে যান ➔</a>
