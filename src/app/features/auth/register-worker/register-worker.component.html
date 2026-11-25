@@ -200,6 +200,7 @@
                 class="form-control textarea-control"
                 placeholder="আপনার অভিজ্ঞতা, কাজের ধরন ও বিশেষ পারদর্শিতা সম্পর্কে লিখুন..."
                 [(ngModel)]="bio"
+                (ngModelChange)="bioCustomized = true"
                 name="bio"
               ></textarea>
             </div>
@@ -257,18 +258,16 @@
               <span class="suggested-heading">প্রস্তাবিত স্কিল (ক্লিক করে যুক্ত করুন):</span>
               <div class="suggested-chips-flow">
                 @for (catId of selectedCategoryIds(); track catId) {
-                  @if (suggestedSkillsMap[catId]) {
-                    @for (s of suggestedSkillsMap[catId]; track s) {
-                      <button
-                        type="button"
-                        class="btn-suggested-chip"
-                        [class.already-added]="hasSkill(s)"
-                        (click)="toggleSkill(s)"
-                      >
-                        <span class="plus-icon">{{ hasSkill(s) ? '✓' : '+' }}</span>
-                        <span>{{ s }}</span>
-                      </button>
-                    }
+                  @for (s of getCategorySuggestedSkills(catId); track s) {
+                    <button
+                      type="button"
+                      class="btn-suggested-chip"
+                      [class.already-added]="hasSkill(s)"
+                      (click)="toggleSkill(s)"
+                    >
+                      <span class="plus-icon">{{ hasSkill(s) ? '✓' : '+' }}</span>
+                      <span>{{ s }}</span>
+                    </button>
                   }
                 }
               </div>
@@ -521,6 +520,7 @@
                   step="50"
                   class="form-control rate-number-control"
                   [(ngModel)]="rate"
+                  (ngModelChange)="rateCustomized = true"
                   name="rate"
                   required
                 />
@@ -536,7 +536,7 @@
                   <div
                     class="unit-option-item"
                     [class.selected]="rateUnit() === u.id"
-                    (click)="rateUnit.set(u.id)"
+                    (click)="selectRateUnit(u.id)"
                   >
                     <div class="radio-circle">
                       @if (rateUnit() === u.id) { <span class="inner-dot"></span> }
@@ -609,6 +609,14 @@
               <div class="summary-item">
                 <span class="sum-label">মোবাইল:</span>
                 <span class="sum-value">{{ phone() | maskPhone }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="sum-label">নির্বাচিত ক্যাটাগরি:</span>
+                <span class="sum-value">{{ selectedCategoryNames() }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="sum-label">দক্ষতা (Skills):</span>
+                <span class="sum-value">{{ skills().join(', ') }}</span>
               </div>
               <div class="summary-item">
                 <span class="sum-label">হোম লোকেশন:</span>
