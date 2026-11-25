@@ -342,7 +342,8 @@ export class RegisterWorkerComponent {
     this.isLoading.set(true);
 
     setTimeout(async () => {
-      const uid = 'worker_onboard_' + Date.now();
+      const authUid = this.firebaseService?.auth?.currentUser?.uid;
+      const uid = authUid || ('worker_onboard_' + Date.now());
       const cleanPhone = this.phone().replace(/[^0-9]/g, '');
 
       // Create Public Worker Profile
@@ -416,10 +417,9 @@ export class RegisterWorkerComponent {
         createdAt: workerProfile.createdAt
       };
 
-      // Persist to Firebase Firestore if connected
+      // Persist to Firebase Firestore only when an authenticated Firebase session owns `uid`
       try {
-        if (this.firebaseService?.db) {
-          await setDoc(doc(this.firebaseService.db, 'users', uid), workerUser);
+        if (this.firebaseService?.db && this.firebaseService?.auth?.currentUser?.uid === uid) {
           await setDoc(doc(this.firebaseService.db, 'workers', uid), workerProfile);
           await setDoc(doc(this.firebaseService.db, 'workerPrivate', uid), workerPrivate);
         }

@@ -42,6 +42,8 @@ export class LoginComponent implements OnDestroy {
   public phone = signal<string>('01712345678');
   public otpDigits = signal<string[]>(['', '', '', '', '', '']);
   public otpString = signal<string>('');
+  public generatedOtp = signal<string>('');
+  private otpExpiresAt = 0;
   public otpSent = signal<boolean>(false);
   public isLoading = signal<boolean>(false);
   public errorMessage = signal<string>('');
@@ -585,6 +587,11 @@ export class LoginComponent implements OnDestroy {
     }
   ];
 
+  // Role counts for tabs
+  public customerCount = computed(() => this.demoAccounts.filter(a => a.category === 'customer').length);
+  public workerCount = computed(() => this.demoAccounts.filter(a => a.category === 'worker').length);
+  public adminCount = computed(() => this.demoAccounts.filter(a => a.category === 'admin').length);
+
   // Filtered accounts for horizontal quick bar
   public filteredDemoAccounts = computed(() => {
     const tab = this.activeRoleTab();
@@ -650,15 +657,29 @@ export class LoginComponent implements OnDestroy {
 
     this.isLoading.set(true);
 
-    // Simulate SMS gateway OTP dispatch
+    // Generate 6-digit OTP locally (no external SMS API — displayed only to this user)
     setTimeout(() => {
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      this.generatedOtp.set(otp);
+      this.otpExpiresAt = Date.now() + 2 * 60 * 1000;
       this.isLoading.set(false);
       this.otpSent.set(true);
       this.otpString.set('');
       this.otpDigits.set(['', '', '', '', '', '']);
-      this.successMessage.set(`+৮৮০ ${cleanPhone}-এ ৬ ডিজিটের ওটিপি পাঠানো হয়েছে।`);
+      this.successMessage.set(`+৮৮০ ${cleanPhone}-এর জন্য ৬ ডিজিটের ওটিপি তৈরি হয়েছে (শুধুমাত্র আপনার জন্য দৃশ্যমান)।`);
       this.startCountdown();
-    }, 500);
+    }, 300);
+  }
+
+  private rejectIfBanned(user: User): boolean {
+    if (user.status === 'banned' || user.status === 'suspended') {
+      this.isLoading.set(false);
+      this.errorMessage.set(
+        `অ্যাকাউন্ট ${user.status === 'banned' ? 'স্থায়ীভাবে নিষিদ্ধ' : 'সাময়িক বরখাস্ত'}। কারণ: ${user.banReason || 'কর্তৃপক্ষের সিদ্ধান্ত'}`
+      );
+      return true;
+    }
+    return false;
   }
 
   public async verifyOtp(): Promise<void> {
@@ -667,6 +688,16 @@ export class LoginComponent implements OnDestroy {
 
     if (enteredOtp.length < 6) {
       this.errorMessage.set('অনুগ্রহ করে ৬ ডিজিটের সম্পূর্ণ ওটিপি কোড লিখুন।');
+      return;
+    }
+
+    if (!this.generatedOtp() || Date.now() > this.otpExpiresAt) {
+      this.errorMessage.set('ওটিপি কোডের মেয়াদ শেষ হয়ে গেছে। অনুগ্রহ করে নতুন ওটিপি পাঠান।');
+      return;
+    }
+
+    if (enteredOtp !== this.generatedOtp()) {
+      this.errorMessage.set('ভুল ওটিপি কোড! অনুগ্রহ করে আপনার স্ক্রিনে প্রদর্শিত সঠিক ৬-ডিজিট কোড লিখুন।');
       return;
     }
 
@@ -710,6 +741,7 @@ export class LoginComponent implements OnDestroy {
           createdAt: matchingWorker.createdAt
         };
 
+        if (this.rejectIfBanned(workerUser)) return;
         this.authService.setUser(workerUser, matchingWorker);
         this.isLoading.set(false);
         this.router.navigate(['/worker']);
@@ -718,6 +750,7 @@ export class LoginComponent implements OnDestroy {
 
       // 3. User found in Firestore
       if (firestoreUser) {
+        if (this.rejectIfBanned(firestoreUser)) return;
         if (firestoreUser.role === 'superadmin' || firestoreUser.role === 'admin') {
           this.authService.setUser(firestoreUser, null);
           this.isLoading.set(false);
@@ -750,6 +783,8 @@ export class LoginComponent implements OnDestroy {
             }
           }
         } catch {}
+
+        if (this.rejectIfBanned(localUser)) return;
 
         if (localUser.role === 'superadmin' || localUser.role === 'admin') {
           this.authService.setUser(localUser, null);
@@ -801,8 +836,10 @@ export class LoginComponent implements OnDestroy {
   }
 
   public autoFillOtp(): void {
-    this.otpString.set('123456');
-    this.otpDigits.set(['1', '2', '3', '4', '5', '6']);
+    const code = this.generatedOtp();
+    if (!code || code.length !== 6) return;
+    this.otpString.set(code);
+    this.otpDigits.set(code.split(''));
     this.verifyOtp();
   }
 
@@ -813,6 +850,8 @@ export class LoginComponent implements OnDestroy {
 
   public changePhone(): void {
     this.otpSent.set(false);
+    this.generatedOtp.set('');
+    this.otpExpiresAt = 0;
     this.otpString.set('');
     this.errorMessage.set('');
     this.successMessage.set('');

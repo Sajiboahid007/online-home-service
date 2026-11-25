@@ -15,7 +15,7 @@
             [class.active]="activeRoleTab() === 'customer'"
             (click)="setRoleTab('customer')"
           >
-            👤 কাস্টমার (১০)
+            👤 কাস্টমার ({{ customerCount() | bnNumber }})
           </button>
           <button
             type="button"
@@ -23,7 +23,7 @@
             [class.active]="activeRoleTab() === 'worker'"
             (click)="setRoleTab('worker')"
           >
-            🔧 ওয়ার্কার (১৮)
+            🔧 ওয়ার্কার ({{ workerCount() | bnNumber }})
           </button>
           <button
             type="button"
@@ -31,7 +31,7 @@
             [class.active]="activeRoleTab() === 'admin'"
             (click)="setRoleTab('admin')"
           >
-            👑 অ্যাডমিন (৪)
+            👑 অ্যাডমিন ({{ adminCount() | bnNumber }})
           </button>
           <button
             type="button"
@@ -39,7 +39,7 @@
             [class.active]="activeRoleTab() === 'all'"
             (click)="setRoleTab('all')"
           >
-            ⚡ সকল (৩২)
+            ⚡ সকল ({{ demoAccounts.length | bnNumber }})
           </button>
           <button
             type="button"
@@ -208,12 +208,12 @@
             </button>
           </div>
 
-          <!-- Simulation Quick Auto-Fill Helper -->
+          <!-- In-App OTP Display (Only visible to current user, no SMS API required) -->
           <div class="simulation-banner">
             <div class="sim-content">
-              <span class="sim-icon">💡</span>
+              <span class="sim-icon">🔐</span>
               <div class="sim-text">
-                <strong>টেস্ট ওটিপি কোড:</strong> ১২৩৪৫৬ (যেকোনো ৬ ডিজিট প্রযোজ্য)
+                <strong>আপনার ওটিপি কোড:</strong> {{ generatedOtp() }} (শুধুমাত্র আপনার জন্য দৃশ্যমান)
               </div>
             </div>
             <button type="button" class="btn-autofill" (click)="autoFillOtp()">
@@ -322,7 +322,7 @@
         <div class="modal-header">
           <div>
             <h2 class="modal-title">📋 ফায়ারবেস ডেটাবেস ইউজার ও কাস্টমার ডিরেক্টরি</h2>
-            <p class="modal-subtitle">মোট ৩২টি ডেমো অ্যাকাউন্ট • যেকোনো অ্যাকাউন্টে ১-ক্লিকে লগইন করুন বা নম্বর বসান</p>
+            <p class="modal-subtitle">মোট {{ demoAccounts.length | bnNumber }}টি ডেমো অ্যাকাউন্ট • যেকোনো অ্যাকাউন্টে ১-ক্লিকে লগইন করুন বা নম্বর বসান</p>
           </div>
           <button type="button" class="btn-close-modal" (click)="closeDirectoryModal()">✕</button>
         </div>
