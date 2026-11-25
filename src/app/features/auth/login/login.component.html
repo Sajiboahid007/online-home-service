@@ -15,7 +15,7 @@
             [class.active]="activeRoleTab() === 'customer'"
             (click)="setRoleTab('customer')"
           >
-            👤 কাস্টমার ({{ customerCount() | bnNumber }})
+            👤 {{ isEn() ? 'Customer' : 'কাস্টমার' }} ({{ customerCount() | bnNumber }})
           </button>
           <button
             type="button"
@@ -23,7 +23,7 @@
             [class.active]="activeRoleTab() === 'worker'"
             (click)="setRoleTab('worker')"
           >
-            🔧 ওয়ার্কার ({{ workerCount() | bnNumber }})
+            🔧 {{ isEn() ? 'Worker' : 'ওয়ার্কার' }} ({{ workerCount() | bnNumber }})
           </button>
           <button
             type="button"
@@ -31,7 +31,7 @@
             [class.active]="activeRoleTab() === 'admin'"
             (click)="setRoleTab('admin')"
           >
-            👑 অ্যাডমিন ({{ adminCount() | bnNumber }})
+            👑 {{ isEn() ? 'Admin' : 'অ্যাডমিন' }} ({{ adminCount() | bnNumber }})
           </button>
           <button
             type="button"
@@ -39,16 +39,17 @@
             [class.active]="activeRoleTab() === 'all'"
             (click)="setRoleTab('all')"
           >
-            ⚡ সকল ({{ demoAccounts.length | bnNumber }})
+            ⚡ {{ isEn() ? 'All' : 'সকল' }} ({{ demoAccounts.length | bnNumber }})
           </button>
           <button
             type="button"
             class="btn-open-directory"
             (click)="openDirectoryModal()"
-            title="সকল কাস্টমার ও ইউজার তালিকা দেখুন"
+            [title]="isEn() ? 'View all users' : 'সকল কাস্টমার ও ইউজার তালিকা দেখুন'"
           >
-            📋 ইউজার ডিরেক্টরি
+            📋 {{ isEn() ? 'User Directory' : 'ইউজার ডিরেক্টরি' }}
           </button>
+          <app-lang-toggle></app-lang-toggle>
         </div>
       </div>
 
@@ -79,8 +80,8 @@
           <span class="logo-icon">🛠️</span>
           <span class="logo-spark">✨</span>
         </div>
-        <h1 class="brand-title">কাজখোঁজ</h1>
-        <p class="brand-subtitle">বিশ্বস্ত হোম সার্ভিস প্ল্যাটফর্ম • সাভার ও ঢাকা</p>
+        <h1 class="brand-title">{{ 'কাজখোঁজ' | t }}</h1>
+        <p class="brand-subtitle">{{ isEn() ? 'Trusted Home Service Platform • Savar & Dhaka' : 'বিশ্বস্ত হোম সার্ভিস প্ল্যাটফর্ম • সাভার ও ঢাকা' }}</p>
       </div>
 
       <!-- Current Logged In Notification if any -->
@@ -124,8 +125,8 @@
       <!-- STEP 1: Phone Input Screen -->
       @if (!otpSent()) {
         <div class="form-wrapper">
-          <h2 class="form-heading">মোবাইল নম্বর দিয়ে প্রবেশ করুন</h2>
-          <p class="form-subtext">আপনার ফোন নম্বরে একটি ৬-সংখ্যার ওটিপি কোড পাঠানো হবে।</p>
+          <h2 class="form-heading">{{ 'মোবাইল নম্বর দিয়ে প্রবেশ করুন' | t }}</h2>
+          <p class="form-subtext">{{ 'আপনার ফোন নম্বরে একটি ৬-সংখ্যার ওটিপি কোড পাঠানো হবে।' | t }}</p>
 
           <!-- Quick Account Preset Selector Dropdown -->
           <div class="form-group preset-group">
@@ -270,7 +271,7 @@
       <!-- Divider -->
       <div class="or-divider">
         <span class="divider-line"></span>
-        <span class="divider-text">নতুন অ্যাকাউন্ট খুলুন</span>
+        <span class="divider-text">{{ 'নতুন অ্যাকাউন্ট খুলুন' | t }}</span>
         <span class="divider-line"></span>
       </div>
 
@@ -279,8 +280,8 @@
         <a routerLink="/auth/register-customer" class="reg-card customer-card">
           <div class="reg-icon-box">🏠</div>
           <div class="reg-card-content">
-            <h3 class="reg-card-title">কাস্টমার রেজিস্ট্রেশন</h3>
-            <p class="reg-card-desc">বাসাবাড়ির কাজের জন্য বিশ্বস্ত কারিগর বুকিং করুন</p>
+            <h3 class="reg-card-title">{{ 'কাস্টমার রেজিস্ট্রেশন' | t }}</h3>
+            <p class="reg-card-desc">{{ isEn() ? 'Book trusted home service professionals' : 'বাসাবাড়ির কাজের জন্য বিশ্বস্ত কারিগর বুকিং করুন' }}</p>
           </div>
           <span class="card-chevron">›</span>
         </a>
@@ -288,8 +289,8 @@
         <a routerLink="/auth/register-worker" class="reg-card worker-card">
           <div class="reg-icon-box worker-icon-box">🔧</div>
           <div class="reg-card-content">
-            <h3 class="reg-card-title">ওয়ার্কার হিসেবে যুক্ত হন</h3>
-            <p class="reg-card-desc">কাজের স্বাধীনতা, সম্মানজনক আয় ও লাইভ জব রিকোয়েস্ট</p>
+            <h3 class="reg-card-title">{{ 'ওয়ার্কার হিসেবে যুক্ত হন' | t }}</h3>
+            <p class="reg-card-desc">{{ isEn() ? 'Work flexibility, fair earnings & live job alerts' : 'কাজের স্বাধীনতা, সম্মানজনক আয় ও লাইভ জব রিকোয়েস্ট' }}</p>
           </div>
           <span class="card-chevron">›</span>
         </a>

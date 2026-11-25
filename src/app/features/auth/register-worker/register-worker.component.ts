@@ -7,9 +7,12 @@ import { WorkerService } from '../../../core/services/worker.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { AreaService } from '../../../core/services/area.service';
 import { LocationService } from '../../../core/services/location.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
 import { MaskPhonePipe } from '../../../shared/pipes/mask-phone.pipe';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { LangToggleComponent } from '../../../shared/components/lang-toggle/lang-toggle.component';
 import { WorkerProfile, WorkerPrivate, RateUnit, GeoPoint } from '../../../core/models/worker.model';
 import { User } from '../../../core/models/user.model';
 import { FirebaseService } from '../../../core/services/firebase.service';
@@ -19,7 +22,7 @@ import { doc, setDoc } from 'firebase/firestore';
 @Component({
   selector: 'app-register-worker',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, BnNumberPipe, TakaPipe, MaskPhonePipe],
+  imports: [CommonModule, FormsModule, RouterModule, BnNumberPipe, TakaPipe, MaskPhonePipe, TranslatePipe, LangToggleComponent],
   templateUrl: './register-worker.component.html',
   styleUrl: './register-worker.component.scss'
 })
@@ -31,6 +34,8 @@ export class RegisterWorkerComponent {
   private locationService = inject(LocationService);
   private firebaseService = inject(FirebaseService);
   private router = inject(Router);
+  public theme = inject(ThemeService);
+  public isEn = computed(() => this.theme.currentLang() === 'en');
 
   public categories = computed(() =>
     this.categoryService.categories().filter(c => c.isActive).sort((a, b) => a.order - b.order)
@@ -67,9 +72,10 @@ export class RegisterWorkerComponent {
 
   public selectedCategoryNames = computed(() => {
     const ids = this.selectedCategoryIds();
+    const en = this.isEn();
     return this.categories()
       .filter(c => ids.includes(c.id))
-      .map(c => `${c.icon} ${c.nameBn}`)
+      .map(c => `${c.icon} ${en ? c.nameEn : c.nameBn}`)
       .join(', ');
   });
 

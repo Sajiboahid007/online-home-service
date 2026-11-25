@@ -4,14 +4,17 @@
     <div class="onboarding-card">
       <!-- Top Header -->
       <div class="card-top-nav">
-        <a routerLink="/login" class="nav-back-link">
-          <span class="arrow">←</span>
-          <span>লগইনে ফিরে যান</span>
-        </a>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px;">
+          <a routerLink="/login" class="nav-back-link">
+            <span class="arrow">←</span>
+            <span>{{ 'লগইনে ফিরে যান' | t }}</span>
+          </a>
+          <app-lang-toggle></app-lang-toggle>
+        </div>
         <div class="header-titles">
-          <div class="badge-role">🔧 কারিগর ও টেকনিশিয়ান অনবোর্ডিং</div>
-          <h1 class="main-title">ওয়ার্কার অ্যাকাউন্ট রেজিস্ট্রেশন</h1>
-          <p class="subtitle">৫টি সহজ ধাপে কাজখোঁজে যুক্ত হয়ে আয় শুরু করুন</p>
+          <div class="badge-role">🔧 {{ isEn() ? 'Technician & Worker Onboarding' : 'কারিগর ও টেকনিশিয়ান অনবোর্ডিং' }}</div>
+          <h1 class="main-title">{{ 'ওয়ার্কার অ্যাকাউন্ট রেজিস্ট্রেশন' | t }}</h1>
+          <p class="subtitle">{{ isEn() ? 'Join KajKhoj in 5 simple steps and start earning' : '৫টি সহজ ধাপে কাজখোঁজে যুক্ত হয়ে আয় শুরু করুন' }}</p>
         </div>
       </div>
 
@@ -232,7 +235,7 @@
                     @if (isCategorySelected(cat.id)) { <span>✓</span> }
                   </div>
                   <span class="cat-icon">{{ cat.icon }}</span>
-                  <span class="cat-name">{{ cat.nameBn }}</span>
+                  <span class="cat-name">{{ isEn() ? cat.nameEn : cat.nameBn }}</span>
                 </div>
               }
             </div>
@@ -244,18 +247,18 @@
             <div class="selected-skills-chips">
               @for (skill of skills(); track skill) {
                 <span class="skill-chip">
-                  <span>{{ skill }}</span>
+                  <span>{{ skill | t }}</span>
                   <button type="button" class="btn-remove-skill" (click)="removeSkill(skill)">✕</button>
                 </span>
               }
               @if (skills().length === 0) {
-                <span class="no-skills-hint">কোনো স্কিল সিলেক্ট করা হয়নি। নিচের তালিকা থেকে সিলেক্ট করুন।</span>
+                <span class="no-skills-hint">{{ isEn() ? 'No skills selected. Pick from the list below.' : 'কোনো স্কিল সিলেক্ট করা হয়নি। নিচের তালিকা থেকে সিলেক্ট করুন।' }}</span>
               }
             </div>
 
             <!-- Predefined Suggested Skills -->
             <div class="suggested-skills-block">
-              <span class="suggested-heading">প্রস্তাবিত স্কিল (ক্লিক করে যুক্ত করুন):</span>
+              <span class="suggested-heading">{{ isEn() ? 'Suggested skills (click to add):' : 'প্রস্তাবিত স্কিল (ক্লিক করে যুক্ত করুন):' }}</span>
               <div class="suggested-chips-flow">
                 @for (catId of selectedCategoryIds(); track catId) {
                   @for (s of getCategorySuggestedSkills(catId); track s) {
@@ -266,7 +269,7 @@
                       (click)="toggleSkill(s)"
                     >
                       <span class="plus-icon">{{ hasSkill(s) ? '✓' : '+' }}</span>
-                      <span>{{ s }}</span>
+                      <span>{{ s | t }}</span>
                     </button>
                   }
                 }
@@ -682,7 +685,7 @@
           <div class="left-action">
             @if (currentStep() > 1) {
               <button type="button" class="btn-prev-step" (click)="prevStep()" [disabled]="isLoading()">
-                ← পূর্ববর্তী ধাপ
+                ← {{ 'পূর্ববর্তী ধাপ' | t }}
               </button>
             }
           </div>
@@ -690,16 +693,16 @@
           <div class="right-action">
             @if (currentStep() < 5) {
               <button type="button" class="btn-next-step" (click)="nextStep()">
-                <span>পরবর্তী ধাপ</span>
+                <span>{{ 'পরবর্তী ধাপ' | t }}</span>
                 <span class="btn-arrow">➔</span>
               </button>
             } @else {
               <button type="button" class="btn-submit-onboarding" (click)="submitOnboarding()" [disabled]="isLoading()">
                 @if (isLoading()) {
                   <span class="spinner"></span>
-                  <span>প্রক্রিয়াকরণ হচ্ছে...</span>
+                  <span>{{ isEn() ? 'Processing...' : 'প্রক্রিয়াকরণ হচ্ছে...' }}</span>
                 } @else {
-                  <span>অনবোর্ডিং আবেদন জমা দিন</span>
+                  <span>{{ 'অনবোর্ডিং আবেদন জমা দিন' | t }}</span>
                   <span class="btn-arrow">✓</span>
                 }
               </button>

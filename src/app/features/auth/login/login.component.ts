@@ -6,7 +6,10 @@ import { AuthService } from '../../../core/services/auth.service';
 import { WorkerService } from '../../../core/services/worker.service';
 import { SeedDataService } from '../../../core/services/seed-data.service';
 import { FirebaseService } from '../../../core/services/firebase.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { LangToggleComponent } from '../../../shared/components/lang-toggle/lang-toggle.component';
 import { User, UserRole } from '../../../core/models/user.model';
 import { collection, doc, getDocs, query, setDoc, where } from 'firebase/firestore';
 
@@ -27,12 +30,14 @@ export interface DemoAccount {
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, BnNumberPipe],
+  imports: [CommonModule, FormsModule, RouterModule, BnNumberPipe, TranslatePipe, LangToggleComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
 export class LoginComponent implements OnDestroy {
   public authService = inject(AuthService);
+  public theme = inject(ThemeService);
+  public isEn = computed(() => this.theme.currentLang() === 'en');
   private workerService = inject(WorkerService);
   private seedData = inject(SeedDataService);
   private firebaseService = inject(FirebaseService);
