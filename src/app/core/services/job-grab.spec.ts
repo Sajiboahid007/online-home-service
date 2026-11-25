@@ -140,4 +140,47 @@ describe('Work Request & First-Come First-Served (FCFS) Grab System', () => {
     expect(updatedJob?.workerId).toBe('worker_kalam_5');
     expect(updatedJob?.status).toBe('accepted');
   });
+
+  it('requires valid startOtp to start work and valid completionOtp to finish work', () => {
+    const job = jobService.createJob({
+      customerId: 'user_customer_demo_1',
+      customerName: 'তানভীর আহমেদ',
+      categoryId: 'plumber',
+      categoryName: 'প্লাম্বার',
+      estimatedPrice: 400,
+      type: 'instant',
+      status: 'searching'
+    });
+
+    expect(job.startOtp).toMatch(/^\d{4}$/);
+    expect(job.completionOtp).toMatch(/^\d{4}$/);
+
+    jobService.grabJob(job.id, {
+      uid: 'worker_rahim_1',
+      name: 'মো: রহিম উদ্দিন',
+      phone: '01711223344',
+      photoURL: ''
+    });
+
+    const badStart = jobService.verifyAndStartJob(job.id, '0000');
+    if (job.startOtp !== '0000') {
+      expect(badStart.success).toBe(false);
+    }
+
+    const goodStart = jobService.verifyAndStartJob(job.id, job.startOtp);
+    expect(goodStart.success).toBe(true);
+    expect(jobService.getJobById(job.id)?.status).toBe('in_progress');
+
+    const badFinish = jobService.verifyAndCompleteJob(job.id, '9999', 400, 0);
+    if (job.completionOtp !== '9999') {
+      expect(badFinish.success).toBe(false);
+      expect(jobService.getJobById(job.id)?.status).toBe('in_progress');
+    }
+
+    const goodFinish = jobService.verifyAndCompleteJob(job.id, job.completionOtp!, 400, 50);
+    expect(goodFinish.success).toBe(true);
+    expect(jobService.getJobById(job.id)?.status).toBe('completed');
+    expect(jobService.getJobById(job.id)?.finalPrice).toBe(400);
+    expect(jobService.getJobById(job.id)?.materialCost).toBe(50);
+  });
 });

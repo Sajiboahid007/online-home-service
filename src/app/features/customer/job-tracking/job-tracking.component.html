@@ -36,32 +36,59 @@
           </div>
         }
 
-        <!-- 4-Digit Start OTP Card (Prominent Uber-style verification) -->
-        @if (job.status !== 'completed' && !job.status.includes('cancelled')) {
-          <div class="otp-card">
-            <div class="otp-header">
-              <div class="otp-icon-wrap">🔐</div>
-              <div class="otp-title-text">
-                <h3 class="otp-title">৪-সংখ্যার কাজ শুরুর ওটিপি (OTP)</h3>
-                <p class="otp-subtitle">এই OTP ওয়ার্কারকে বলুন কাজ শুরু করার জন্য</p>
+        <!-- 4-Digit Start / Completion OTP Card (Visible ONLY to the customer/user, never to worker) -->
+        @if (canViewJobOtp() && job.status !== 'completed' && job.status !== 'paid' && !job.status.includes('cancelled')) {
+          @if (job.status === 'in_progress') {
+            <div class="otp-card">
+              <div class="otp-header">
+                <div class="otp-icon-wrap">🏁</div>
+                <div class="otp-title-text">
+                  <h3 class="otp-title">৪-সংখ্যার কাজ শেষ করার ওটিপি (Completion OTP)</h3>
+                  <p class="otp-subtitle">কাজ সঠিকভাবে শেষ হলে কর্মীকে এই OTP দিন</p>
+                </div>
+              </div>
+
+              <div class="otp-display-row">
+                @for (char of (job.completionOtp || job.startOtp).split(''); track $index) {
+                  <div class="otp-digit-box">{{ char | bnNumber }}</div>
+                }
+                <button type="button" class="btn-copy-otp" (click)="copyOtp(job.completionOtp || job.startOtp)" title="OTP কপি করুন">
+                  <span class="pi" [class.pi-copy]="!copySuccess()" [class.pi-check]="copySuccess()"></span>
+                  <span>{{ copySuccess() ? 'কপি হয়েছে!' : 'কপি' }}</span>
+                </button>
+              </div>
+
+              <div class="otp-security-note">
+                <span class="sec-icon">🛡️</span>
+                <span class="sec-text">কাজ সম্পূর্ণভাবে শেষ হওয়া যাচাই করার পরই কেবল কর্মীকে এই সমাপনী OTP দিন, যাতে কর্মী অ্যাপে কাজ সম্পন্ন করতে পারেন।</span>
               </div>
             </div>
+          } @else {
+            <div class="otp-card">
+              <div class="otp-header">
+                <div class="otp-icon-wrap">🔐</div>
+                <div class="otp-title-text">
+                  <h3 class="otp-title">৪-সংখ্যার কাজ শুরুর ওটিপি (Start OTP)</h3>
+                  <p class="otp-subtitle">এই OTP ওয়ার্কারকে বলুন কাজ শুরু করার জন্য</p>
+                </div>
+              </div>
 
-            <div class="otp-display-row">
-              @for (char of job.startOtp.split(''); track $index) {
-                <div class="otp-digit-box">{{ char | bnNumber }}</div>
-              }
-              <button type="button" class="btn-copy-otp" (click)="copyOtp(job.startOtp)" title="OTP কপি করুন">
-                <span class="pi" [class.pi-copy]="!copySuccess()" [class.pi-check]="copySuccess()"></span>
-                <span>{{ copySuccess() ? 'কপি হয়েছে!' : 'কপি' }}</span>
-              </button>
-            </div>
+              <div class="otp-display-row">
+                @for (char of job.startOtp.split(''); track $index) {
+                  <div class="otp-digit-box">{{ char | bnNumber }}</div>
+                }
+                <button type="button" class="btn-copy-otp" (click)="copyOtp(job.startOtp)" title="OTP কপি করুন">
+                  <span class="pi" [class.pi-copy]="!copySuccess()" [class.pi-check]="copySuccess()"></span>
+                  <span>{{ copySuccess() ? 'কপি হয়েছে!' : 'কপি' }}</span>
+                </button>
+              </div>
 
-            <div class="otp-security-note">
-              <span class="sec-icon">🛡️</span>
-              <span class="sec-text">কর্মী আপনার বাসায় পৌঁছানোর পর তার হাতে কাজ শুরুর অনুমতি হিসেবে এই কোডটি বলবেন। অন্য কাউকে এই কোড শেয়ার করবেন না।</span>
+              <div class="otp-security-note">
+                <span class="sec-icon">🛡️</span>
+                <span class="sec-text">কর্মী আপনার বাসায় পৌঁছানোর পর কাজ শুরুর অনুমতি হিসেবে এই কোডটি বলবেন। অন্য কাউকে এই কোড শেয়ার করবেন না।</span>
+              </div>
             </div>
-          </div>
+          }
         }
 
         <!-- Job Status Timeline -->

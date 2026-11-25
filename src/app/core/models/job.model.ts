@@ -95,7 +95,8 @@ export interface Job {
   workerEarning?: number;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
-  startOtp: string; // 4-digit code shown to customer
+  startOtp: string; // 4-digit code shown only to customer to start work
+  completionOtp?: string; // 4-digit code shown only to customer to confirm work completion
   searchRadiusKm?: number;
   dispatchRound?: number;
   timeline: JobTimeline;

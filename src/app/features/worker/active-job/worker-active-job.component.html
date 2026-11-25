@@ -397,18 +397,11 @@
               <input 
                 id="otp-input-4" 
                 type="text" 
+                inputmode="numeric"
                 maxlength="1" 
                 class="otp-digit-input" 
                 [(ngModel)]="otpDigit4" 
                 (input)="onOtpInput(4, $event)" />
-            </div>
-
-            <!-- Demo helper test hint -->
-            <div class="demo-otp-helper">
-              <span>টেস্ট/ডেমো কোড:</span>
-              <button type="button" class="btn-demo-otp" (click)="fillDemoOtp()">
-                অটো-কোড বসান ({{ currentJob.startOtp }})
-              </button>
             </div>
 
             @if (otpError()) {
@@ -505,9 +498,61 @@
                 </div>
               </div>
 
+              <!-- Completion OTP Verification (Ask customer when work finishes) -->
+              <div class="completion-otp-box" style="padding: 14px; border: 1px solid #f59e0b; background: #fffbeb; border-radius: 10px;">
+                <label class="picker-label" style="display: block; font-weight: 700; color: #92400e; margin-bottom: 4px;">
+                  🔐 কাজ শেষ করার ৪-সংখ্যার সমাপনী OTP দিন <span style="color:#dc2626">*</span>
+                </label>
+                <p style="margin: 0 0 10px 0; font-size: 12px; color: #78350f;">
+                  কাজ সম্পূর্ণ শেষ করে কাস্টমারের স্ক্রিন থেকে ৪ সংখ্যার সমাপনী OTP কোডটি জেনে এখানে বসান।
+                </p>
+
+                <div class="otp-inputs-wrapper">
+                  <input
+                    id="finish-otp-input-1"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="1"
+                    class="otp-digit-input"
+                    [(ngModel)]="finishOtpDigit1"
+                    (input)="onOtpInput(1, $event, 'finish-otp')" />
+                  <input
+                    id="finish-otp-input-2"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="1"
+                    class="otp-digit-input"
+                    [(ngModel)]="finishOtpDigit2"
+                    (input)="onOtpInput(2, $event, 'finish-otp')" />
+                  <input
+                    id="finish-otp-input-3"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="1"
+                    class="otp-digit-input"
+                    [(ngModel)]="finishOtpDigit3"
+                    (input)="onOtpInput(3, $event, 'finish-otp')" />
+                  <input
+                    id="finish-otp-input-4"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="1"
+                    class="otp-digit-input"
+                    [(ngModel)]="finishOtpDigit4"
+                    (input)="onOtpInput(4, $event, 'finish-otp')" />
+                </div>
+
+                @if (finishOtpError()) {
+                  <div class="otp-alert alert-error" style="margin-top: 8px;">
+                    <i class="pi pi-times-circle"></i>
+                    <span>{{ finishOtpError() }}</span>
+                  </div>
+                }
+              </div>
+
               <button type="button" class="btn-step-action btn-final-complete" (click)="completeActiveJob()">
                 <i class="pi pi-check"></i>
-                <span>কাজ সম্পন্ন হয়েছে নিশ্চিত করুন</span>
+                <span>OTP যাচাই করে কাজ সম্পন্ন নিশ্চিত করুন</span>
               </button>
             </div>
           </div>

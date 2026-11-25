@@ -93,6 +93,14 @@ export class JobTrackingComponent implements OnInit, OnDestroy {
     return this.workerService.getWorkerById(job.workerId) || null;
   });
 
+  // Only the customer who booked the job can view the OTP (never exposed to workers)
+  public canViewJobOtp = computed<boolean>(() => {
+    const job = this.currentJob();
+    if (!job || this.isWorker()) return false;
+    const user = this.currentUser();
+    return !user || user.uid === job.customerId;
+  });
+
   // Status index for timeline progression
   public currentStepIndex = computed<number>(() => {
     const job = this.currentJob();

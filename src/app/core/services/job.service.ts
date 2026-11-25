@@ -32,13 +32,32 @@ export class JobService {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          this.jobsSignal.set(parsed);
+          let changed = false;
+          const normalized = parsed.map((j: Job) => {
+            if (!j.completionOtp) {
+              changed = true;
+              return { ...j, completionOtp: this.generateFourDigitOtp() };
+            }
+            return j;
+          });
+          this.jobsSignal.set(normalized);
+          if (changed) {
+            this.saveToStorage();
+          }
           return;
         }
       } catch (e) {}
     }
-    this.jobsSignal.set(this.seedData.defaultJobs);
+    const seeded = this.seedData.defaultJobs.map(j => ({
+      ...j,
+      completionOtp: j.completionOtp || this.generateFourDigitOtp()
+    }));
+    this.jobsSignal.set(seeded);
     this.saveToStorage();
+  }
+
+  private generateFourDigitOtp(): string {
+    return Math.floor(1000 + Math.random() * 9000).toString();
   }
 
   public resetSeedJobs(): void {
@@ -87,7 +106,8 @@ export class JobService {
   }
 
   public createJob(jobData: Partial<Job>): Job {
-    const startOtp = Math.floor(1000 + Math.random() * 9000).toString();
+    const startOtp = this.generateFourDigitOtp();
+    const completionOtp = this.generateFourDigitOtp();
     const newJob: Job = {
       id: `job_${Date.now()}`,
       customerId: jobData.customerId || 'user_customer_demo_1',
@@ -105,6 +125,7 @@ export class JobService {
       paymentMethod: jobData.paymentMethod || 'cash',
       paymentStatus: 'unpaid',
       startOtp,
+      completionOtp,
       searchRadiusKm: 3,
       timeline: {
         createdAt: new Date().toISOString()
@@ -132,7 +153,8 @@ export class JobService {
 
   // Direct Booking for a specific worker (Item 18)
   public directBookWorker(worker: WorkerProfile, details: Partial<Job>): Job {
-    const startOtp = Math.floor(1000 + Math.random() * 9000).toString();
+    const startOtp = this.generateFourDigitOtp();
+    const completionOtp = this.generateFourDigitOtp();
     const newJob: Job = {
       id: `job_${Date.now()}`,
       customerId: details.customerId || 'user_customer_demo_1',
@@ -154,6 +176,7 @@ export class JobService {
       paymentMethod: details.paymentMethod || 'cash',
       paymentStatus: 'unpaid',
       startOtp,
+      completionOtp,
       timeline: {
         createdAt: new Date().toISOString()
       },
@@ -206,7 +229,7 @@ export class JobService {
       this.saveToStorage();
       const job = this.getJobById(jobId);
       if (job) {
-        this.firebaseService.updateJobTracking(jobId, job.location, 10);
+        this.firebaseService.updateJobTracking(jobId, job.location, 10, job.workerId);
       }
     }
     return updated;
@@ -317,6 +340,27 @@ export class JobService {
 
     this.updateJobStatus(jobId, 'in_progress');
     return { success: true, message: 'OTP সফলভাবে যাচাই হয়েছে! কাজ শুরু করা হয়েছে।' };
+  }
+
+  public verifyAndCompleteJob(
+    jobId: string,
+    inputOtp: string,
+    finalPrice: number,
+    materialCost: number = 0,
+    afterWorkPhoto?: string
+  ): { success: boolean; message: string } {
+    const job = this.getJobById(jobId);
+    if (!job) return { success: false, message: 'কাজটি পাওয়া যায়নি।' };
+    const expectedOtp = job.completionOtp || job.startOtp;
+    if (expectedOtp !== inputOtp.trim()) {
+      return {
+        success: false,
+        message: 'ভুল সমাপনী OTP! কাজ শেষ করার পর কাস্টমারের কাছ থেকে ৪ সংখ্যার সঠিক কোড জেনে নিন।'
+      };
+    }
+
+    this.completeJob(jobId, finalPrice, materialCost, afterWorkPhoto);
+    return { success: true, message: 'সমাপনী OTP যাচাই সফল! কাজ সম্পন্ন হয়েছে।' };
   }
 
   public completeJob(

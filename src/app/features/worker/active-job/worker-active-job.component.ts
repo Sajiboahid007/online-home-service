@@ -30,13 +30,20 @@ export class WorkerActiveJobComponent implements OnInit, OnDestroy {
   public chatService = inject(ChatService);
   public unreadChatCount = computed(() => this.chatService.getUnreadCount(this.jobId()));
   
-  // OTP state
+  // Start OTP state
   public otpDigit1 = signal<string>('');
   public otpDigit2 = signal<string>('');
   public otpDigit3 = signal<string>('');
   public otpDigit4 = signal<string>('');
   public otpError = signal<string | null>(null);
   public otpSuccess = signal<string | null>(null);
+
+  // Completion OTP state (worker asks customer when work finishes)
+  public finishOtpDigit1 = signal<string>('');
+  public finishOtpDigit2 = signal<string>('');
+  public finishOtpDigit3 = signal<string>('');
+  public finishOtpDigit4 = signal<string>('');
+  public finishOtpError = signal<string | null>(null);
 
   // Completion Form state
   public laborCost = signal<number>(400);
@@ -349,30 +356,28 @@ export class WorkerActiveJobComponent implements OnInit, OnDestroy {
     this.jobService.updateJobStatus(j.id, 'arrived');
   }
 
-  // STEP 3: OTP ইনপুট ও যাচাই
-  public onOtpInput(index: number, event: any): void {
+  // STEP 3: Start OTP ইনপুট ও যাচাই
+  public onOtpInput(index: number, event: any, prefix: 'otp' | 'finish-otp' = 'otp'): void {
     const input = event.target as HTMLInputElement;
-    const val = input.value;
-    if (val && val.length > 1) {
-      input.value = val.slice(0, 1);
-    }
-    
-    // Auto advance to next input
-    if (val && index < 4) {
-      const nextInput = document.getElementById(`otp-input-${index + 1}`) as HTMLInputElement;
-      if (nextInput) nextInput.focus();
-    }
-  }
+    const clean = (input.value || '').replace(/[^0-9]/g, '').slice(0, 1);
+    input.value = clean;
 
-  public fillDemoOtp(): void {
-    const j = this.job();
-    if (!j) return;
-    const otp = j.startOtp;
-    if (otp && otp.length === 4) {
-      this.otpDigit1.set(otp[0]);
-      this.otpDigit2.set(otp[1]);
-      this.otpDigit3.set(otp[2]);
-      this.otpDigit4.set(otp[3]);
+    if (prefix === 'otp') {
+      if (index === 1) this.otpDigit1.set(clean);
+      if (index === 2) this.otpDigit2.set(clean);
+      if (index === 3) this.otpDigit3.set(clean);
+      if (index === 4) this.otpDigit4.set(clean);
+    } else {
+      if (index === 1) this.finishOtpDigit1.set(clean);
+      if (index === 2) this.finishOtpDigit2.set(clean);
+      if (index === 3) this.finishOtpDigit3.set(clean);
+      if (index === 4) this.finishOtpDigit4.set(clean);
+    }
+
+    // Auto advance to next input
+    if (clean && index < 4) {
+      const nextInput = document.getElementById(`${prefix}-input-${index + 1}`) as HTMLInputElement;
+      if (nextInput) nextInput.focus();
     }
   }
 
@@ -383,9 +388,9 @@ export class WorkerActiveJobComponent implements OnInit, OnDestroy {
     this.otpError.set(null);
     this.otpSuccess.set(null);
 
-    const enteredOtp = `${this.otpDigit1()}${this.otpDigit2()}${this.otpDigit3()}${this.otpDigit4()}`;
+    const enteredOtp = `${this.otpDigit1()}${this.otpDigit2()}${this.otpDigit3()}${this.otpDigit4()}`.trim();
     if (enteredOtp.length < 4) {
-      this.otpError.set('অনুগ্রহ করে ৪ সংখ্যার সম্পূর্ণ OTP কোড লিখুন।');
+      this.otpError.set('অনুগ্রহ করে কাস্টমারের কাছ থেকে ৪ সংখ্যার সম্পূর্ণ OTP কোড জেনে লিখুন।');
       return;
     }
 
@@ -397,16 +402,27 @@ export class WorkerActiveJobComponent implements OnInit, OnDestroy {
     }
   }
 
-  // STEP 4: কাজ সম্পন্ন ও বিলিং
+  // STEP 4: কাজ সম্পন্ন ও বিলিং (Completion OTP যাচাইসহ)
   public completeActiveJob(): void {
     const j = this.job();
     if (!j) return;
+
+    this.finishOtpError.set(null);
+    const enteredFinishOtp = `${this.finishOtpDigit1()}${this.finishOtpDigit2()}${this.finishOtpDigit3()}${this.finishOtpDigit4()}`.trim();
+    if (enteredFinishOtp.length < 4) {
+      this.finishOtpError.set('কাজ শেষ করার জন্য কাস্টমারের কাছ থেকে ৪ সংখ্যার সমাপনী OTP জেনে এখানে লিখুন।');
+      return;
+    }
 
     const finalLabor = this.laborCost();
     const finalMaterial = this.materialCost();
     const photo = this.afterWorkPhoto();
 
-    this.jobService.completeJob(j.id, finalLabor, finalMaterial, photo);
+    const result = this.jobService.verifyAndCompleteJob(j.id, enteredFinishOtp, finalLabor, finalMaterial, photo);
+    if (!result.success) {
+      this.finishOtpError.set(result.message);
+      return;
+    }
 
     // Update worker stats (increase commission due if cash payment, mark not busy)
     const workerUid = j.workerId || this.authService.currentWorker()?.uid || 'worker_rahim_1';
