@@ -17,7 +17,14 @@ export class CategoryService {
     const saved = localStorage.getItem('kajkhoj_categories');
     if (saved) {
       try {
-        this.categoriesSignal.set(JSON.parse(saved));
+        const parsed: Category[] = JSON.parse(saved);
+        const existingIds = new Set(parsed.map(c => c.id));
+        const missingDefaults = this.seedData.defaultCategories.filter(d => !existingIds.has(d.id));
+        const merged = [...parsed, ...missingDefaults].sort((a, b) => a.order - b.order);
+        this.categoriesSignal.set(merged);
+        if (missingDefaults.length > 0) {
+          this.saveToStorage();
+        }
         return;
       } catch (e) {}
     }
