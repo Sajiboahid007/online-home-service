@@ -11,11 +11,12 @@ import { WorkerProfile, RateUnit } from '../../../core/models/worker.model';
 import { CATEGORY_DEFAULTS, getSuggestedSkillsForCategories, syncSkillsWithCategories } from '../../../core/constants/category-defaults';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { CategoryIconComponent } from '../../../shared/components/category-icon/category-icon.component';
 
 @Component({
   selector: 'app-worker-edit-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImageUploaderComponent, SkeletonLoaderComponent, BnNumberPipe, TranslatePipe],
+  imports: [CommonModule, FormsModule, ImageUploaderComponent, SkeletonLoaderComponent, BnNumberPipe, TranslatePipe, CategoryIconComponent],
   templateUrl: './worker-edit-profile.component.html',
   styleUrls: ['./worker-edit-profile.component.scss']
 })

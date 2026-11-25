@@ -13,7 +13,7 @@
           <span class="chosen-cat-label">{{ 'নির্বাচিত সার্ভিস:' | t }}</span>
           @for (cat of workerCategories(); track cat.id) {
             <span class="chosen-cat-pill">
-              <span>{{ cat.icon }}</span>
+              <app-cat-icon [icon]="cat.icon" />
               <span>{{ isEn() ? cat.nameEn : cat.nameBn }}</span>
             </span>
           }
@@ -43,7 +43,7 @@
             <ng-template #selectedItem let-selected>
               @if (selected) {
                 <div class="pselect-selected-row">
-                  <span class="pselect-icon">{{ selected.icon }}</span>
+                  <app-cat-icon class="pselect-icon" [icon]="selected.icon" />
                   <span class="pselect-label-text">{{ selected.label | t }}</span>
                   <span class="pselect-price">{{ selected.estimatedPrice | taka }}</span>
                 </div>
@@ -52,14 +52,14 @@
             <ng-template #item let-item>
               <div class="pselect-dropdown-item">
                 <div class="pdi-top">
-                  <span class="pdi-icon">{{ item.icon }}</span>
+                  <app-cat-icon class="pdi-icon" [icon]="item.icon" />
                   <strong class="pdi-title">{{ item.label | t }}</strong>
                   <span class="pdi-cat-badge">{{ item.categoryName | t }}</span>
                 </div>
                 <p class="pdi-desc">{{ item.description | t }}</p>
                 <div class="pdi-meta">
-                  <span>👤 {{ item.customerName | t }}</span>
-                  <span>📍 {{ item.address | t }}</span>
+                  <span><i class="pi pi-user"></i> {{ item.customerName | t }}</span>
+                  <span><i class="pi pi-map-marker"></i> {{ item.address | t }}</span>
                   <span class="pdi-budget">{{ isEn() ? 'Budget:' : 'বাজেট:' }} {{ item.estimatedPrice | taka }}</span>
                 </div>
               </div>
@@ -154,7 +154,7 @@
             <i class="pi pi-map-marker"></i> {{ job.location.address }}
           </p>
           <div class="job-meta-row">
-            <span class="customer-tag">👤 কাস্টমার: {{ job.customerName }}</span>
+            <span class="customer-tag"><i class="pi pi-user"></i> কাস্টমার: {{ job.customerName }}</span>
             <span class="status-pill">
               @switch (job.status) {
                 @case ('accepted') { রওনা দেওয়ার অপেক্ষায় }
@@ -181,20 +181,20 @@
     <section class="open-requests-section">
       <div class="open-requests-header">
         <div class="orh-title-wrap">
-          <span class="lightning-badge">⚡</span>
+          <span class="lightning-badge"><i class="pi pi-bolt"></i></span>
           <div>
             <h2 class="section-title">উন্মুক্ত কাজের রিকোয়েস্ট ({{ openWorkRequests().length | bnNumber }}টি নতুন চাহিদা)</h2>
             <p class="section-sub">যে কারিগর প্রথমে 'কাজটি নিন' চাপবেন, তিনিই সরাসরি কাজ পাবেন (First Grab)।</p>
           </div>
         </div>
-        <a routerLink="/worker/job-board" class="btn-all-board">জব বোর্ডে যান ➔</a>
+        <a routerLink="/worker/job-board" class="btn-all-board">জব বোর্ডে যান <i class="pi pi-arrow-right"></i></a>
       </div>
 
       <div class="open-requests-grid">
         @for (req of openWorkRequests(); track req.id) {
           <div class="open-request-card">
             <div class="orc-top">
-              <span class="cat-pill">🔧 {{ req.categoryName }}</span>
+              <span class="cat-pill"><i class="pi pi-wrench"></i> {{ req.categoryName }}</span>
               <span class="price-tag">{{ req.estimatedPrice | taka }}</span>
             </div>
 
@@ -207,7 +207,7 @@
             </div>
 
             <div class="orc-footer">
-              <span class="fcfs-note">⚡ যে আগে নিবেন তিনিই পাবেন</span>
+              <span class="fcfs-note"><i class="pi pi-bolt"></i> যে আগে নিবেন তিনিই পাবেন</span>
               <button type="button" class="btn-grab-now" (click)="quickGrab(req)">
                 <i class="pi pi-bolt"></i>
                 <span>কাজটি নিন (Grab)</span>
@@ -278,7 +278,7 @@
         </div>
       </div>
       <div class="kpi-body">
-        <h3 class="kpi-value value-star">⭐ {{ (currentWorker()?.rating || 4.8) | bnNumber }}</h3>
+        <h3 class="kpi-value value-star"><i class="pi pi-star-fill" style="color: #f59e0b; font-size: 20px;"></i> {{ (currentWorker()?.rating || 4.8) | bnNumber }}</h3>
         <span class="kpi-trend">
           {{ (currentWorker()?.ratingCount || 15) | bnNumber }} {{ isEn() ? 'customer reviews' : 'টি গ্রাহক রিভিউ' }}
         </span>
@@ -325,7 +325,7 @@
                   <td>
                     <div class="customer-cell">
                       <span>{{ job.customerName | t }}</span>
-                      <span class="rating-mini">⭐ {{ (job.customerRating || 5.0) | bnNumber }}</span>
+                      <span class="rating-mini"><i class="pi pi-star-fill" style="color: #f59e0b; font-size: 11px;"></i> {{ (job.customerRating || 5.0) | bnNumber }}</span>
                     </div>
                   </td>
                   <td>

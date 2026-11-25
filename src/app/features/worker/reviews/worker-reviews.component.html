@@ -5,7 +5,7 @@
       <p class="subtitle">গ্রাহকদের দেওয়া মতামত এবং গ্রাহককে রেটিং প্রদান করুন</p>
     </div>
     <div class="overall-score">
-      <span class="score-stars">⭐ {{ worker()?.rating?.toFixed(1) || '৪.৮' }}</span>
+      <span class="score-stars"><i class="pi pi-star-fill" style="color: #f59e0b;"></i> {{ worker()?.rating?.toFixed(1) || '৪.৮' }}</span>
       <span class="score-count">({{ worker()?.ratingCount || 38 | bnNumber }} রিভিউ)</span>
     </div>
   </div>

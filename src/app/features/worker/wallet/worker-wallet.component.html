@@ -49,7 +49,7 @@
       <p class="card-hint">
         {{ theme.currentLang() === 'bn' ? 'সর্বোচ্চ সীমা' : 'Maximum Limit' }} <strong>৳৫০০</strong>
         @if ((currentWorker()?.commissionDue || 0) >= 400) {
-          <span class="text-danger font-bold"> (⚠️ {{ theme.currentLang() === 'bn' ? 'সীমা প্রায় পূর্ণ' : 'Limit almost reached' }})</span>
+          <span class="text-danger font-bold"> (<i class="pi pi-exclamation-triangle"></i> {{ theme.currentLang() === 'bn' ? 'সীমা প্রায় পূর্ণ' : 'Limit almost reached' }})</span>
         }
       </p>
       <button 

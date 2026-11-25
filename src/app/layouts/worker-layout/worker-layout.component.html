@@ -99,9 +99,9 @@
             <div class="profile-meta">
               <span class="profile-name">{{ currentWorker()?.name }}</span>
               <div class="profile-sub">
-                <span class="rating">⭐ {{ (currentWorker()?.rating || 5.0) | bnNumber }}</span>
+                <span class="rating"><i class="pi pi-star-fill" style="color: #f59e0b; font-size: 11px;"></i> {{ (currentWorker()?.rating || 5.0) | bnNumber }}</span>
                 @if (currentWorker()?.verified) {
-                  <span class="verified-icon" [title]="'ভেরিফায়েড কারিগর' | t">✔</span>
+                  <span class="verified-icon" [title]="'ভেরিফায়েড কারিগর' | t"><i class="pi pi-check"></i></span>
                 }
               </div>
             </div>
@@ -119,7 +119,7 @@
                   <div class="name-line">
                     <strong class="user-fullname">{{ currentWorker()?.name }}</strong>
                     @if (currentWorker()?.verified) {
-                      <span class="badge-verified" [title]="'ভেরিফায়েড কারিগর' | t">✔</span>
+                      <span class="badge-verified" [title]="'ভেরিফায়েড কারিগর' | t"><i class="pi pi-check"></i></span>
                     }
                   </div>
                   <span class="menu-skill">{{ currentWorker()?.skills?.[0] || ('দক্ষ কারিগর' | t) }}</span>
@@ -257,7 +257,7 @@
             <span class="pill-label">{{ 'বকেয়া কমিশন:' | t }}</span>
             <strong class="pill-value">{{ (currentWorker()?.commissionDue || 0) | taka }}</strong>
             @if ((currentWorker()?.commissionDue || 0) >= 400) {
-              <span class="due-warning-tag">⚠️ {{ 'সীমা' | t }} {{ 500 | bnNumber }}</span>
+              <span class="due-warning-tag"><i class="pi pi-exclamation-triangle"></i> {{ 'সীমা' | t }} {{ 500 | bnNumber }}</span>
             }
           </a>
         </div>
@@ -466,7 +466,7 @@
               <i class="pi pi-user meta-icon"></i>
               <div>
                 <span class="meta-label">{{ 'কাস্টমার' | t }}</span>
-                <strong>{{ offer.job.customerName }} (⭐ {{ (offer.job.customerRating || 4.9) | bnNumber }})</strong>
+                <strong>{{ offer.job.customerName }} (<i class="pi pi-star-fill" style="color: #f59e0b; font-size: 11px;"></i> {{ (offer.job.customerRating || 4.9) | bnNumber }})</strong>
               </div>
             </div>
 
@@ -486,7 +486,7 @@
               </div>
             </div>
           </div>
-          <p class="exact-location-lock">🔒 {{ 'সঠিক বাড়ির পিন, ল্যান্ডমার্ক ও গেটের ছবি কাজ গ্রহণের পর দেখা যাবে।' | t }}</p>
+          <p class="exact-location-lock"><i class="pi pi-lock"></i> {{ 'সঠিক বাড়ির পিন, ল্যান্ডমার্ক ও গেটের ছবি কাজ গ্রহণের পর দেখা যাবে।' | t }}</p>
 
           @if (offer.job.photos && offer.job.photos.length > 0) {
             <div class="job-photos-preview">

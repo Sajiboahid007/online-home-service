@@ -107,10 +107,10 @@
       <div class="modal-card" (click)="$event.stopPropagation()" style="max-width: 500px;">
         <div class="modal-header">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 20px;">💰</span>
+            <i class="pi pi-wallet" style="font-size: 20px; color: #16a34a;"></i>
             <h3 class="modal-title">{{ theme.currentLang() === 'bn' ? 'উত্তোলন অনুমোদন ও অর্থ প্রেরণ' : 'Approve & Process Withdrawal' }}</h3>
           </div>
-          <button type="button" class="close-btn" (click)="closeApproveModal()">✕</button>
+          <button type="button" class="close-btn" (click)="closeApproveModal()"><i class="pi pi-times"></i></button>
         </div>
 
         <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px; padding: 20px;">
@@ -168,10 +168,10 @@
       <div class="modal-card" (click)="$event.stopPropagation()" style="max-width: 480px;">
         <div class="modal-header">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 20px;">⚠️</span>
+            <i class="pi pi-exclamation-triangle" style="font-size: 20px; color: #dc2626;"></i>
             <h3 class="modal-title">{{ theme.currentLang() === 'bn' ? 'উত্তোলন অনুরোধ প্রত্যাখ্যান (Reject)' : 'Reject Withdrawal Request' }}</h3>
           </div>
-          <button type="button" class="close-btn" (click)="closeRejectModal()">✕</button>
+          <button type="button" class="close-btn" (click)="closeRejectModal()"><i class="pi pi-times"></i></button>
         </div>
 
         <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px; padding: 20px;">
@@ -206,7 +206,7 @@
           </div>
 
           <p style="margin: 0; font-size: 12px; color: var(--text-secondary); background: #f8fafc; padding: 8px 10px; border-radius: 6px;">
-            ℹ️ <strong>নোট:</strong> অনুরোধটি প্রত্যাখ্যান করলে উত্তোলনের অর্থ ({{ tx.amount | taka }}) স্বয়ংক্রিয়ভাবে কারিগরের ওয়ালেটে রিফান্ড হয়ে যাবে।
+            <i class="pi pi-info-circle" style="color: #0284c7;"></i> <strong>নোট:</strong> অনুরোধটি প্রত্যাখ্যান করলে উত্তোলনের অর্থ ({{ tx.amount | taka }}) স্বয়ংক্রিয়ভাবে কারিগরের ওয়ালেটে রিফান্ড হয়ে যাবে।
           </p>
         </div>
 

@@ -97,10 +97,10 @@
       <div class="modal-card" (click)="$event.stopPropagation()" style="max-width: 440px;">
         <div class="modal-header">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 20px;">⚡</span>
+            <i class="pi pi-bolt" style="font-size: 20px; color: #f59e0b;"></i>
             <h3 class="modal-title">{{ theme.currentLang() === 'bn' ? 'সার্জ মাল্টিপ্লায়ার সমন্বয়' : 'Adjust Surge Multiplier' }}</h3>
           </div>
-          <button type="button" class="close-btn" (click)="closeSurgeModal()">✕</button>
+          <button type="button" class="close-btn" (click)="closeSurgeModal()"><i class="pi pi-times"></i></button>
         </div>
 
         <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">

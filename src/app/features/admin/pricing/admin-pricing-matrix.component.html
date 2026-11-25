@@ -49,10 +49,10 @@
       <div class="modal-card" (click)="$event.stopPropagation()" style="max-width: 480px;">
         <div class="modal-header">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 20px;">🏷️</span>
+            <i class="pi pi-tag" style="font-size: 20px; color: #0f766e;"></i>
             <h3 class="modal-title">{{ theme.currentLang() === 'bn' ? 'প্রাইসিং ও কমিশন ম্যাট্রিক্স এডিট' : 'Edit Pricing & Commission' }}</h3>
           </div>
-          <button type="button" class="close-btn" (click)="closeEditModal()">✕</button>
+          <button type="button" class="close-btn" (click)="closeEditModal()"><i class="pi pi-times"></i></button>
         </div>
 
         <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">

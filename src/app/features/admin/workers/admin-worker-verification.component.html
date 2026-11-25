@@ -30,7 +30,7 @@
           <div class="kyc-details">
             <div class="detail-group">
               <label>হোম লোকেশন (বাধ্যতামূলক পিন):</label>
-              <p>📍 {{ worker.homeLocation.address || 'সাভার বাজার, সাভার' }} ({{ worker.homeLocation.lat }}, {{ worker.homeLocation.lng }})</p>
+              <p><i class="pi pi-map-marker" style="color: #ef4444;"></i> {{ worker.homeLocation.address || 'সাভার বাজার, সাভার' }} ({{ worker.homeLocation.lat }}, {{ worker.homeLocation.lng }})</p>
             </div>
 
             <div class="detail-group">
@@ -80,10 +80,10 @@
       <div class="modal-card" (click)="$event.stopPropagation()" style="max-width: 480px;">
         <div class="modal-header">
           <div class="modal-title-wrap" style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 20px;">⚠️</span>
+            <i class="pi pi-exclamation-triangle" style="font-size: 20px; color: #dc2626;"></i>
             <h3 class="modal-title" style="margin: 0; font-size: 16px; font-weight: 700;">ওয়ার্কার আবেদন বাতিল (Reject Verification)</h3>
           </div>
-          <button type="button" class="close-btn" (click)="closeRejectModal()">✕</button>
+          <button type="button" class="close-btn" (click)="closeRejectModal()"><i class="pi pi-times"></i></button>
         </div>
 
         <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px; padding: 18px 22px;">

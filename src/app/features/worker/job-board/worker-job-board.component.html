@@ -123,7 +123,7 @@
             </div>
             <div class="info-line">
               <i class="pi pi-user icon-user"></i>
-              <span class="customer-info">{{ job.customerName | t }} • ⭐ {{ (job.customerRating || 4.8) | bnNumber }}</span>
+              <span class="customer-info">{{ job.customerName | t }} • <i class="pi pi-star-fill" style="color: #f59e0b; font-size: 11px;"></i> {{ (job.customerRating || 4.8) | bnNumber }}</span>
               <span class="time-stamp">{{ job.timeline.createdAt | timeAgo }}</span>
             </div>
           </div>
@@ -188,15 +188,15 @@
             <h4 class="grab-title">{{ jobToGrab.categoryName }}</h4>
             <p class="grab-desc">"{{ jobToGrab.description }}"</p>
             <div class="grab-meta">
-              <span>📍 {{ jobToGrab.location.address }} ({{ jobToGrab.distanceKm | bnNumber }} কিমি দূরে)</span>
-              <span>💰 পারিশ্রমিক: <strong>{{ jobToGrab.estimatedPrice | taka }}</strong></span>
+              <span><i class="pi pi-map-marker" style="color: #ef4444;"></i> {{ jobToGrab.location.address }} ({{ jobToGrab.distanceKm | bnNumber }} কিমি দূরে)</span>
+              <span><i class="pi pi-wallet" style="color: #0f766e;"></i> পারিশ্রমিক: <strong>{{ jobToGrab.estimatedPrice | taka }}</strong></span>
             </div>
           </div>
 
           <p class="grab-notice">
             কাজটি গ্রহণ করলে এটি আপনার একটিভ জব লিস্টে চলে যাবে এবং আপনি সরাসরি কাস্টমারের ঠিকানায় রওনা হতে পারবেন।
           </p>
-          <p class="exact-location-lock">🔒 {{ 'সঠিক বাড়ির পিন, ল্যান্ডমার্ক ও গেটের ছবি কাজ গ্রহণের পর দেখা যাবে।' | t }}</p>
+          <p class="exact-location-lock"><i class="pi pi-lock"></i> {{ 'সঠিক বাড়ির পিন, ল্যান্ডমার্ক ও গেটের ছবি কাজ গ্রহণের পর দেখা যাবে।' | t }}</p>
         </div>
 
         <div class="modal-footer">

@@ -3,11 +3,12 @@
   <aside class="admin-sidebar">
     <div class="sidebar-header">
       <a routerLink="/customer/home" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;">
-        <span class="logo-icon">🛠️</span>
+        <span class="logo-icon"><i class="pi pi-wrench"></i></span>
         <div class="brand">
           <h2>{{ 'কাজখোঁজ' | t }}</h2>
           <span class="badge" [class.badge-warning]="isSuperAdmin()" [class.badge-info]="!isSuperAdmin()">
-            {{ isSuperAdmin() ? '👑 Super Admin' : '🛡️ Admin' }}
+            <i [class]="'pi ' + (isSuperAdmin() ? 'pi-crown' : 'pi-shield')"></i>
+            {{ isSuperAdmin() ? 'Super Admin' : 'Admin' }}
           </span>
         </div>
       </a>

@@ -25,7 +25,7 @@
       [style.background]="activeTab() === 'customers' ? '#0f766e' : '#fff'"
       [style.color]="activeTab() === 'customers' ? '#fff' : '#475569'"
     >
-      <span>👤 নিবন্ধিত কাস্টমারবৃন্দ</span>
+      <span><i class="pi pi-user"></i> নিবন্ধিত কাস্টমারবৃন্দ</span>
       <span style="font-size: 11px; padding: 2px 7px; border-radius: 9999px; background: rgba(255,255,255,0.25);" [style.background]="activeTab() === 'customers' ? 'rgba(255,255,255,0.25)' : '#e2e8f0'">
         {{ customers().length | bnNumber }}
       </span>
@@ -40,7 +40,7 @@
       [style.background]="activeTab() === 'workers' ? '#0f766e' : '#fff'"
       [style.color]="activeTab() === 'workers' ? '#fff' : '#475569'"
     >
-      <span>👷 নিবন্ধিত ওয়ার্কারবৃন্দ</span>
+      <span><i class="pi pi-wrench"></i> নিবন্ধিত ওয়ার্কারবৃন্দ</span>
       <span style="font-size: 11px; padding: 2px 7px; border-radius: 9999px;" [style.background]="activeTab() === 'workers' ? 'rgba(255,255,255,0.25)' : '#e2e8f0'">
         {{ workers().length | bnNumber }}
       </span>
@@ -55,7 +55,7 @@
       [style.background]="activeTab() === 'admins' ? '#0f766e' : '#fff'"
       [style.color]="activeTab() === 'admins' ? '#fff' : '#475569'"
     >
-      <span>👑 অ্যাডমিনবৃন্দ</span>
+      <span><i class="pi pi-crown"></i> অ্যাডমিনবৃন্দ</span>
       <span style="font-size: 11px; padding: 2px 7px; border-radius: 9999px;" [style.background]="activeTab() === 'admins' ? 'rgba(255,255,255,0.25)' : '#e2e8f0'">
         {{ admins().length | bnNumber }}
       </span>
@@ -65,7 +65,7 @@
   <!-- 1. Customers List Section -->
   @if (activeTab() === 'customers') {
     <div class="card section-box">
-      <h3>👤 নিবন্ধিত গ্রাহক ও কাস্টমারবৃন্দ (Firebase Firestore: users)</h3>
+      <h3><i class="pi pi-user"></i> নিবন্ধিত গ্রাহক ও কাস্টমারবৃন্দ (Firebase Firestore: users)</h3>
       <div class="table-container">
         <table class="kajkhoj-table">
           <thead>
@@ -109,7 +109,7 @@
                 </td>
                 <td>
                   <div class="rate-col">
-                    <span>⭐ {{ (cust.rating || 5.0).toFixed(1) | bnNumber }}</span>
+                    <span><i class="pi pi-star-fill" style="color: #f59e0b; font-size: 11px;"></i> {{ (cust.rating || 5.0).toFixed(1) | bnNumber }}</span>
                     <small>{{ (cust.ratingCount || 0) | bnNumber }} রিভিউ</small>
                   </div>
                 </td>
@@ -137,7 +137,7 @@
   <!-- 2. Workers List Section -->
   @if (activeTab() === 'workers') {
     <div class="card section-box">
-      <h3>👷 নিবন্ধিত ওয়ার্কারবৃন্দ (Firebase Firestore: workers)</h3>
+      <h3><i class="pi pi-wrench"></i> নিবন্ধিত ওয়ার্কারবৃন্দ (Firebase Firestore: workers)</h3>
       <div class="table-container">
         <table class="kajkhoj-table">
           <thead>
@@ -168,7 +168,7 @@
                 </td>
                 <td>
                   <div class="rate-col">
-                    <span>⭐ {{ worker.rating.toFixed(1) | bnNumber }} ({{ worker.totalJobs | bnNumber }} কাজ)</span>
+                    <span><i class="pi pi-star-fill" style="color: #f59e0b; font-size: 11px;"></i> {{ worker.rating.toFixed(1) | bnNumber }} ({{ worker.totalJobs | bnNumber }} কাজ)</span>
                     <small>সম্পন্নতা: {{ (worker.completionRate * 100).toFixed(0) | bnNumber }}%</small>
                   </div>
                 </td>
@@ -229,7 +229,7 @@
   <!-- 3. Admins List Section -->
   @if (activeTab() === 'admins') {
     <div class="card section-box">
-      <h3>👑 প্ল্যাটফর্ম ও জোন অ্যাডমিনবৃন্দ (Firebase Firestore: users)</h3>
+      <h3><i class="pi pi-crown" style="color: #f59e0b;"></i> প্ল্যাটফর্ম ও জোন অ্যাডমিনবৃন্দ (Firebase Firestore: users)</h3>
       <div class="table-container">
         <table class="kajkhoj-table">
           <thead>
@@ -261,7 +261,8 @@
                 </td>
                 <td>
                   <span class="badge" [class.badge-success]="adm.role === 'superadmin'" [class.badge-info]="adm.role === 'admin'">
-                    {{ adm.role === 'superadmin' ? '👑 সুপার অ্যাডমিন' : '🛡️ জোন অ্যাডমিন' }}
+                    <i [class]="'pi ' + (adm.role === 'superadmin' ? 'pi-crown' : 'pi-shield')"></i>
+                    {{ adm.role === 'superadmin' ? 'সুপার অ্যাডমিন' : 'জোন অ্যাডমিন' }}
                   </span>
                 </td>
                 <td>
@@ -281,10 +282,10 @@
       <div class="modal-card" (click)="$event.stopPropagation()" style="max-width: 480px;">
         <div class="modal-header">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 20px;">⚠️</span>
+            <i class="pi pi-exclamation-triangle" style="font-size: 20px; color: #eab308;"></i>
             <h3 class="modal-title">{{ theme.currentLang() === 'bn' ? 'সতর্কবার্তা প্রেরণ (Send Warning Notice)' : 'Send Warning Notice' }}</h3>
           </div>
-          <button type="button" class="close-btn" (click)="closeWarnModal()">✕</button>
+          <button type="button" class="close-btn" (click)="closeWarnModal()"><i class="pi pi-times"></i></button>
         </div>
 
         <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
@@ -324,10 +325,10 @@
       <div class="modal-card" (click)="$event.stopPropagation()" style="max-width: 480px;">
         <div class="modal-header">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 20px;">🚫</span>
+            <i class="pi pi-ban" style="font-size: 20px; color: #ef4444;"></i>
             <h3 class="modal-title">{{ theme.currentLang() === 'bn' ? 'ব্যবহারকারী সাসপেন্ড বা ব্যান' : 'Suspend / Ban Account' }}</h3>
           </div>
-          <button type="button" class="close-btn" (click)="closeBanModal()">✕</button>
+          <button type="button" class="close-btn" (click)="closeBanModal()"><i class="pi pi-times"></i></button>
         </div>
 
         <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
@@ -404,10 +405,10 @@
       <div class="modal-card" (click)="$event.stopPropagation()" style="max-width: 440px;">
         <div class="modal-header">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 20px;">💸</span>
+            <i class="pi pi-wallet" style="font-size: 20px; color: #16a34a;"></i>
             <h3 class="modal-title">{{ theme.currentLang() === 'bn' ? 'বকেয়া কমিশন মওকুফ' : 'Waive Due Commission' }}</h3>
           </div>
-          <button type="button" class="close-btn" (click)="closeWaiveModal()">✕</button>
+          <button type="button" class="close-btn" (click)="closeWaiveModal()"><i class="pi pi-times"></i></button>
         </div>
 
         <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">

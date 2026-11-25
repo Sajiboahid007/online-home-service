@@ -8,7 +8,7 @@
 
     @if (activeSOSCount() > 0) {
       <div class="sos-alarm-pill">
-        <span class="siren-pulse">🚨</span>
+        <i class="pi pi-exclamation-circle siren-pulse"></i>
         <span>{{ activeSOSCount() | bnNumber }} টি সক্রিয় জরুরি SOS সতর্কতা</span>
       </div>
     }
@@ -18,7 +18,7 @@
   <section class="sos-section card mb-4">
     <div class="section-title-row">
       <div class="st-left">
-        <span class="st-icon">🚨</span>
+        <i class="pi pi-exclamation-triangle st-icon"></i>
         <h3 class="st-title">সক্রিয় জরুরি SOS অ্যালার্ট ফিড</h3>
       </div>
       <span class="badge badge-danger">রিয়েল-টাইম রেসপন্স ডেস্ক</span>
@@ -26,7 +26,7 @@
 
     @if (sosAlerts().length === 0) {
       <div class="empty-sos">
-        <span class="es-icon">🛡️</span>
+        <i class="pi pi-shield es-icon"></i>
         <p>এই মুহূর্তে কোনো জরুরি SOS সংকেত নেই। প্ল্যাটফর্ম নিরাপদ রয়েছে।</p>
       </div>
     } @else {
@@ -35,7 +35,7 @@
           <div class="sos-alert-card" [class.active-alarm]="sos.status === 'active'" [class.resolved-alarm]="sos.status === 'resolved'">
             <div class="sac-header">
               <div class="sac-user">
-                <span class="sac-siren">{{ sos.status === 'active' ? '🚨' : '✅' }}</span>
+                <i [class]="'pi sac-siren ' + (sos.status === 'active' ? 'pi-exclamation-triangle' : 'pi-check-circle')"></i>
                 <div>
                   <h4 class="sac-name">{{ sos.userName }}</h4>
                   <span class="sac-time">{{ sos.createdAt | timeAgo }}</span>
@@ -49,11 +49,11 @@
             <div class="sac-body">
               <div class="meta-item">
                 <span class="mi-lbl">মোবাইল নম্বর:</span>
-                <a [href]="'tel:' + sos.userPhone" class="phone-link">📞 {{ sos.userPhone }}</a>
+                <a [href]="'tel:' + sos.userPhone" class="phone-link"><i class="pi pi-phone"></i> {{ sos.userPhone }}</a>
               </div>
               <div class="meta-item">
                 <span class="mi-lbl">লোকেশন ঠিকানা:</span>
-                <span class="mi-val">📍 {{ sos.location.address }}</span>
+                <span class="mi-val"><i class="pi pi-map-marker"></i> {{ sos.location.address }}</span>
               </div>
               <div class="meta-item">
                 <span class="mi-lbl">GPS কোঅর্ডিনেট:</span>
@@ -70,7 +70,7 @@
 
             <div class="sac-footer">
               <a [href]="'https://www.google.com/maps?q=' + sos.location.lat + ',' + sos.location.lng" target="_blank" class="btn-map-link">
-                <span>ম্যাপে অবস্থান দেখুন 🗺️</span>
+                <span>ম্যাপে অবস্থান দেখুন <i class="pi pi-map"></i></span>
               </a>
 
               @if (sos.status === 'active') {
@@ -89,8 +89,7 @@
   <section class="disputes-section card">
     <div class="section-title-row">
       <div class="st-left">
-        <span class="st-icon">⚖️</span>
-        <h3 class="st-title">অভিযোগ ও বিরোধ নিষ্পত্তি (Disputes)</h3>
+        <h3 class="st-title"><i class="pi pi-shield st-icon"></i> অভিযোগ ও বিরোধ নিষ্পত্তি (Disputes)</h3>
       </div>
 
       <!-- Status Filters -->
@@ -141,7 +140,7 @@
                 <strong>{{ r.reporterName }}</strong>
               </td>
               <td>
-                <span class="against-name">🔧 {{ r.againstName }}</span>
+                <span class="against-name"><i class="pi pi-wrench"></i> {{ r.againstName }}</span>
               </td>
               <td>
                 <span class="type-pill">{{ getTypeText(r.type) }}</span>
@@ -173,8 +172,8 @@
     <div class="modal-backdrop" (click)="closeSOSModal()">
       <div class="modal-card admin-action-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3 class="modal-title">🚨 SOS অ্যালার্ট সমাধান</h3>
-          <button class="close-btn" (click)="closeSOSModal()">✕</button>
+          <h3 class="modal-title"><i class="pi pi-exclamation-triangle" style="color: #dc2626;"></i> SOS অ্যালার্ট সমাধান</h3>
+          <button class="close-btn" (click)="closeSOSModal()"><i class="pi pi-times"></i></button>
         </div>
 
         <div class="modal-body">
@@ -201,10 +200,10 @@
       <div class="modal-card report-details-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <div class="modal-title-wrap">
-            <span class="modal-icon">⚖️</span>
+            <i class="pi pi-shield modal-icon"></i>
             <h3 class="modal-title">অভিযোগ পর্যালোচনা — #{{ r.id }}</h3>
           </div>
-          <button class="close-btn" (click)="closeReportDetails()">✕</button>
+          <button class="close-btn" (click)="closeReportDetails()"><i class="pi pi-times"></i></button>
         </div>
 
         <div class="modal-body">

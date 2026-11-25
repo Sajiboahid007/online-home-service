@@ -61,7 +61,7 @@
               [class.selected]="isCategorySelected(cat.id)"
               (click)="toggleCategory(cat.id)"
             >
-              <span>{{ cat.icon }}</span>
+              <app-cat-icon [icon]="cat.icon" />
               <span>{{ isEn() ? cat.nameEn : cat.nameBn }}</span>
               @if (isCategorySelected(cat.id)) {
                 <i class="pi pi-check-circle"></i>
@@ -97,7 +97,7 @@
                   [class.active]="hasSkill(s)"
                   (click)="toggleSuggestedSkill(s)"
                 >
-                  <span>{{ hasSkill(s) ? '✓' : '+' }}</span>
+                  <i [class]="'pi ' + (hasSkill(s) ? 'pi-check' : 'pi-plus')"></i>
                   <span>{{ s | t }}</span>
                 </button>
               }
