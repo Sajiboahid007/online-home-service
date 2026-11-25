@@ -109,7 +109,7 @@
             <div class="bcard-cat">
               <span class="bcard-cat-icon">{{ getCategoryIcon(job.categoryId) }}</span>
               <div>
-                <h4 class="bcard-cat-name">{{ job.categoryName }}</h4>
+                <h4 class="bcard-cat-name">{{ getCategoryName(job) }}</h4>
                 <span class="bcard-id">{{ theme.currentLang() === 'bn' ? 'আইডি: #' : 'ID: #' }}{{ job.id }}</span>
               </div>
             </div>
@@ -122,7 +122,7 @@
           </div>
 
           <!-- Description -->
-          <p class="bcard-description">{{ job.description }}</p>
+          <p class="bcard-description">{{ job.description | t }}</p>
 
           <!-- Middle Row: Worker & Time & Location -->
           <div class="bcard-middle">
@@ -134,11 +134,11 @@
                     'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=100&auto=format&fit=crop&q=80'
                   "
                   class="worker-thumb"
-                  [alt]="job.workerName"
+                  [alt]="(job.workerName || '') | t"
                 />
                 <div class="worker-meta">
                   <span class="wm-label">{{ theme.currentLang() === 'bn' ? 'নিয়োজিত কর্মী' : 'Assigned Worker' }}</span>
-                  <strong class="wm-name">{{ job.workerName }}</strong>
+                  <strong class="wm-name">{{ (job.workerName || '') | t }}</strong>
                   <span class="wm-phone"
                     >📞 {{ job.workerPhone || '01712345678' | maskPhone }}</span
                   >
@@ -159,7 +159,7 @@
             <div class="bcard-info-item">
               <span class="bii-label">{{ theme.currentLang() === 'bn' ? 'স্থান' : 'Location' }}</span>
               <span class="bii-val address-truncate">{{
-                job.location.address || 'সাভার, ঢাকা'
+                (job.location.address || 'সাভার, ঢাকা') | t
               }}</span>
             </div>
 
@@ -276,8 +276,8 @@
                 [alt]="job.workerName"
               />
               <div>
-                <h4 class="r-name">{{ job.workerName }}</h4>
-                <span class="r-service">{{ theme.currentLang() === 'bn' ? 'সার্ভিস: ' : 'Service: ' }}{{ job.categoryName }} (#{{ job.id }})</span>
+                <h4 class="r-name">{{ (job.workerName || '') | t }}</h4>
+                <span class="r-service">{{ theme.currentLang() === 'bn' ? 'সার্ভিস: ' : 'Service: ' }}{{ getCategoryName(job) }} (#{{ job.id }})</span>
               </div>
             </div>
           }

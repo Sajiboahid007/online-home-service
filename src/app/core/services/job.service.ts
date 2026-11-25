@@ -267,7 +267,7 @@ export class JobService {
     if (job.workerId && job.workerId !== worker.uid) {
       return {
         success: false,
-        message: `দুঃখিত! এই কাজটি ইতিমধ্যে অন্য একজন কারিগর (${job.workerName || 'অন্য প্লাম্বার'}) গ্রহণ করে ফেলেছেন।`
+        message: `দুঃখিত! এই কাজটি ইতিমধ্যে অন্য একজন কারিগর (${job.workerName || 'অন্য কারিগর'}) গ্রহণ করে ফেলেছেন।`
       };
     }
 
@@ -308,9 +308,11 @@ export class JobService {
     workerUid?: string
   ): { success: boolean; message: string; workerName: string; job?: Job } {
     const defaultWorkers = this.seedData.defaultWorkers;
+    const job = this.getJobById(jobId);
     const targetWorker = workerUid
       ? defaultWorkers.find(w => w.uid === workerUid)
-      : defaultWorkers.find(w => w.categoryIds.includes('plumber')) || defaultWorkers[0];
+      : (job?.categoryId ? defaultWorkers.find(w => w.categoryIds.includes(job.categoryId)) : undefined)
+        || defaultWorkers[0];
 
     if (!targetWorker) {
       return { success: false, message: 'কোনো ডেমো কারিগর পাওয়া যায়নি।', workerName: '' };

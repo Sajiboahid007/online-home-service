@@ -13,13 +13,14 @@ import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
 import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
 import { MaskPhonePipe } from '../../../shared/pipes/mask-phone.pipe';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 type FilterTab = 'all' | 'active' | 'completed' | 'cancelled';
 
 @Component({
   selector: 'app-my-bookings',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, BnNumberPipe, TakaPipe, TimeAgoPipe, MaskPhonePipe],
+  imports: [CommonModule, RouterModule, FormsModule, BnNumberPipe, TakaPipe, TimeAgoPipe, MaskPhonePipe, TranslatePipe],
   templateUrl: './my-bookings.component.html',
   styleUrl: './my-bookings.component.scss'
 })
@@ -126,6 +127,16 @@ export class MyBookingsComponent implements OnInit, OnDestroy {
   public getCategoryIcon(catId: string): string {
     const cat = this.categoryService.getCategoryById(catId);
     return cat ? cat.icon : '🔨';
+  }
+
+  public getCategoryName(job: Job): string {
+    const cat = job.categoryId ? this.categoryService.getCategoryById(job.categoryId) : undefined;
+    if (this.theme.currentLang() === 'en') {
+      const translated = this.theme.t(job.categoryName);
+      if (translated && translated !== job.categoryName) return translated;
+      return cat?.nameEn || translated || job.categoryName;
+    }
+    return cat?.nameBn || this.theme.t(job.categoryName);
   }
 
   public getStatusBadgeClass(status: JobStatus): string {

@@ -4,7 +4,7 @@
     <div class="tracking-top-nav">
       <a routerLink="/customer/home" class="btn-back">
         <span class="pi pi-arrow-left"></span>
-        <span>ম্যাপে ফিরে যান</span>
+        <span>{{ 'ম্যাপে ফিরে যান' | t }}</span>
       </a>
 
       <div class="live-status-pill" [class.completed]="job.status === 'completed'" [class.cancelled]="job.status.includes('cancelled')">
@@ -13,7 +13,7 @@
       </div>
 
       <a routerLink="/customer/bookings" class="all-bookings-link">
-        <span>সকল বুকিং</span>
+        <span>{{ 'সকল বুকিং' | t }}</span>
       </a>
     </div>
 
@@ -26,12 +26,12 @@
             <div class="sim-info">
               <span class="sim-icon">🧪</span>
               <div>
-                <span class="sim-title">লাইভ ডেমো সিমুলেটর</span>
-                <p class="sim-sub">ওয়ার্কারের অবস্থান ও কাজের ধাপ পরিবর্তন টেস্ট করুন</p>
+                <span class="sim-title">{{ 'লাইভ ডেমো সিমুলেটর' | t }}</span>
+                <p class="sim-sub">{{ 'ওয়ার্কারের অবস্থান ও কাজের ধাপ পরিবর্তন টেস্ট করুন' | t }}</p>
               </div>
             </div>
             <button type="button" class="btn-advance-step" (click)="advanceSimulationStep()" [disabled]="job.status === 'completed' || job.status.includes('cancelled')">
-              <span>ধাপ পরিবর্তন করুন ⏩</span>
+              <span>{{ 'ধাপ পরিবর্তন করুন ⏩' | t }}</span>
             </button>
           </div>
         }
@@ -43,8 +43,8 @@
               <div class="otp-header">
                 <div class="otp-icon-wrap">🏁</div>
                 <div class="otp-title-text">
-                  <h3 class="otp-title">৪-সংখ্যার কাজ শেষ করার ওটিপি (Completion OTP)</h3>
-                  <p class="otp-subtitle">কাজ সঠিকভাবে শেষ হলে কর্মীকে এই OTP দিন</p>
+                  <h3 class="otp-title">{{ '৪-সংখ্যার কাজ শেষ করার ওটিপি (Completion OTP)' | t }}</h3>
+                  <p class="otp-subtitle">{{ 'কাজ সঠিকভাবে শেষ হলে কর্মীকে এই OTP দিন' | t }}</p>
                 </div>
               </div>
 
@@ -52,15 +52,15 @@
                 @for (char of (job.completionOtp || job.startOtp).split(''); track $index) {
                   <div class="otp-digit-box">{{ char | bnNumber }}</div>
                 }
-                <button type="button" class="btn-copy-otp" (click)="copyOtp(job.completionOtp || job.startOtp)" title="OTP কপি করুন">
+                <button type="button" class="btn-copy-otp" (click)="copyOtp(job.completionOtp || job.startOtp)" [title]="'কপি করুন' | t">
                   <span class="pi" [class.pi-copy]="!copySuccess()" [class.pi-check]="copySuccess()"></span>
-                  <span>{{ copySuccess() ? 'কপি হয়েছে!' : 'কপি' }}</span>
+                  <span>{{ (copySuccess() ? 'কপি হয়েছে!' : 'কপি') | t }}</span>
                 </button>
               </div>
 
               <div class="otp-security-note">
                 <span class="sec-icon">🛡️</span>
-                <span class="sec-text">কাজ সম্পূর্ণভাবে শেষ হওয়া যাচাই করার পরই কেবল কর্মীকে এই সমাপনী OTP দিন, যাতে কর্মী অ্যাপে কাজ সম্পন্ন করতে পারেন।</span>
+                <span class="sec-text">{{ 'কাজ সম্পূর্ণভাবে শেষ হওয়া যাচাই করার পরই কেবল কর্মীকে এই সমাপনী OTP দিন, যাতে কর্মী অ্যাপে কাজ সম্পন্ন করতে পারেন।' | t }}</span>
               </div>
             </div>
           } @else {
@@ -68,8 +68,8 @@
               <div class="otp-header">
                 <div class="otp-icon-wrap">🔐</div>
                 <div class="otp-title-text">
-                  <h3 class="otp-title">৪-সংখ্যার কাজ শুরুর ওটিপি (Start OTP)</h3>
-                  <p class="otp-subtitle">এই OTP ওয়ার্কারকে বলুন কাজ শুরু করার জন্য</p>
+                  <h3 class="otp-title">{{ '৪-সংখ্যার কাজ শুরুর ওটিপি (Start OTP)' | t }}</h3>
+                  <p class="otp-subtitle">{{ 'এই OTP ওয়ার্কারকে বলুন কাজ শুরু করার জন্য' | t }}</p>
                 </div>
               </div>
 
@@ -77,15 +77,15 @@
                 @for (char of job.startOtp.split(''); track $index) {
                   <div class="otp-digit-box">{{ char | bnNumber }}</div>
                 }
-                <button type="button" class="btn-copy-otp" (click)="copyOtp(job.startOtp)" title="OTP কপি করুন">
+                <button type="button" class="btn-copy-otp" (click)="copyOtp(job.startOtp)" [title]="'কপি করুন' | t">
                   <span class="pi" [class.pi-copy]="!copySuccess()" [class.pi-check]="copySuccess()"></span>
-                  <span>{{ copySuccess() ? 'কপি হয়েছে!' : 'কপি' }}</span>
+                  <span>{{ (copySuccess() ? 'কপি হয়েছে!' : 'কপি') | t }}</span>
                 </button>
               </div>
 
               <div class="otp-security-note">
                 <span class="sec-icon">🛡️</span>
-                <span class="sec-text">কর্মী আপনার বাসায় পৌঁছানোর পর কাজ শুরুর অনুমতি হিসেবে এই কোডটি বলবেন। অন্য কাউকে এই কোড শেয়ার করবেন না।</span>
+                <span class="sec-text">{{ 'কর্মী আপনার বাসায় পৌঁছানোর পর কাজ শুরুর অনুমতি হিসেবে এই কোডটি বলবেন। অন্য কাউকে এই কোড শেয়ার করবেন না।' | t }}</span>
               </div>
             </div>
           }
@@ -93,10 +93,10 @@
 
         <!-- Job Status Timeline -->
         <div class="timeline-card card">
-          <h3 class="card-heading">কাজের অগ্রগতি ট্র্যাকিং</h3>
+          <h3 class="card-heading">{{ 'কাজের অগ্রগতি ট্র্যাকিং' | t }}</h3>
 
           <div class="steps-flow">
-            @for (step of timelineSteps; track step.key; let i = $index) {
+            @for (step of timelineSteps(); track step.key; let i = $index) {
               <div class="step-item" 
                    [class.completed]="i < currentStepIndex() || (i === currentStepIndex() && job.status === 'completed')"
                    [class.active]="i === currentStepIndex() && job.status !== 'completed'"
@@ -110,7 +110,7 @@
                       <span class="step-num">{{ i + 1 | bnNumber }}</span>
                     }
                   </div>
-                  @if (i < timelineSteps.length - 1) {
+                  @if (i < timelineSteps().length - 1) {
                     <div class="connecting-line"></div>
                   }
                 </div>
@@ -120,7 +120,7 @@
                     <span class="step-icon">{{ step.icon }}</span>
                     <h4 class="step-title">{{ step.titleBn }}</h4>
                     @if (i === currentStepIndex() && job.status !== 'completed') {
-                      <span class="current-badge">বর্তমান অবস্থা</span>
+                      <span class="current-badge">{{ 'বর্তমান অবস্থা' | t }}</span>
                     }
                   </div>
                   <p class="step-desc">{{ step.descBn }}</p>
@@ -135,7 +135,7 @@
       <div class="details-column">
         <!-- Worker Contact Card -->
         <div class="worker-live-card card">
-          <h3 class="card-heading">নিযুক্ত কর্মীর তথ্য</h3>
+          <h3 class="card-heading">{{ 'নিযুক্ত কর্মীর তথ্য' | t }}</h3>
 
           @if (job.workerId) {
             <div class="worker-profile-row">
@@ -145,10 +145,10 @@
               </div>
 
               <div class="worker-details">
-                <h4 class="worker-fullname">{{ job.workerName || 'রহিম প্লাম্বার' }}</h4>
+                <h4 class="worker-fullname">{{ (job.workerName || categoryLabel()) | t }}</h4>
                 <div class="worker-submeta">
-                  <span class="cat-pill">🔧 {{ job.categoryName }}</span>
-                  <span class="rating-txt">⭐ ৫.০ (১৮টি কাজ)</span>
+                  <span class="cat-pill">{{ categoryIcon() }} {{ categoryLabel() }}</span>
+                  <span class="rating-txt">⭐ {{ (worker()?.rating || 5.0) | bnNumber }} ({{ (worker()?.totalJobs || 0) | bnNumber }} {{ 'টি কাজ' | t }})</span>
                 </div>
                 <div class="worker-masked-phone">
                   <span class="phone-icon">📞</span>
@@ -160,29 +160,29 @@
             <div class="worker-action-buttons">
               <a [href]="'tel:' + (job.workerPhone || '01712345678')" class="btn-call-worker">
                 <span class="pi pi-phone"></span>
-                <span>সরাসরি কল দিন</span>
+                <span>{{ 'সরাসরি কল দিন' | t }}</span>
               </a>
               <button type="button" class="btn-chat-worker" (click)="openChat()">
                 <span class="pi pi-comments"></span>
-                <span>ইন-অ্যাপ চ্যাট</span>
+                <span>{{ 'ইন-অ্যাপ চ্যাট' | t }}</span>
                 @if (unreadChatCount() > 0) {
                   <span class="chat-unread-badge">{{ unreadChatCount() }}</span>
                 }
               </button>
               <button type="button" class="btn-share-trip" (click)="openShare()">
                 <span class="pi pi-share-alt"></span>
-                <span>ট্রিপ শেয়ার</span>
+                <span>{{ 'ট্রিপ শেয়ার' | t }}</span>
               </button>
             </div>
 
             <div class="worker-secondary-actions">
               <button type="button" class="btn-report-dispute" (click)="openReport()">
                 <span class="pi pi-exclamation-triangle"></span>
-                <span>সমস্যা বা অভিযোগ রিপোর্ট করুন</span>
+                <span>{{ 'সমস্যা বা অভিযোগ রিপোর্ট করুন' | t }}</span>
               </button>
               <button type="button" class="btn-safety-check" (click)="openSafetyModal()" style="margin-top: 8px; background: none; border: 1px solid var(--border-color); padding: 8px; border-radius: 8px; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px;">
                 <i class="pi pi-shield text-teal"></i>
-                <span>আপনি কি নিরাপদ আছেন? (Safety Check)</span>
+                <span>{{ 'আপনি কি নিরাপদ আছেন? (Safety Check)' | t }}</span>
               </button>
             </div>
 
@@ -263,32 +263,53 @@
               <div class="radar-pulse-wrap">
                 <div class="pulse-ring"></div>
                 <div class="pulse-ring delay"></div>
-                <div class="center-icon">🔧</div>
+                <div class="center-icon">{{ categoryIcon() }}</div>
               </div>
 
-              <h4 class="owr-title">উন্মুক্ত কাজের রিকোয়েস্ট — প্লাম্বারের অপেক্ষায়...</h4>
-              <p class="owr-desc">
-                আপনার এলাকার ভেরিফায়েড প্লাম্বারদের কাছে নোটিফিকেশন পৌঁছে গেছে।
-                <strong>যে প্লাম্বার সবার প্রথমে কাজটি গ্রহণ (Grab) করবেন, তিনিই সেবা দিতে আসবেন।</strong>
-              </p>
-
-              <div class="owr-badge-row">
-                <span class="badge badge-warning">⚡ প্রথম গ্রহণকারী নিয়ম (FCFS Grab)</span>
-                <span class="badge badge-success">🟢 ২ জন প্লাম্বার সক্রিয়</span>
-              </div>
-
-              <!-- Live Demo Simulation Controls -->
-              <div class="simulator-grab-card">
-                <span class="sim-label">🧪 লাইভ টেস্ট: ডেমো প্লাম্বার দিয়ে কাজ গ্রহণ করান</span>
-                <div class="sim-buttons">
-                  <button type="button" class="btn-demo-grab" (click)="simulateGrab('worker_rahim_1')">
-                    <span>⚡ রহিম প্লাম্বারকে দিয়ে Grab করান</span>
-                  </button>
-                  <button type="button" class="btn-demo-grab alt" (click)="simulateGrab('worker_kalam_5')">
-                    <span>⚡ কালাম প্লাম্বারকে দিয়ে Grab করান</span>
-                  </button>
+              @if (isEn()) {
+                <h4 class="owr-title">Open Work Request — Waiting for {{ categoryLabel() }}...</h4>
+                <p class="owr-desc">
+                  Notifications have been sent to verified {{ categoryLabel() }} workers in your area.
+                  <strong>The first worker to grab the job will come to serve you.</strong>
+                </p>
+                <div class="owr-badge-row">
+                  <span class="badge badge-warning">⚡ First-Come, First-Served (FCFS Grab)</span>
+                  <span class="badge badge-success">🟢 {{ matchingDemoWorkers().length | bnNumber }} {{ categoryLabel() }} active</span>
                 </div>
-              </div>
+                <div class="simulator-grab-card">
+                  <span class="sim-label">🧪 Live Test: Have a demo {{ categoryLabel() }} grab this job</span>
+                  <div class="sim-buttons">
+                    @for (demoWorker of matchingDemoWorkers(); track demoWorker.uid; let idx = $index) {
+                      <button type="button" class="btn-demo-grab" [class.alt]="idx > 0" (click)="simulateGrab(demoWorker.uid)">
+                        <span>⚡ Grab with {{ demoWorker.name | t }}</span>
+                      </button>
+                    }
+                  </div>
+                </div>
+              } @else {
+                <h4 class="owr-title">উন্মুক্ত কাজের রিকোয়েস্ট — {{ categoryLabel() }} এর অপেক্ষায়...</h4>
+                <p class="owr-desc">
+                  আপনার এলাকার ভেরিফায়েড {{ categoryLabel() }} কর্মীদের কাছে নোটিফিকেশন পৌঁছে গেছে।
+                  <strong>যে কারিগর সবার প্রথমে কাজটি গ্রহণ (Grab) করবেন, তিনিই সেবা দিতে আসবেন।</strong>
+                </p>
+
+                <div class="owr-badge-row">
+                  <span class="badge badge-warning">⚡ প্রথম গ্রহণকারী নিয়ম (FCFS Grab)</span>
+                  <span class="badge badge-success">🟢 {{ matchingDemoWorkers().length | bnNumber }} জন {{ categoryLabel() }} সক্রিয়</span>
+                </div>
+
+                <!-- Live Demo Simulation Controls -->
+                <div class="simulator-grab-card">
+                  <span class="sim-label">🧪 লাইভ টেস্ট: ডেমো {{ categoryLabel() }} দিয়ে কাজ গ্রহণ করান</span>
+                  <div class="sim-buttons">
+                    @for (demoWorker of matchingDemoWorkers(); track demoWorker.uid; let idx = $index) {
+                      <button type="button" class="btn-demo-grab" [class.alt]="idx > 0" (click)="simulateGrab(demoWorker.uid)">
+                        <span>⚡ {{ demoWorker.name }}-কে দিয়ে Grab করান</span>
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
             </div>
           }
         </div>
@@ -296,31 +317,31 @@
         <!-- Job & Billing Summary Card -->
         <div class="bill-summary-card card">
           <div class="bill-header">
-            <h3 class="card-heading">বিল ও সার্ভিসের বিবরণ</h3>
-            <span class="job-id-pill">আইডি: #{{ job.id }}</span>
+            <h3 class="card-heading">{{ 'বিল ও সার্ভিসের বিবরণ' | t }}</h3>
+            <span class="job-id-pill">{{ 'আইডি:' | t }} #{{ job.id }}</span>
           </div>
 
           <div class="bill-rows-list">
             <div class="bill-row">
-              <span class="b-label">সার্ভিস ক্যাটাগরি:</span>
-              <span class="b-value"><strong>{{ job.categoryName }}</strong></span>
+              <span class="b-label">{{ 'সার্ভিস ক্যাটাগরি:' | t }}</span>
+              <span class="b-value"><strong>{{ categoryLabel() }}</strong></span>
             </div>
 
             <div class="bill-row">
-              <span class="b-label">কাজের বিবরণ:</span>
-              <span class="b-value text-right">{{ job.description }}</span>
+              <span class="b-label">{{ 'কাজের বিবরণ:' | t }}</span>
+              <span class="b-value text-right">{{ job.description | t }}</span>
             </div>
 
             <div class="bill-row">
-              <span class="b-label">সার্ভিস লোকেশন:</span>
-              <span class="b-value text-right">{{ job.location.address || 'সাভার বাজার, সাভার, ঢাকা' }}</span>
+              <span class="b-label">{{ 'সার্ভিস লোকেশন:' | t }}</span>
+              <span class="b-value text-right">{{ (job.location.address || 'সাভার বাজার, সাভার, ঢাকা') | t }}</span>
             </div>
 
             @if (job.locationPinned) {
               <div class="doorstep-confirm">
                 <span class="doorstep-confirm-title">📍 {{ 'আপনার দরজার পিন + ল্যান্ডমার্ক' | t }} <span class="doorstep-confirm-badge">✓ {{ 'সঠিক পিন' | t }}</span></span>
                 @if (job.landmark) {
-                  <span class="doorstep-confirm-landmark">{{ job.landmark }}</span>
+                  <span class="doorstep-confirm-landmark">{{ job.landmark | t }}</span>
                 }
                 @if (job.doorPhotoURL) {
                   <img [src]="job.doorPhotoURL" [alt]="'গেটের ছবি' | t" class="doorstep-confirm-photo" />
@@ -330,37 +351,37 @@
             }
 
             <div class="bill-row">
-              <span class="b-label">অর্ডার সময়:</span>
+              <span class="b-label">{{ 'অর্ডার সময়:' | t }}</span>
               <span class="b-value">{{ job.timeline.createdAt | timeAgo }}</span>
             </div>
 
             <div class="bill-divider"></div>
 
             <div class="bill-row">
-              <span class="b-label">প্রাথমিক পরিদর্শন ও সার্ভিস ফি:</span>
+              <span class="b-label">{{ 'প্রাথমিক পরিদর্শন ও সার্ভিস ফি:' | t }}</span>
               <span class="b-value">{{ job.estimatedPrice | taka }}</span>
             </div>
 
             @if (job.materialCost) {
               <div class="bill-row">
-                <span class="b-label">যন্ত্রাংশ খরচ:</span>
+                <span class="b-label">{{ 'যন্ত্রাংশ খরচ:' | t }}</span>
                 <span class="b-value">{{ job.materialCost | taka }}</span>
               </div>
             }
 
             <div class="bill-row total-row">
-              <span class="b-label">সর্বমোট প্রদেয় বিল:</span>
+              <span class="b-label">{{ 'সর্বমোট প্রদেয় বিল:' | t }}</span>
               <span class="b-value total-price">
                 {{ (job.finalPrice || job.estimatedPrice) | taka }}
               </span>
             </div>
 
             <div class="bill-row payment-status-row">
-              <span class="b-label">পরিশোধের মাধ্যম:</span>
+              <span class="b-label">{{ 'পরিশোধের মাধ্যম:' | t }}</span>
               <div class="payment-badge-wrap">
                 <span class="badge" [class.badge-success]="job.paymentStatus === 'paid'" [class.badge-warning]="job.paymentStatus !== 'paid'">
-                  {{ job.paymentMethod === 'cash' ? '💵 ক্যাশ' : job.paymentMethod === 'bkash' ? '📱 বিকাশ' : 'অন্যান্য' }} 
-                  ({{ job.paymentStatus === 'paid' ? 'পরিশোধিত' : 'কাজ শেষে প্রদেয়' }})
+                  {{ (job.paymentMethod === 'cash' ? '💵 ক্যাশ' : job.paymentMethod === 'bkash' ? '📱 বিকাশ' : 'অন্যান্য') | t }}
+                  ({{ (job.paymentStatus === 'paid' ? 'পরিশোধিত' : 'কাজ শেষে প্রদেয়') | t }})
                 </span>
               </div>
             </div>
@@ -370,20 +391,20 @@
           <div class="tracking-actions-bar">
             @if (job.status === 'completed') {
               <a [routerLink]="['/customer/bookings']" class="btn-primary w-full">
-                <span>রিভিউ দিন ও সমাপ্ত করুন ⭐</span>
+                <span>{{ 'রিভিউ দিন ও সমাপ্ত করুন ⭐' | t }}</span>
               </a>
             } @else if (!job.status.includes('cancelled')) {
               <button type="button" class="btn-cancel-job" (click)="openCancelModal()">
-                <span>অর্ডার বাতিল করতে চান?</span>
+                <span>{{ 'অর্ডার বাতিল করতে চান?' | t }}</span>
               </button>
             } @else {
               <div class="cancelled-banner">
-                <span>❌ এই অর্ডারটি বাতিল করা হয়েছে।</span>
+                <span>{{ '❌ এই অর্ডারটি বাতিল করা হয়েছে।' | t }}</span>
                 <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
                   <button type="button" (click)="reopenJob(job)" style="background: #0f766e; color: #fff; border: none; padding: 7px 12px; border-radius: 6px; font-size: 12.5px; font-weight: 700; cursor: pointer;">
-                    🔄 পুনরায় চালু করুন
+                    {{ '🔄 পুনরায় চালু করুন' | t }}
                   </button>
-                  <a [routerLink]="['/customer/bookings']" [queryParams]="{ tab: 'cancelled' }" class="btn-view-bookings">সব বুকিং দেখুন →</a>
+                  <a [routerLink]="['/customer/bookings']" [queryParams]="{ tab: 'cancelled' }" class="btn-view-bookings">{{ 'সব বুকিং দেখুন →' | t }}</a>
                 </div>
               </div>
             }
@@ -394,11 +415,11 @@
   } @else {
     <div class="no-job-state card">
       <span class="no-job-icon">📋</span>
-      <h3>কোনো চলমান কাজের ট্র্যাকিং পাওয়া যায়নি</h3>
-      <p>আপনি বর্তমানে কোনো চলমান সার্ভিসের সাথে যুক্ত নেই। নতুন কর্মী ডাকতে নিচের বাটনে চাপুন।</p>
+      <h3>{{ 'কোনো চলমান কাজের ট্র্যাকিং পাওয়া যায়নি' | t }}</h3>
+      <p>{{ 'আপনি বর্তমানে কোনো চলমান সার্ভিসের সাথে যুক্ত নেই। নতুন কর্মী ডাকতে নিচের বাটনে চাপুন।' | t }}</p>
       <div class="actions">
-        <a routerLink="/customer/home" class="btn-primary">ম্যাপ থেকে কর্মী ডাকুন</a>
-        <a routerLink="/customer/bookings" class="btn-outline">পূর্ববর্তী বুকিং দেখুন</a>
+        <a routerLink="/customer/home" class="btn-primary">{{ 'ম্যাপ থেকে কর্মী ডাকুন' | t }}</a>
+        <a routerLink="/customer/bookings" class="btn-outline">{{ 'পূর্ববর্তী বুকিং দেখুন' | t }}</a>
       </div>
     </div>
   }
@@ -408,40 +429,40 @@
     <div class="modal-backdrop" (click)="closeCancelModal()">
       <div class="modal-card cancel-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3 class="modal-title">অর্ডার বাতিলের কারণ</h3>
+          <h3 class="modal-title">{{ 'অর্ডার বাতিলের কারণ' | t }}</h3>
           <button class="close-btn" (click)="closeCancelModal()">✕</button>
         </div>
 
         <div class="cancel-modal-body">
-          <p class="cancel-desc">আপনি কি নিশ্চিত যে এই কাজটি বাতিল করতে চান? অনুগ্রহ করে বাতিলের কারণ নির্বাচন করুন:</p>
+          <p class="cancel-desc">{{ 'আপনি কি নিশ্চিত যে এই কাজটি বাতিল করতে চান? অনুগ্রহ করে বাতিলের কারণ নির্বাচন করুন:' | t }}</p>
 
           <div class="reasons-list">
             <label class="reason-option" [class.selected]="cancelReason() === 'দেরি হচ্ছে'" (click)="cancelReason.set('দেরি হচ্ছে')">
               <input type="radio" name="creason" value="দেরি হচ্ছে" [checked]="cancelReason() === 'দেরি হচ্ছে'" (change)="cancelReason.set('দেরি হচ্ছে')" />
-              <span>ওয়ার্কার আসতে অতিরিক্ত দেরি করছে</span>
+              <span>{{ isEn() ? 'Worker is taking too long to arrive' : 'ওয়ার্কার আসতে অতিরিক্ত দেরি করছে' }}</span>
             </label>
 
             <label class="reason-option" [class.selected]="cancelReason() === 'ভুল অর্ডার'" (click)="cancelReason.set('ভুল অর্ডার')">
               <input type="radio" name="creason" value="ভুল অর্ডার" [checked]="cancelReason() === 'ভুল অর্ডার'" (change)="cancelReason.set('ভুল অর্ডার')" />
-              <span>ভুলবশত অর্ডার তৈরি করা হয়েছে</span>
+              <span>{{ isEn() ? 'Order was created by mistake' : 'ভুলবশত অর্ডার তৈরি করা হয়েছে' }}</span>
             </label>
 
             <label class="reason-option" [class.selected]="cancelReason() === 'অন্য মিস্ত্রি পেয়েছি'" (click)="cancelReason.set('অন্য মিস্ত্রি পেয়েছি')">
               <input type="radio" name="creason" value="অন্য মিস্ত্রি পেয়েছি" [checked]="cancelReason() === 'অন্য মিস্ত্রি পেয়েছি'" (change)="cancelReason.set('অন্য মিস্ত্রি পেয়েছি')" />
-              <span>স্থানীয় অন্য মিস্ত্রি দ্বারা কাজ করানো হয়েছে</span>
+              <span>{{ isEn() ? 'Got the work done by another local technician' : 'স্থানীয় অন্য মিস্ত্রি দ্বারা কাজ করানো হয়েছে' }}</span>
             </label>
 
             <label class="reason-option" [class.selected]="cancelReason() === 'অতিরিক্ত ফি দাবি'" (click)="cancelReason.set('অতিরিক্ত ফি দাবি')">
               <input type="radio" name="creason" value="অতিরিক্ত ফি দাবি" [checked]="cancelReason() === 'অতিরিক্ত ফি দাবি'" (change)="cancelReason.set('অতিরিক্ত ফি দাবি')" />
-              <span>ওয়ার্কার অতিরিক্ত পারিশ্রমিক দাবি করেছেন</span>
+              <span>{{ isEn() ? 'Worker demanded extra fee' : 'ওয়ার্কার অতিরিক্ত পারিশ্রমিক দাবি করেছেন' }}</span>
             </label>
           </div>
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn-outline" (click)="closeCancelModal()">ফিরে যান</button>
+          <button type="button" class="btn-outline" (click)="closeCancelModal()">{{ 'ফিরে যান' | t }}</button>
           <button type="button" class="btn-danger-confirm" (click)="confirmCancel()">
-            <span>হ্যাঁ, অর্ডার বাতিল করুন</span>
+            <span>{{ 'হ্যাঁ, অর্ডার বাতিল করুন' | t }}</span>
           </button>
         </div>
       </div>
@@ -453,11 +474,11 @@
     <app-job-chat
       [jobId]="job.id"
       [currentUserId]="currentUser()?.uid || 'user_customer_demo_1'"
-      [currentUserName]="currentUser()?.name || 'তানভীর আহমেদ'"
+      [currentUserName]="(currentUser()?.name || 'তানভীর আহমেদ') | t"
       [currentUserRole]="'customer'"
-      [partnerName]="job.workerName || 'রহিম প্লাম্বার'"
+      [partnerName]="(job.workerName || categoryLabel()) | t"
       [partnerPhoto]="job.workerPhoto || ''"
-      [partnerRoleBn]="job.categoryName"
+      [partnerRoleBn]="categoryLabel()"
       (closeChat)="closeChat()"
     ></app-job-chat>
   }
@@ -469,7 +490,7 @@
         <div class="modal-header">
           <div class="modal-title-wrap">
             <span class="modal-icon">🔗</span>
-            <h3 class="modal-title">লাইভ ট্রিপ শেয়ার করুন</h3>
+            <h3 class="modal-title">{{ 'লাইভ ট্রিপ শেয়ার করুন' | t }}</h3>
           </div>
           <button class="close-btn" (click)="closeShare()">✕</button>
         </div>
@@ -477,26 +498,26 @@
         <div class="share-modal-body">
           <div class="share-safety-badge">
             <span class="ss-icon">🛡️</span>
-            <span>পরিবারের সদস্য বা পরিচিত কারও সাথে শেয়ার করুন যাতে তারা রিয়েল-টাইমে দেখতে পারেন কর্মী কখন আসছেন ও কার সাথে কাজ চলছে।</span>
+            <span>{{ isEn() ? 'Share with family or friends so they can track in real time when the worker arrives.' : 'পরিবারের সদস্য বা পরিচিত কারও সাথে শেয়ার করুন যাতে তারা রিয়েল-টাইমে দেখতে পারেন কর্মী কখন আসছেন ও কার সাথে কাজ চলছে।' }}</span>
           </div>
 
           <div class="share-link-box">
             <input type="text" class="link-input" [value]="getTrackingUrl()" readonly />
             <button type="button" class="btn-copy-link" (click)="copyShareUrl()">
-              <span>{{ shareCopied() ? 'কপি হয়েছে!' : 'কপি করুন' }}</span>
+              <span>{{ (shareCopied() ? 'কপি হয়েছে!' : 'কপি করুন') | t }}</span>
             </button>
           </div>
 
           <div class="share-channels">
             <button type="button" class="btn-share-whatsapp" (click)="shareWhatsApp()">
               <span class="pi pi-whatsapp"></span>
-              <span>হোয়াটসঅ্যাপে (WhatsApp) পাঠান</span>
+              <span>{{ 'হোয়াটসঅ্যাপে (WhatsApp) পাঠান' | t }}</span>
             </button>
           </div>
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn-outline" (click)="closeShare()">বন্ধ করুন</button>
+          <button type="button" class="btn-outline" (click)="closeShare()">{{ 'বন্ধ করুন' | t }}</button>
         </div>
       </div>
     </div>
@@ -509,41 +530,41 @@
         <div class="modal-header">
           <div class="modal-title-wrap">
             <span class="modal-icon">⚠️</span>
-            <h3 class="modal-title">অভিযোগ দাখিল করুন (Dispute Report)</h3>
+            <h3 class="modal-title">{{ 'অভিযোগ দাখিল করুন (Dispute Report)' | t }}</h3>
           </div>
           <button class="close-btn" (click)="closeReport()">✕</button>
         </div>
 
         <div class="dispute-modal-body">
           @if (!reportSubmitted()) {
-            <p class="dispute-desc">কাজের বিষয়ে কোনো অসন্তোষ বা অনিয়ম থাকলে অ্যাডমিনকে জানান। অভিযোগটি সাভার উপজেলা কন্ট্রোল রুম সরাসরি তদন্ত করবে।</p>
+            <p class="dispute-desc">{{ isEn() ? 'Let the admin team know if there is any issue or misconduct. Our control room will investigate.' : 'কাজের বিষয়ে কোনো অসন্তোষ বা অনিয়ম থাকলে অ্যাডমিনকে জানান। অভিযোগটি সাভার উপজেলা কন্ট্রোল রুম সরাসরি তদন্ত করবে।' }}</p>
 
             <div class="form-group mb-3">
-              <label class="form-label">সমস্যার ধরন</label>
+              <label class="form-label">{{ 'সমস্যার ধরন' | t }}</label>
               <select class="form-select" [ngModel]="reportType()" (ngModelChange)="reportType.set($event)">
-                <option value="overcharge">অতিরিক্ত পারিশ্রমিক দাবি করেছে</option>
-                <option value="behavior">অপেশাদার বা অসৌজন্যমূলক আচরণ</option>
-                <option value="quality">কাজের মান সন্তোষজনক নয় / ক্ষতি করেছে</option>
-                <option value="no_show">কর্মী উপস্থিত হননি / ভুয়া স্ট্যাটাস</option>
-                <option value="other">অন্যান্য সমস্যা</option>
+                <option value="overcharge">{{ isEn() ? 'Demanded overcharge' : 'অতিরিক্ত পারিশ্রমিক দাবি করেছে' }}</option>
+                <option value="behavior">{{ isEn() ? 'Unprofessional behavior' : 'অপেশাদার বা অসৌজন্যমূলক আচরণ' }}</option>
+                <option value="quality">{{ isEn() ? 'Poor work quality / damage' : 'কাজের মান সন্তোষজনক নয় / ক্ষতি করেছে' }}</option>
+                <option value="no_show">{{ isEn() ? 'Worker did not show up' : 'কর্মী উপস্থিত হননি / ভুয়া স্ট্যাটাস' }}</option>
+                <option value="other">{{ isEn() ? 'Other issue' : 'অন্যান্য সমস্যা' }}</option>
               </select>
             </div>
 
             <div class="form-group mb-3">
-              <label class="form-label">সমস্যার তীব্রতা (Severity)</label>
+              <label class="form-label">{{ 'সমস্যার তীব্রতা (Severity)' | t }}</label>
               <div class="severity-chips">
-                <button type="button" class="sev-chip" [class.selected]="reportSeverity() === 'low'" (click)="reportSeverity.set('low')">সাধারণ</button>
-                <button type="button" class="sev-chip" [class.selected]="reportSeverity() === 'medium'" (click)="reportSeverity.set('medium')">মাঝারি</button>
-                <button type="button" class="sev-chip danger" [class.selected]="reportSeverity() === 'high'" (click)="reportSeverity.set('high')">জরুরি / গুরুতর</button>
+                <button type="button" class="sev-chip" [class.selected]="reportSeverity() === 'low'" (click)="reportSeverity.set('low')">{{ 'সাধারণ' | t }}</button>
+                <button type="button" class="sev-chip" [class.selected]="reportSeverity() === 'medium'" (click)="reportSeverity.set('medium')">{{ 'মাঝারি' | t }}</button>
+                <button type="button" class="sev-chip danger" [class.selected]="reportSeverity() === 'high'" (click)="reportSeverity.set('high')">{{ 'জরুরি / গুরুতর' | t }}</button>
               </div>
             </div>
 
             <div class="form-group mb-3">
-              <label class="form-label">বিস্তারিত বিবরণ</label>
+              <label class="form-label">{{ 'বিস্তারিত বিবরণ' | t }}</label>
               <textarea 
                 class="form-textarea" 
                 rows="3" 
-                placeholder="সমস্যা সম্পর্কে সংক্ষেপে লিখুন..."
+                [placeholder]="isEn() ? 'Briefly describe the issue...' : 'সমস্যা সম্পর্কে সংক্ষেপে লিখুন...'"
                 [ngModel]="reportDescription()"
                 (ngModelChange)="reportDescription.set($event)"
               ></textarea>
@@ -551,16 +572,16 @@
           } @else {
             <div class="report-success-state">
               <span class="rss-icon">✅</span>
-              <h4>অভিযোগটি অ্যাডমিন সেন্টারে পাঠানো হয়েছে</h4>
-              <p>অ্যাডমিন টিম তদন্ত শেষে দ্রুত পদক্ষেপ নেবে এবং আপনার সাথে যোগাযোগ করবে।</p>
+              <h4>{{ 'অভিযোগটি অ্যাডমিন সেন্টারে পাঠানো হয়েছে' | t }}</h4>
+              <p>{{ isEn() ? 'Admin team will review and contact you shortly.' : 'অ্যাডমিন টিম তদন্ত শেষে দ্রুত পদক্ষেপ নেবে এবং আপনার সাথে যোগাযোগ করবে।' }}</p>
             </div>
           }
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn-outline" (click)="closeReport()">বন্ধ করুন</button>
+          <button type="button" class="btn-outline" (click)="closeReport()">{{ 'বন্ধ করুন' | t }}</button>
           @if (!reportSubmitted()) {
-            <button type="button" class="btn-danger-confirm" (click)="submitReport()">অভিযোগ নিশ্চিত করুন</button>
+            <button type="button" class="btn-danger-confirm" (click)="submitReport()">{{ 'অভিযোগ নিশ্চিত করুন' | t }}</button>
           }
         </div>
       </div>
@@ -574,17 +595,17 @@
         <div style="width: 56px; height: 56px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 16px auto;">
           <i class="pi pi-shield"></i>
         </div>
-        <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 800;">আপনি কি নিরাপদ আছেন?</h3>
+        <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 800;">{{ 'আপনি কি নিরাপদ আছেন?' | t }}</h3>
         <p style="margin: 0 0 20px 0; font-size: 13.5px; color: var(--text-secondary); line-height: 1.5;">
-          কাজখোঁজ আপনার নিরাপত্তাকে সর্বোচ্চ গুরুত্ব দেয়। যেকোনো অনাকাঙ্ক্ষিত পরিস্থিতিতে সরাসরি জরুরি সাহায্য নিতে পারেন।
+          {{ isEn() ? 'KajKhoj prioritizes your safety. You can trigger emergency support immediately if anything feels unsafe.' : 'কাজখোঁজ আপনার নিরাপত্তাকে সর্বোচ্চ গুরুত্ব দেয়। যেকোনো অনাকাঙ্ক্ষিত পরিস্থিতিতে সরাসরি জরুরি সাহায্য নিতে পারেন।' }}
         </p>
 
         <div style="display: flex; flex-direction: column; gap: 10px;">
           <button type="button" class="btn-primary" style="padding: 12px; font-size: 14px;" (click)="dismissSafetyModal()">
-            <i class="pi pi-check"></i> হ্যাঁ, আমি সম্পূর্ণ নিরাপদ আছি
+            <i class="pi pi-check"></i> {{ 'হ্যাঁ, আমি সম্পূর্ণ নিরাপদ আছি' | t }}
           </button>
           <button type="button" class="btn-danger" style="background: #ef4444; color: #fff; border: none; border-radius: var(--radius-md); padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" (click)="triggerSafetySos()">
-            <i class="pi pi-exclamation-triangle"></i> জরুরি SOS অ্যালার্ম পাঠান
+            <i class="pi pi-exclamation-triangle"></i> {{ 'জরুরি SOS অ্যালার্ম পাঠান' | t }}
           </button>
         </div>
       </div>

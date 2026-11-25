@@ -6,6 +6,8 @@ import { JobService } from '../../../core/services/job.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { WorkerService } from '../../../core/services/worker.service';
 import { ReportService } from '../../../core/services/report.service';
+import { CategoryService } from '../../../core/services/category.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { JobChatComponent } from '../../../shared/components/job-chat/job-chat.component';
 import { ChatService } from '../../../core/services/chat.service';
 import { Job, JobStatus } from '../../../core/models/job.model';
@@ -37,6 +39,9 @@ export class JobTrackingComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private workerService = inject(WorkerService);
   private reportService = inject(ReportService);
+  private categoryService = inject(CategoryService);
+  public theme = inject(ThemeService);
+  public isEn = computed(() => this.theme.currentLang() === 'en');
 
   public currentUser = this.authService.currentUser;
   public isAdmin = this.authService.isAdmin;
@@ -62,16 +67,6 @@ export class JobTrackingComponent implements OnInit, OnDestroy {
   public reportDescription = signal<string>('');
   public reportSubmitted = signal<boolean>(false);
 
-  // Timeline configuration
-  public readonly timelineSteps: TimelineStep[] = [
-    { key: 'searching', titleBn: 'কাজের চাহিদা পোস্ট', descBn: 'উন্মুক্ত রিকোয়েস্ট — প্লাম্বারের অপেক্ষায়', icon: '📢' },
-    { key: 'accepted', titleBn: 'প্লাম্বার গ্রহণ করেছেন', descBn: 'প্রথম প্লাম্বার কাজটি গ্রহণ (Grab) করেছেন', icon: '🔧' },
-    { key: 'on_the_way', titleBn: 'রওনা দিয়েছেন', descBn: 'প্লাম্বার আপনার ঠিকানার পথে রয়েছেন', icon: '🛵' },
-    { key: 'arrived', titleBn: 'পৌঁছে গেছেন', descBn: 'প্লাম্বার আপনার বাড়িতে উপস্থিত হয়েছেন', icon: '📍' },
-    { key: 'in_progress', titleBn: 'কাজ চলছে', descBn: 'ওটিপি যাচাই শেষে কাজ শুরু হয়েছে', icon: '⚡' },
-    { key: 'completed', titleBn: 'সম্পন্ন', descBn: 'কাজ সফলভাবে শেষ হয়েছে ও বিল প্রস্তুত', icon: '✅' }
-  ];
-
   // Current active job
   public currentJob = computed<Job | null>(() => {
     const id = this.jobId();
@@ -84,6 +79,57 @@ export class JobTrackingComponent implements OnInit, OnDestroy {
     const uid = user ? user.uid : 'user_customer_demo_1';
     const userJobs = this.jobService.jobs().filter(j => j.customerId === uid);
     return userJobs.length > 0 ? userJobs[0] : (this.jobService.jobs()[0] || null);
+  });
+
+  // Dynamic category info for the current job (never hardcode "plumber")
+  public jobCategory = computed(() => {
+    const catId = this.currentJob()?.categoryId;
+    return catId ? this.categoryService.getCategoryById(catId) : undefined;
+  });
+
+  public categoryLabel = computed<string>(() => {
+    const cat = this.jobCategory();
+    const raw = this.currentJob()?.categoryName;
+    if (this.isEn()) {
+      return cat?.nameEn || (raw ? this.theme.t(raw) : 'Worker');
+    }
+    return cat?.nameBn || (raw ? this.theme.t(raw) : 'কারিগর');
+  });
+
+  public categoryIcon = computed<string>(() => {
+    return this.jobCategory()?.icon || '🔧';
+  });
+
+  public matchingDemoWorkers = computed<WorkerProfile[]>(() => {
+    const catId = this.currentJob()?.categoryId;
+    const all = this.workerService.workers();
+    if (!catId) return all.slice(0, 2);
+    const matched = all.filter(w => w.categoryIds.includes(catId));
+    return (matched.length > 0 ? matched : all).slice(0, 2);
+  });
+
+  // Dynamic Timeline configuration matching the job's category and current language
+  public timelineSteps = computed<TimelineStep[]>(() => {
+    const cat = this.categoryLabel();
+    const icon = this.categoryIcon();
+    if (this.isEn()) {
+      return [
+        { key: 'searching', titleBn: 'Job Request Posted', descBn: `Open request — waiting for ${cat}`, icon: '📢' },
+        { key: 'accepted', titleBn: `${cat} Accepted`, descBn: `First ${cat} grabbed the job`, icon },
+        { key: 'on_the_way', titleBn: 'On the Way', descBn: `${cat} is heading to your address`, icon: '🛵' },
+        { key: 'arrived', titleBn: 'Arrived', descBn: `${cat} has arrived at your location`, icon: '📍' },
+        { key: 'in_progress', titleBn: 'Work in Progress', descBn: 'OTP verified and work has started', icon: '⚡' },
+        { key: 'completed', titleBn: 'Completed', descBn: 'Work finished and bill is ready', icon: '✅' }
+      ];
+    }
+    return [
+      { key: 'searching', titleBn: 'কাজের চাহিদা পোস্ট', descBn: `উন্মুক্ত রিকোয়েস্ট — ${cat} এর অপেক্ষায়`, icon: '📢' },
+      { key: 'accepted', titleBn: `${cat} গ্রহণ করেছেন`, descBn: `প্রথম ${cat} কাজটি গ্রহণ (Grab) করেছেন`, icon },
+      { key: 'on_the_way', titleBn: 'রওনা দিয়েছেন', descBn: `${cat} আপনার ঠিকানার পথে রয়েছেন`, icon: '🛵' },
+      { key: 'arrived', titleBn: 'পৌঁছে গেছেন', descBn: `${cat} আপনার বাড়িতে উপস্থিত হয়েছেন`, icon: '📍' },
+      { key: 'in_progress', titleBn: 'কাজ চলছে', descBn: 'ওটিপি যাচাই শেষে কাজ শুরু হয়েছে', icon: '⚡' },
+      { key: 'completed', titleBn: 'সম্পন্ন', descBn: 'কাজ সফলভাবে শেষ হয়েছে ও বিল প্রস্তুত', icon: '✅' }
+    ];
   });
 
   // Assigned worker profile
@@ -324,12 +370,27 @@ export class JobTrackingComponent implements OnInit, OnDestroy {
   }
 
   public getStatusText(status?: JobStatus): string {
+    const cat = this.categoryLabel();
+    if (this.isEn()) {
+      switch (status) {
+        case 'searching': return `📢 Open Request — Waiting for ${cat}`;
+        case 'pending': return 'Pending';
+        case 'accepted': return `${cat} Accepted (Grabbed)`;
+        case 'on_the_way': return `${cat} On the Way`;
+        case 'arrived': return `${cat} Arrived`;
+        case 'in_progress': return 'Work in Progress';
+        case 'completed': return 'Work Completed';
+        case 'cancelled_by_customer': return 'Cancelled by Customer';
+        case 'cancelled_by_worker': return 'Cancelled by Worker';
+        default: return 'Processing';
+      }
+    }
     switch (status) {
-      case 'searching': return '📢 উন্মুক্ত রিকোয়েস্ট — প্লাম্বারের অপেক্ষায়';
+      case 'searching': return `📢 উন্মুক্ত রিকোয়েস্ট — ${cat} এর অপেক্ষায়`;
       case 'pending': return 'অপেক্ষমাণ';
-      case 'accepted': return 'প্লাম্বার গ্রহণ করেছেন (Grabbed)';
-      case 'on_the_way': return 'প্লাম্বার রওনা দিয়েছেন';
-      case 'arrived': return 'প্লাম্বার পৌঁছে গেছেন';
+      case 'accepted': return `${cat} গ্রহণ করেছেন (Grabbed)`;
+      case 'on_the_way': return `${cat} রওনা দিয়েছেন`;
+      case 'arrived': return `${cat} পৌঁছে গেছেন`;
       case 'in_progress': return 'কাজ চলছে';
       case 'completed': return 'কাজ সম্পন্ন';
       case 'cancelled_by_customer': return 'কাস্টমার কর্তৃক বাতিল';

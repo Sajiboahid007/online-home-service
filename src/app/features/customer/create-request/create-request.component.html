@@ -3,12 +3,12 @@
   <header class="request-header">
     <a routerLink="/customer/home" class="btn-back">
       <span class="pi pi-arrow-left"></span>
-      <span>ম্যাপে ফিরুন</span>
+      <span>{{ isEn() ? 'Back to Map' : 'ম্যাপে ফিরুন' }}</span>
     </a>
 
     <a routerLink="/customer/bookings" class="my-bookings-btn">
       <span class="pi pi-list"></span>
-      <span>আমার সব বুকিং</span>
+      <span>{{ isEn() ? 'My Bookings' : 'আমার সব বুকিং' }}</span>
     </a>
   </header>
 
@@ -19,16 +19,21 @@
       <div class="grab-rule-banner">
         <div class="grb-icon">⚡</div>
         <div class="grb-text">
-          <h3>উন্মুক্ত কাজের চাহিদা (First-Come, First-Served Grab)</h3>
+          <h3>{{ isEn() ? 'Open Work Request (First-Come, First-Served Grab)' : 'উন্মুক্ত কাজের চাহিদা (First-Come, First-Served Grab)' }}</h3>
           <p>
-            আপনার চাহিদা পোস্ট করার সাথে সাথে সাভার এলাকার সকল সক্রিয় ও ভেরিফায়েড কারিগরদের কাছে নোটিফিকেশন পৌঁছে যাবে।
-            <strong>যে কারিগর সবার প্রথমে কাজটি গ্রহণ (Grab) করবেন</strong>, সরাসরি তিনিই আপনার ঠিকানায় রওনা দেবেন।
+            @if (isEn()) {
+              Once posted, all active verified workers in your area are notified immediately.
+              <strong>The first worker who grabs the job will head directly to your location.</strong>
+            } @else {
+              আপনার চাহিদা পোস্ট করার সাথে সাথে সাভার এলাকার সকল সক্রিয় ও ভেরিফায়েড কারিগরদের কাছে নোটিফিকেশন পৌঁছে যাবে।
+              <strong>যে কারিগর সবার প্রথমে কাজটি গ্রহণ (Grab) করবেন</strong>, সরাসরি তিনিই আপনার ঠিকানায় রওনা দেবেন।
+            }
           </p>
         </div>
         <div class="plumber-counter-chip">
           <span class="pulse-dot"></span>
           @for (count of [nearbyPlumbersCount()]; track count) {
-            <span>{{ count | bnNumber }} জন কারিগর প্রস্তুত</span>
+            <span>{{ count | bnNumber }} {{ isEn() ? 'workers ready' : 'জন কারিগর প্রস্তুত' }}</span>
           }
         </div>
       </div>
@@ -37,26 +42,26 @@
         <section class="form-card">
           <div class="card-header-bar">
             <h2 class="card-title">
-              <span class="step-num">১</span>
-              <span>সেবা ও কাজের ধরন নির্বাচন করুন</span>
+              <span class="step-num">{{ 1 | bnNumber }}</span>
+              <span>{{ isEn() ? 'Select Service & Category' : 'সেবা ও কাজের ধরন নির্বাচন করুন' }}</span>
             </h2>
-            <span class="search-badge-hint"><i class="pi pi-search"></i> সার্চযোগ্য তালিকা</span>
+            <span class="search-badge-hint"><i class="pi pi-search"></i> {{ isEn() ? 'Searchable List' : 'সার্চযোগ্য তালিকা' }}</span>
           </div>
 
           <div class="select-field-group">
             <label class="form-label">
-              <span>কাজের সার্ভিস ক্যাটাগরি বেছে নিন</span>
-              <span class="search-hint-inline">নাম লিখে সার্চ করতে পারবেন</span>
+              <span>{{ isEn() ? 'Choose Service Category' : 'কাজের সার্ভিস ক্যাটাগরি বেছে নিন' }}</span>
+              <span class="search-hint-inline">{{ isEn() ? 'Type to search' : 'নাম লিখে সার্চ করতে পারবেন' }}</span>
             </label>
             <p-select
               [options]="categoryOptions"
               [(ngModel)]="selectedCategory"
               (onChange)="onCategoryChange($event.value)"
-              optionLabel="nameBn"
-              placeholder="সার্ভিস ক্যাটাগরি বেছে নিন বা সার্চ করুন..."
+              [optionLabel]="isEn() ? 'nameEn' : 'nameBn'"
+              [placeholder]="isEn() ? 'Select or search service category...' : 'সার্ভিস ক্যাটাগরি বেছে নিন বা সার্চ করুন...'"
               [filter]="true"
               filterBy="nameBn,nameEn"
-              filterPlaceholder="🔍 ক্যাটাগরি বা পেশা সার্চ করুন..."
+              [filterPlaceholder]="isEn() ? '🔍 Search category...' : '🔍 ক্যাটাগরি বা পেশা সার্চ করুন...'"
               [resetFilterOnHide]="true"
               [fluid]="true"
               panelStyleClass="kajkhoj-select-overlay"
@@ -71,11 +76,11 @@
                     <div class="pselect-selected-row">
                       <span class="pselect-icon">{{ sel.icon }}</span>
                       <div class="pselect-text-wrap">
-                        <strong class="pselect-title">{{ sel.nameBn }}</strong>
-                        <span class="pselect-sub">({{ sel.nameEn }})</span>
+                        <strong class="pselect-title">{{ isEn() ? sel.nameEn : sel.nameBn }}</strong>
+                        <span class="pselect-sub">({{ isEn() ? sel.nameBn : sel.nameEn }})</span>
                       </div>
                       @if (sel.id === 'plumber') {
-                        <span class="badge-recommended">জনপ্রিয়</span>
+                        <span class="badge-recommended">{{ isEn() ? 'Popular' : 'জনপ্রিয়' }}</span>
                       }
                     </div>
                   }
@@ -86,11 +91,11 @@
                 <div class="pselect-option-row">
                   <span class="pselect-icon">{{ cat.icon }}</span>
                   <div class="pselect-text-wrap">
-                    <strong class="pselect-name">{{ cat.nameBn }}</strong>
-                    <span class="pselect-en">{{ cat.nameEn }}</span>
+                    <strong class="pselect-name">{{ isEn() ? cat.nameEn : cat.nameBn }}</strong>
+                    <span class="pselect-en">{{ isEn() ? cat.nameBn : cat.nameEn }}</span>
                   </div>
                   @if (cat.id === 'plumber') {
-                    <span class="badge-recommended">প্লাম্বার স্পেশাল</span>
+                    <span class="badge-recommended">{{ isEn() ? 'Popular' : 'জনপ্রিয়' }}</span>
                   }
                 </div>
               </ng-template>
@@ -102,26 +107,26 @@
         <section class="form-card presets-card">
           <div class="card-header-bar">
             <h2 class="card-title">
-              <span class="step-num">২</span>
-              <span>সাধারণ সমস্যা দ্রুত নির্বাচন (১-ক্লিক পূরণ)</span>
+              <span class="step-num">{{ 2 | bnNumber }}</span>
+              <span>{{ 'সাধারণ সমস্যা দ্রুত নির্বাচন (১-ক্লিক পূরণ)' | t }}</span>
             </h2>
-            <span class="presets-hint">যেকোনো একটি নির্বাচন করলেই বিবরণ ও বাজেট স্বয়ংক্রিয়ভাবে বসে যাবে</span>
+            <span class="presets-hint">{{ 'যেকোনো একটি নির্বাচন করলেই বিবরণ ও বাজেট স্বয়ংক্রিয়ভাবে বসে যাবে' | t }}</span>
           </div>
 
           <div class="select-field-group">
             <label class="form-label">
-              <span>সমস্যার তালিকা থেকে স্ট্যান্ডার্ড কাজ নির্বাচন করুন</span>
-              <span class="search-hint-inline">সমস্যা লিখে সার্চ করতে পারবেন</span>
+              <span>{{ 'সমস্যার তালিকা থেকে স্ট্যান্ডার্ড কাজ নির্বাচন করুন' | t }}</span>
+              <span class="search-hint-inline">{{ isEn() ? 'Type to search tasks' : 'সমস্যা লিখে সার্চ করতে পারবেন' }}</span>
             </label>
             <p-select
               [options]="availablePresets"
               [(ngModel)]="selectedPreset"
               (onChange)="onPresetChange($event.value)"
               optionLabel="label"
-              placeholder="সমস্যার তালিকা থেকে বেছে নিন বা সার্চ করুন..."
+              [placeholder]="isEn() ? 'Choose or search a problem preset...' : 'সমস্যার তালিকা থেকে বেছে নিন বা সার্চ করুন...'"
               [filter]="true"
               filterBy="label,title,description"
-              filterPlaceholder="🔍 সমস্যা বা কাজের বিবরণ সার্চ করুন..."
+              [filterPlaceholder]="isEn() ? '🔍 Search problem or task...' : '🔍 সমস্যা বা কাজের বিবরণ সার্চ করুন...'"
               [resetFilterOnHide]="true"
               [fluid]="true"
               panelStyleClass="kajkhoj-select-overlay"
@@ -134,7 +139,7 @@
                     <div class="pselect-selected-row">
                       <span class="pselect-icon">{{ sel.icon }}</span>
                       <div class="pselect-text-wrap">
-                        <strong class="pselect-title">{{ sel.label }}</strong>
+                        <strong class="pselect-title">{{ sel.label | t }}</strong>
                       </div>
                       <span class="pselect-price-tag">{{ sel.suggestedPrice | taka }}</span>
                     </div>
@@ -146,8 +151,8 @@
                 <div class="pselect-option-row preset-option">
                   <span class="pselect-icon">{{ preset.icon }}</span>
                   <div class="pselect-text-wrap">
-                    <strong class="pselect-name">{{ preset.label }}</strong>
-                    <span class="pselect-desc-short">{{ preset.title }}</span>
+                    <strong class="pselect-name">{{ preset.label | t }}</strong>
+                    <span class="pselect-desc-short">{{ preset.title | t }}</span>
                   </div>
                   <span class="pselect-price-tag">{{ preset.suggestedPrice | taka }}</span>
                 </div>
@@ -160,19 +165,19 @@
         <section class="form-card">
           <div class="card-header-bar">
             <h2 class="card-title">
-              <span class="step-num">৩</span>
-              <span>কাজের বিস্তারিত বিবরণ ও বাজেট</span>
+              <span class="step-num">{{ 3 | bnNumber }}</span>
+              <span>{{ 'কাজের বিস্তারিত বিবরণ ও বাজেট' | t }}</span>
             </h2>
           </div>
 
           <!-- Request Title -->
           <div class="form-group mb-3">
-            <label class="form-label" for="reqTitle">কাজের শিরোনাম / সংক্ষিপ্ত সমস্যা</label>
+            <label class="form-label" for="reqTitle">{{ 'কাজের শিরোনাম / সংক্ষিপ্ত সমস্যা' | t }}</label>
             <input
               id="reqTitle"
               type="text"
               class="form-input"
-              placeholder="যেমন: জরুরি প্লাম্বার প্রয়োজন — বাথরুমে পানির পাইপ লিকেজ"
+              [placeholder]="isEn() ? 'e.g. Need urgent plumber — bathroom pipe leak' : 'যেমন: জরুরি প্লাম্বার প্রয়োজন — বাথরুমে পানির পাইপ লিকেজ'"
               [ngModel]="requestTitle()"
               (ngModelChange)="requestTitle.set($event)"
             />
@@ -180,12 +185,12 @@
 
           <!-- Request Details -->
           <div class="form-group mb-3">
-            <label class="form-label" for="reqDesc">বিস্তারিত বর্ণনা ও নির্দেশনা (যা কারিগরকে জানাতে চান)</label>
+            <label class="form-label" for="reqDesc">{{ 'বিস্তারিত বর্ণনা ও নির্দেশনা (যা কারিগরকে জানাতে চান)' | t }}</label>
             <textarea
               id="reqDesc"
               rows="4"
               class="form-textarea"
-              placeholder="সমস্যাটি ঠিক কোথায়, কি কারণে হচ্ছে বা কী কী যন্ত্রপাতি লাগবে বিস্তারিত লিখুন..."
+              [placeholder]="isEn() ? 'Describe where the issue is, what caused it, or any tools/parts needed...' : 'সমস্যাটি ঠিক কোথায়, কি কারণে হচ্ছে বা কী কী যন্ত্রপাতি লাগবে বিস্তারিত লিখুন...'"
               [ngModel]="requestDescription()"
               (ngModelChange)="requestDescription.set($event)"
             ></textarea>
@@ -194,8 +199,8 @@
           <!-- Budget / Proposed Price -->
           <div class="form-group mb-3">
             <div class="budget-label-row">
-              <label class="form-label" for="reqBudget">প্রস্তাবিত পারিশ্রমিক / বাজেট (টাকা)</label>
-              <span class="budget-hint">ন্যায্য বাজেট দিলে কারিগররা অবিলম্বে কাজটি ধরবেন</span>
+              <label class="form-label" for="reqBudget">{{ isEn() ? 'Proposed Fee / Budget (BDT)' : 'প্রস্তাবিত পারিশ্রমিক / বাজেট (টাকা)' }}</label>
+              <span class="budget-hint">{{ isEn() ? 'A fair budget helps workers accept immediately' : 'ন্যায্য বাজেট দিলে কারিগররা অবিলম্বে কাজটি ধরবেন' }}</span>
             </div>
             <div class="budget-input-wrapper">
               <span class="currency-symbol">৳</span>
@@ -226,13 +231,13 @@
 
           <!-- Service Location -->
           <div class="form-group mb-3">
-            <label class="form-label">সার্ভিস ঠিকানা / কাজের স্থান</label>
+            <label class="form-label">{{ isEn() ? 'Service Address / Location' : 'সার্ভিস ঠিকানা / কাজের স্থান' }}</label>
             <app-doorstep-pin-picker [initial]="userLocation()" (pinChange)="doorstepPin.set($event)"></app-doorstep-pin-picker>
           </div>
 
           <!-- Payment Method -->
           <div class="form-group mb-3">
-            <label class="form-label">পরিশোধের মাধ্যম</label>
+            <label class="form-label">{{ 'পরিশোধের মাধ্যম' | t }}</label>
             <div class="payment-pills-row">
               <label class="payment-radio-pill" [class.selected]="paymentMethod() === 'cash'">
                 <input
@@ -243,7 +248,7 @@
                   (change)="paymentMethod.set('cash')"
                 />
                 <span class="pill-icon">💵</span>
-                <span class="pill-text">কাজ শেষে নগদ (Cash)</span>
+                <span class="pill-text">{{ isEn() ? 'Cash after work' : 'কাজ শেষে নগদ (Cash)' }}</span>
               </label>
 
               <label class="payment-radio-pill" [class.selected]="paymentMethod() === 'bkash'">
@@ -255,7 +260,7 @@
                   (change)="paymentMethod.set('bkash')"
                 />
                 <span class="pill-icon">📱</span>
-                <span class="pill-text">বিকাশ (bKash)</span>
+                <span class="pill-text">{{ isEn() ? 'bKash' : 'বিকাশ (bKash)' }}</span>
               </label>
 
               <label class="payment-radio-pill" [class.selected]="paymentMethod() === 'nagad'">
@@ -267,7 +272,7 @@
                   (change)="paymentMethod.set('nagad')"
                 />
                 <span class="pill-icon">🟧</span>
-                <span class="pill-text">নগদ (Nagad)</span>
+                <span class="pill-text">{{ isEn() ? 'Nagad' : 'নগদ (Nagad)' }}</span>
               </label>
             </div>
           </div>
@@ -283,10 +288,10 @@
           >
             @if (isSubmitting()) {
               <span class="pi pi-spin pi-spinner"></span>
-              <span>রিকোয়েস্ট পোস্ট করা হচ্ছে...</span>
+              <span>{{ 'কাজের রিকোয়েস্ট পোস্ট করা হচ্ছে...' | t }}</span>
             } @else {
               <span class="pi pi-send"></span>
-              <span>🚀 কাজের রিকোয়েস্ট পোস্ট করুন (যিনি আগে গ্রহণ করবেন তিনিই কাজ পাবেন)</span>
+              <span>{{ isEn() ? '🚀 Publish Work Request (First to Grab Gets the Job)' : '🚀 কাজের রিকোয়েস্ট পোস্ট করুন (যিনি আগে গ্রহণ করবেন তিনিই কাজ পাবেন)' }}</span>
             }
           </button>
         </div>
@@ -297,39 +302,39 @@
         <div class="sidebar-card flow-guide-card">
           <h3 class="guide-title">
             <span class="pi pi-info-circle"></span>
-            <span>কাজের রিকোয়েস্ট কিভাবে কাজ করে?</span>
+            <span>{{ isEn() ? 'How Work Requests Work?' : 'কাজের রিকোয়েস্ট কিভাবে কাজ করে?' }}</span>
           </h3>
 
           <div class="guide-steps">
             <div class="guide-step">
-              <div class="step-badge">১</div>
+              <div class="step-badge">{{ 1 | bnNumber }}</div>
               <div class="step-info">
-                <h4>চাহিদা পোস্ট করুন</h4>
-                <p>ক্যাটাগরি ও সাধারণ সমস্যা ড্রপডাউন থেকে নির্বাচন করে পোস্ট করুন।</p>
+                <h4>{{ isEn() ? 'Post Your Need' : 'চাহিদা পোস্ট করুন' }}</h4>
+                <p>{{ isEn() ? 'Choose a category and common problem from the dropdown and publish.' : 'ক্যাটাগরি ও সাধারণ সমস্যা ড্রপডাউন থেকে নির্বাচন করে পোস্ট করুন।' }}</p>
               </div>
             </div>
 
             <div class="guide-step">
-              <div class="step-badge">২</div>
+              <div class="step-badge">{{ 2 | bnNumber }}</div>
               <div class="step-info">
-                <h4>কারিগরদের কাছে নোটিফিকেশন</h4>
-                <p>সাভার এলাকায় উপস্থিত সকল ভেরিফায়েড কারিগরের অ্যাপে তাৎক্ষণিক অ্যালার্ট যাবে।</p>
+                <h4>{{ isEn() ? 'Workers Get Notified' : 'কারিগরদের কাছে নোটিফিকেশন' }}</h4>
+                <p>{{ isEn() ? 'All verified active workers in your area receive an instant alert.' : 'সাভার এলাকায় উপস্থিত সকল ভেরিফায়েড কারিগরের অ্যাপে তাৎক্ষণিক অ্যালার্ট যাবে।' }}</p>
               </div>
             </div>
 
             <div class="guide-step highlight-step">
-              <div class="step-badge">৩</div>
+              <div class="step-badge">{{ 3 | bnNumber }}</div>
               <div class="step-info">
-                <h4>যিনি আগে গ্রহণ করবেন (First Grab)</h4>
-                <p>প্রথম যে কারিগর 'কাজটি গ্রহণ করুন' চাপবেন, সাথে সাথে তিনি কাজে নিযুক্ত হবেন।</p>
+                <h4>{{ isEn() ? 'First Grab Wins' : 'যিনি আগে গ্রহণ করবেন (First Grab)' }}</h4>
+                <p>{{ isEn() ? 'The first technician to tap Grab is assigned immediately.' : "প্রথম যে কারিগর 'কাজটি গ্রহণ করুন' চাপবেন, সাথে সাথে তিনি কাজে নিযুক্ত হবেন।" }}</p>
               </div>
             </div>
 
             <div class="guide-step">
-              <div class="step-badge">৪</div>
+              <div class="step-badge">{{ 4 | bnNumber }}</div>
               <div class="step-info">
-                <h4>বাজেট বৃদ্ধি (যদি দেরি হয়)</h4>
-                <p>কেউ কাজ না ধরলে 'আমার রিকোয়েস্ট তালিকা' থেকে সহজেই বাজেট বৃদ্ধি করতে পারেন।</p>
+                <h4>{{ isEn() ? 'Increase Budget (if delayed)' : 'বাজেট বৃদ্ধি (যদি দেরি হয়)' }}</h4>
+                <p>{{ isEn() ? 'If no one grabs it, raise the budget easily from My Bookings.' : "কেউ কাজ না ধরলে 'আমার রিকোয়েস্ট তালিকা' থেকে সহজেই বাজেট বৃদ্ধি করতে পারেন।" }}</p>
               </div>
             </div>
           </div>
@@ -338,12 +343,12 @@
         <!-- Trust & Security Box -->
         <div class="sidebar-card safety-guarantee-card">
           <div class="safety-icon">🛡️</div>
-          <h4>কাজখোঁজ ১০০% বিশ্বস্ততা গ্যারান্টি</h4>
+          <h4>{{ isEn() ? 'KajKhoj 100% Trust Guarantee' : 'কাজখোঁজ ১০০% বিশ্বস্ততা গ্যারান্টি' }}</h4>
           <ul class="safety-list">
-            <li>✓ সকল কারিগরের এনআইডি ও পুলিশ ব্যাকগ্রাউন্ড ভেরিফায়েড</li>
-            <li>✓ সরাসরি ৪-সংখ্যার গোপন ওটিপি সুরক্ষা</li>
-            <li>✓ ন্যায্য মূল্যের নিশ্চয়তা ও ইন-অ্যাপ লাইভ চ্যাট</li>
-            <li>✓ ২৪/৭ কাস্টমার সাপোর্ট ও এসওএস জরুরি সুরক্ষা</li>
+            <li>{{ isEn() ? '✓ All workers are NID & background verified' : '✓ সকল কারিগরের এনআইডি ও পুলিশ ব্যাকগ্রাউন্ড ভেরিফায়েড' }}</li>
+            <li>{{ isEn() ? '✓ 4-digit secret OTP protection at start & finish' : '✓ সরাসরি ৪-সংখ্যার গোপন ওটিপি সুরক্ষা' }}</li>
+            <li>{{ isEn() ? '✓ Fair pricing & live in-app chat' : '✓ ন্যায্য মূল্যের নিশ্চয়তা ও ইন-অ্যাপ লাইভ চ্যাট' }}</li>
+            <li>{{ isEn() ? '✓ 24/7 customer support & emergency SOS' : '✓ ২৪/৭ কাস্টমার সাপোর্ট ও এসওএস জরুরি সুরক্ষা' }}</li>
           </ul>
         </div>
 
@@ -351,8 +356,8 @@
         <div class="sidebar-card support-box">
           <span class="sup-icon">📞</span>
           <div class="sup-text">
-            <strong>সাহায্য প্রয়োজন?</strong>
-            <p>যেকোনো সমস্যায় আমাদের কাস্টমার কেয়ারে কল করুন: ০১৭০০-০০০০০০</p>
+            <strong>{{ isEn() ? 'Need Help?' : 'সাহায্য প্রয়োজন?' }}</strong>
+            <p>{{ isEn() ? 'Call our customer care for any issue: 01700-000000' : 'যেকোনো সমস্যায় আমাদের কাস্টমার কেয়ারে কল করুন: ০১৭০০-০০০০০০' }}</p>
           </div>
         </div>
       </div>

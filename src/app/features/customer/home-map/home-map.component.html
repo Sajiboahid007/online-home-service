@@ -159,7 +159,7 @@
                     <span class="pwc-status-dot" [class.online]="worker.isOnline && !worker.isBusy" [class.busy]="worker.isBusy"></span>
                   </div>
                   <div class="pwc-title-col">
-                    <h4 class="pwc-name">{{ worker.name }}</h4>
+                    <h4 class="pwc-name">{{ worker.name | t }}</h4>
                     <div class="pwc-meta-line">
                       <span class="pwc-rating">⭐ {{ worker.rating | bnNumber }}</span>
                       <span>•</span>
@@ -254,7 +254,7 @@
                 <!-- Center: Worker Details -->
                 <div class="wc-center">
                   <div class="worker-name-line">
-                    <h4 class="worker-name">{{ worker.name }}</h4>
+                    <h4 class="worker-name">{{ worker.name | t }}</h4>
                     @if (worker.verified) {
                       <span class="verified-pill" [title]="'এনআইডি ও ব্যাকগ্রাউন্ড ভেরিফায়েড' | t">{{ '✓ ভেরিফায়েড' | t }}</span>
                     }
@@ -331,7 +331,7 @@
         @if (!directBookingStep()) {
         <div class="profile-modal-content">
           <div class="name-section">
-            <h3 class="profile-name">{{ w.name }}</h3>
+            <h3 class="profile-name">{{ w.name | t }}</h3>
             <div class="badge-row">
               @if (w.verified) {
                 <span class="badge badge-success">{{ '✓ জাতীয় পরিচয়পত্র ভেরিফায়েড' | t }}</span>
@@ -369,7 +369,7 @@
           @if (w.bio) {
             <div class="profile-bio-box">
               <h4>{{ 'অভিজ্ঞতার বিবরণ' | t }}</h4>
-              <p>{{ w.bio }}</p>
+              <p>{{ w.bio | t }}</p>
             </div>
           }
 
@@ -378,7 +378,7 @@
             <h4>{{ 'বিশেষ পারদর্শিতা' | t }}</h4>
             <div class="skills-wrap">
               @for (skill of w.skills; track skill) {
-                <span class="skill-pill">{{ skill }}</span>
+                <span class="skill-pill">{{ skill | t }}</span>
               }
             </div>
           </div>

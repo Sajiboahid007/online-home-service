@@ -8,9 +8,11 @@ import { CategoryService } from '../../../core/services/category.service';
 import { LocationService } from '../../../core/services/location.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { WorkerService } from '../../../core/services/worker.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { PaymentMethod } from '../../../core/models/job.model';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { DoorstepPin, DoorstepPinPickerComponent } from '../../../shared/components/doorstep-pin-picker/doorstep-pin-picker.component';
 
 export interface CategoryOption {
@@ -40,6 +42,7 @@ export interface ServicePreset {
     Select,
     BnNumberPipe,
     TakaPipe,
+    TranslatePipe,
     DoorstepPinPickerComponent
   ],
   templateUrl: './create-request.component.html',
@@ -52,6 +55,8 @@ export class CreateRequestComponent implements OnInit {
   private authService = inject(AuthService);
   private workerService = inject(WorkerService);
   private router = inject(Router);
+  public theme = inject(ThemeService);
+  public isEn = computed(() => this.theme.currentLang() === 'en');
 
   public currentUser = this.authService.currentUser;
   public userLocation = this.locationService.userLocation;
