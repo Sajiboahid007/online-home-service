@@ -14,6 +14,7 @@ import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { DoorstepPin, DoorstepPinPickerComponent } from '../../../shared/components/doorstep-pin-picker/doorstep-pin-picker.component';
+import { CategoryIconComponent } from '../../../shared/components/category-icon/category-icon.component';
 
 export interface CategoryOption {
   id: string;
@@ -43,7 +44,8 @@ export interface ServicePreset {
     BnNumberPipe,
     TakaPipe,
     TranslatePipe,
-    DoorstepPinPickerComponent
+    DoorstepPinPickerComponent,
+    CategoryIconComponent
   ],
   templateUrl: './create-request.component.html',
   styleUrl: './create-request.component.scss'
@@ -77,7 +79,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'বাথরুমের পানির পাইপ লিক করছে (প্লাম্বার প্রয়োজন)',
       description: 'বাথরুমের মেইন সাপ্লাই পাইপ ফেটে মেঝে ভিজে যাচ্ছে। দ্রুত মেরামত করতে অভিজ্ঞ প্লাম্বার প্রয়োজন।',
       suggestedPrice: 380,
-      icon: '💧'
+      icon: 'pi pi-wrench'
     },
     {
       id: 'p2',
@@ -86,7 +88,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'কিচেনের সিঙ্কের কল ও ড্রেন পাইপ বদলানো',
       description: 'কিচেনের পানির কল বন্ধ হচ্ছে না এবং ড্রেন পাইপ দিয়ে পানি চুইয়ে পড়ছে। নতুন পাইপ ও কল ফিটিং করতে হবে।',
       suggestedPrice: 400,
-      icon: '🚰'
+      icon: 'pi pi-wrench'
     },
     {
       id: 'p3',
@@ -95,7 +97,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'কমোড ফ্লাশ ট্যাংক মেরামত ও হ্যান্ডল ফিটিং',
       description: 'টয়লেটের ফ্লাশ ট্যাঙ্ক স্বয়ংক্রিয়ভাবে পানি ছাড়ছে না এবং হ্যান্ডল আলগা হয়ে গেছে। জরুরি মেরামত দরকার।',
       suggestedPrice: 450,
-      icon: '🚽'
+      icon: 'pi pi-cog'
     },
     {
       id: 'p4',
@@ -104,7 +106,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'পানির মোটর পাম্প চেক ও মেরামত সার্ভিস',
       description: 'মোটরে সুইচ দিলে বিদ্যুৎ পায় কিন্তু পানি উঠছে না। প্লাম্বার ও মোটর টেকনিশিয়ান প্রয়োজন।',
       suggestedPrice: 500,
-      icon: '⚙️'
+      icon: 'pi pi-cog'
     },
     {
       id: 'p5',
@@ -113,7 +115,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'গিজার সংযোগ ও গরম পানির লাইন ফিটিং',
       description: 'বাথরুমে নতুন গিজার স্থাপন ও গরম পানির পাইপ কানেকশন চেক করতে হবে।',
       suggestedPrice: 650,
-      icon: '♨️'
+      icon: 'pi pi-sliders-h'
     },
 
     // Electrician
@@ -124,7 +126,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'জরুরি ইলেকট্রিশিয়ান — বাসার মেইন সুইচ ট্রিপ করছে',
       description: 'বাসার কয়েকটি রুমে হঠাৎ বিদ্যুৎ নেই এবং মেইন সার্কিট ব্রেকার ট্রিপ করছে। জরুরি চেক করা দরকার।',
       suggestedPrice: 350,
-      icon: '⚡'
+      icon: 'pi pi-bolt'
     },
     {
       id: 'e2',
@@ -133,7 +135,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'সিলিং ফ্যান রেগুলেটর ও লাইট পয়েন্ট মেরামত',
       description: 'সিলিং ফ্যানের স্পিড কন্ট্রোল হচ্ছে না এবং দুটি এলইডি লাইট পয়েন্ট হঠাৎ বন্ধ হয়ে গেছে। মেরামত প্রয়োজন।',
       suggestedPrice: 400,
-      icon: '💡'
+      icon: 'pi pi-lightbulb'
     },
     {
       id: 'e3',
@@ -142,7 +144,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'মাল্টিপ্লাগ ও দেয়াল সুইচ বোর্ড নতুন ফিটিং',
       description: 'পুরাতন পোড়া সুইচবোর্ড খুলে নতুন গ্যাং সুইচ ও ৩-পিন পাওয়ার সকেট ফিটিং করতে হবে।',
       suggestedPrice: 300,
-      icon: '🔌'
+      icon: 'pi pi-power-off'
     },
     {
       id: 'e4',
@@ -151,7 +153,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'মেইন ডিস্ট্রিবিউশন বক্স ও সার্কিট ব্রেকার ইন্সটলেশন',
       description: 'মেইন ডিবি বক্সে স্পার্ক করছে। প্রফেশনাল ইলেকট্রিশিয়ান দিয়ে সম্পূর্ণ বক্স চেক ও নতুন ব্রেকার বসাতে হবে।',
       suggestedPrice: 550,
-      icon: '🛡️'
+      icon: 'pi pi-shield'
     },
 
     // AC Technician
@@ -162,7 +164,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'স্প্লিট এসি মাস্টার সার্ভিসিং ও কেমিক্যাল ওয়াশ',
       description: 'ইনডোর ও আউটডোর ইউনিটের এয়ার ফিল্টার ও কুলিং কয়েল প্রেসার জেট দিয়ে গভীর পরিষ্কার করতে হবে।',
       suggestedPrice: 600,
-      icon: '❄️'
+      icon: 'pi pi-asterisk'
     },
     {
       id: 'ac2',
@@ -171,7 +173,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'এসি কম্প্রেসার গ্যাস চার্জিং ও লিকেজ টেস্ট',
       description: 'এসি চলছে কিন্তু কোনো ঠান্ডা বাতাস দিচ্ছে না। আর-৩২ / আর-৪১০এ গ্যাস রিচার্জ ও কপার পাইপ টেস্ট প্রয়োজন।',
       suggestedPrice: 1200,
-      icon: '🧪'
+      icon: 'pi pi-gauge'
     },
     {
       id: 'ac3',
@@ -180,7 +182,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'এসির ড্রেন পাইপ ব্লকেজ ক্লিয়ারিং ও মেরামত',
       description: 'এসি চালু করলে রুমের ভেতরে ইনডোর থেকে পানি ঝরছে। ড্রেন পাইপের জট ছাড়াতে হবে।',
       suggestedPrice: 500,
-      icon: '💧'
+      icon: 'pi pi-wrench'
     },
 
     // Cleaner
@@ -191,7 +193,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'বাথরুম টাইলস, কমোড ও বেসিন কেমিক্যাল ওয়াশ',
       description: 'বাথরুমের ফ্লোর টাইলসের দাগ, গ্রাউটিং ও বেসিন সম্পূর্ণ জীবাণুমুক্ত ডিপ ক্লিন করতে হবে।',
       suggestedPrice: 500,
-      icon: '🧹'
+      icon: 'pi pi-sparkles'
     },
     {
       id: 'c2',
@@ -200,7 +202,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'রান্নাঘরের চুলার স্ল্যাব, হুড ও কিচেন ক্যাবিনেট ডিপ ক্লিন',
       description: 'রান্নাঘরের গ্রিজ ও তেলচিটচিটে ময়লা বিশেষ ফোম দিয়ে সম্পূর্ণ ক্লিন করে চকচকে করতে হবে।',
       suggestedPrice: 700,
-      icon: '🍳'
+      icon: 'pi pi-sparkles'
     },
     {
       id: 'c3',
@@ -209,7 +211,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'সম্পূর্ণ ফ্ল্যাট/বাসার মেঝে, কাচ ও আসবাবপত্র ক্লিনিং',
       description: 'বাসা বদলের পর বা উৎসবের আগে সম্পূর্ণ ফ্ল্যাট পরিষ্কার ও স্যানিটাইজেশন সার্ভিস।',
       suggestedPrice: 1500,
-      icon: '✨'
+      icon: 'pi pi-home'
     },
 
     // Painter
@@ -220,7 +222,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'রুমের অভ্যন্তরীণ দেয়াল প্লাস্টিক পেইন্ট ও টাচআপ',
       description: 'বেডরুমের দেয়ালে প্লাস্টিক পেইন্ট ও ক্র্যাক পুটিং মেরামত করে ফ্রেশ লুক দিতে হবে।',
       suggestedPrice: 1200,
-      icon: '🎨'
+      icon: 'pi pi-palette'
     },
     {
       id: 'pt2',
@@ -229,7 +231,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'দেওয়ালের নোনা ও ড্যাম্প প্রতিরোধক কোটিং',
       description: 'বর্ষায় দেয়ালে নোনা ধরে রং খসে পড়ছে। বিশেষ ড্যাম্প সিল কোটিং প্রয়োগ করতে হবে।',
       suggestedPrice: 1500,
-      icon: '🛡️'
+      icon: 'pi pi-shield'
     },
 
     // Labor
@@ -240,7 +242,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'বাসা বদলের আসবাবপত্র ও কার্টুন পরিবহন শ্রমিক',
       description: 'ফ্ল্যাট শিফটিংয়ের জন্য খাট, আলমারি, সোফা ও বক্স বহন করতে দক্ষ ২ জন দিনমজুর প্রয়োজন।',
       suggestedPrice: 1200,
-      icon: '📦'
+      icon: 'pi pi-box'
     },
     {
       id: 'l2',
@@ -249,7 +251,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'সিঁড়ি দিয়ে ভারী আসবাব বা পণ্য ওঠানামার শ্রমিক',
       description: 'বিল্ডিংয়ের নিচতলা থেকে তিনতলায় ভারী ফার্নিচার ওঠানোর জন্য শ্রমিক প্রয়োজন।',
       suggestedPrice: 600,
-      icon: '👷'
+      icon: 'pi pi-users'
     },
 
     // Mason
@@ -260,7 +262,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'ভেঙে যাওয়া টাইলস খুলে নতুন টাইলস ফিটিং',
       description: 'ফ্লোর ও বাথরুমের ফাঁপা টাইলস সিমেন্ট গ্রাউট দিয়ে মজবুতভাবে বসাতে হবে।',
       suggestedPrice: 700,
-      icon: '🧱'
+      icon: 'pi pi-th-large'
     },
     {
       id: 'm2',
@@ -269,7 +271,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'ইটের গাঁথুনি ও প্লাস্টার মেরামত কাজ',
       description: 'ভেঙে যাওয়া প্লাস্টার নতুন করে বালু-সিমেন্ট দিয়ে মসৃণ করে দিতে হবে।',
       suggestedPrice: 800,
-      icon: '🏗️'
+      icon: 'pi pi-building'
     },
 
     // Carpenter
@@ -280,7 +282,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'মেইন দরজার সিলিন্ডার লক ও হ্যান্ডল পরিবর্তন',
       description: 'মেইন দরজার চাবি আটকে গেছে ও লক ঠিকমতো ঘুরছে না। লকসেট মেরামত বা পরিবর্তন দরকার।',
       suggestedPrice: 350,
-      icon: '🚪'
+      icon: 'pi pi-lock'
     },
     {
       id: 'cp2',
@@ -289,7 +291,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'ওয়ারড্রব পাল্লা ও ড্রয়ারের হাইড্রলিক চ্যানেল মেরামত',
       description: 'ওয়ারড্রবের পাল্লা বাঁকা হয়ে আটকে যাচ্ছে এবং ড্রয়ারের চ্যানেল আলগা হয়ে গেছে। কাঠমিস্ত্রি প্রয়োজন।',
       suggestedPrice: 600,
-      icon: '🪚'
+      icon: 'pi pi-hammer'
     },
 
     // Appliance Repair
@@ -300,7 +302,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'রেফ্রিজারেটর কুলিং সমস্যা ও কম্প্রেসার চেক',
       description: 'ফ্রিজের নিচের অংশ ঠান্ডা হচ্ছে না এবং অস্বাভাবিক শব্দ হচ্ছে। অভিজ্ঞ অ্যাপ্লায়েন্স টেকনিশিয়ান প্রয়োজন।',
       suggestedPrice: 550,
-      icon: '📺'
+      icon: 'pi pi-desktop'
     },
 
     // Pest Control
@@ -311,7 +313,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'বাসার তেলাপোকা ও ছারপোকা দমনে নিরাপদ পেস্ট কন্ট্রোল',
       description: 'রান্নাঘর ও বেডরুমে গন্ধহীন জেল ও স্প্রে ট্রিটমেন্ট করতে অভিজ্ঞ পেস্ট কন্ট্রোল টিম প্রয়োজন।',
       suggestedPrice: 1000,
-      icon: '🪲'
+      icon: 'pi pi-shield'
     },
 
     // Shifting & Moving
@@ -322,7 +324,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'বাসা বদলের জন্য আসবাবপত্র প্যাকিং ও স্থানান্তর',
       description: 'খাট, ফ্রিজ, ওয়ারড্রব ও অন্যান্য আসবাবপত্র যত্নসহকারে প্যাকিং ও শিফটিং করার জন্য দক্ষ টিম প্রয়োজন।',
       suggestedPrice: 1200,
-      icon: '🚚'
+      icon: 'pi pi-truck'
     },
 
     // Locksmith
@@ -333,7 +335,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'মেইন দরজার সিলিন্ডার লক মেরামত বা পরিবর্তন',
       description: 'দরজার তালা জ্যাম হয়ে আটকে গেছে। জরুরিভাবে লক খুলে নতুন সিকিউরিটি লক বসাতে হবে।',
       suggestedPrice: 350,
-      icon: '🔑'
+      icon: 'pi pi-key'
     },
 
     // Gardener
@@ -344,7 +346,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'ছাদ বাগান পরিষ্কার, গাছ ছাঁটাই ও মাটি প্রস্তুত',
       description: 'ছাদ বাগানের গাছ ছাঁটাই, আগাছা পরিষ্কার ও নতুন টবে সার-মাটি প্রস্তুত করতে অভিজ্ঞ মালী প্রয়োজন।',
       suggestedPrice: 350,
-      icon: '🌿'
+      icon: 'pi pi-sun'
     },
 
     // Welder
@@ -355,7 +357,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'মেইন গেট বা ব্যালকনির গ্রিল ওয়েল্ডিং মেরামত',
       description: 'লোহার গেটের কব্জা ভেঙে গেছে এবং ব্যালকনির গ্রিলে স্পট ওয়েল্ডিং করাতে হবে।',
       suggestedPrice: 550,
-      icon: '🔥'
+      icon: 'pi pi-cog'
     },
 
     // Car Wash
@@ -366,7 +368,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'বাসার সামনে গাড়ি ফুল বডি ফোম ওয়াশ ও ক্লিনিং',
       description: 'গাড়ির বাইরের ফোম ওয়াশ ও ভেতরের ভ্যাকুয়াম ক্লিনিং করাতে হবে।',
       suggestedPrice: 400,
-      icon: '🚗'
+      icon: 'pi pi-car'
     },
 
     // CCTV & IT
@@ -377,7 +379,7 @@ export class CreateRequestComponent implements OnInit {
       title: 'বাসা-অফিসে সিসিটিভি ক্যামেরা ও রাউটার কনফিগারেশন',
       description: 'নতুন সিসিটিভি ক্যামেরা ইনস্টলেশন ও ওয়াইফাই রাউটার কনফিগার করতে দক্ষ টেকনিশিয়ান প্রয়োজন।',
       suggestedPrice: 600,
-      icon: '📷'
+      icon: 'pi pi-video'
     }
   ];
 

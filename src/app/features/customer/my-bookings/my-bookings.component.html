@@ -7,7 +7,8 @@
     </div>
 
     <a routerLink="/customer/home" class="btn-primary btn-new-request">
-      <span>{{ theme.currentLang() === 'bn' ? '⚡ নতুন কর্মী খুঁজুন' : '⚡ Find New Worker' }}</span>
+      <i class="pi pi-bolt"></i>
+      <span>{{ theme.currentLang() === 'bn' ? 'নতুন কর্মী খুঁজুন' : 'Find New Worker' }}</span>
     </a>
   </div>
 
@@ -57,7 +58,7 @@
   <div class="bookings-list">
     @if (filteredJobs().length === 0) {
       <div class="empty-bookings card">
-        <span class="empty-icon">📂</span>
+        <i class="pi pi-folder-open empty-icon" style="color:#94a3b8;"></i>
         <h3>{{ theme.currentLang() === 'bn' ? 'এই তালিকায় কোনো বুকিং নেই' : 'No bookings in this list' }}</h3>
         <p>
           {{ theme.currentLang() === 'bn' 
@@ -107,7 +108,7 @@
           <!-- Top Row: Category & Status -->
           <div class="bcard-top">
             <div class="bcard-cat">
-              <span class="bcard-cat-icon">{{ getCategoryIcon(job.categoryId) }}</span>
+              <span class="bcard-cat-icon"><app-cat-icon [icon]="getCategoryIcon(job.categoryId)" /></span>
               <div>
                 <h4 class="bcard-cat-name">{{ getCategoryName(job) }}</h4>
                 <span class="bcard-id">{{ theme.currentLang() === 'bn' ? 'আইডি: #' : 'ID: #' }}{{ job.id }}</span>
@@ -140,13 +141,13 @@
                   <span class="wm-label">{{ theme.currentLang() === 'bn' ? 'নিয়োজিত কর্মী' : 'Assigned Worker' }}</span>
                   <strong class="wm-name">{{ (job.workerName || '') | t }}</strong>
                   <span class="wm-phone"
-                    >📞 {{ job.workerPhone || '01712345678' | maskPhone }}</span
+                    ><i class="pi pi-phone" style="color:#0f766e;font-size:11px;"></i> {{ job.workerPhone || '01712345678' | maskPhone }}</span
                   >
                 </div>
               </div>
             } @else {
               <div class="bcard-worker unassigned">
-                <span class="clock-icon">⏳</span>
+                <i class="pi pi-clock clock-icon"></i>
                 <span class="wm-name">{{ theme.currentLang() === 'bn' ? 'কর্মী অনুসন্ধানাধীন...' : 'Searching for worker...' }}</span>
               </div>
             }
@@ -207,7 +208,7 @@
             }
 
             @if (job.status === 'reviewed') {
-              <span class="reviewed-done-tag">⭐ {{ theme.currentLang() === 'bn' ? 'রিভিউ প্রদান করা হয়েছে' : 'Review submitted' }}</span>
+              <span class="reviewed-done-tag"><i class="pi pi-star-fill" style="color:#f59e0b;font-size:11px;"></i> {{ theme.currentLang() === 'bn' ? 'রিভিউ প্রদান করা হয়েছে' : 'Review submitted' }}</span>
             }
 
             <button
@@ -231,10 +232,10 @@
       <div class="modal-card review-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <div class="modal-title-wrap">
-            <span class="modal-icon">⭐</span>
+            <i class="pi pi-star-fill modal-icon" style="color: #f59e0b;"></i>
             <h3 class="modal-title">{{ theme.currentLang() === 'bn' ? 'কাজের অভিজ্ঞতা ও রিভিউ' : 'Work experience and reviews' }}</h3>
           </div>
-          <button type="button" class="close-btn" (click)="closeReview()" [attr.aria-label]="theme.currentLang() === 'bn' ? 'বন্ধ করুন' : 'Close'">✕</button>
+          <button type="button" class="close-btn" (click)="closeReview()" [attr.aria-label]="theme.currentLang() === 'bn' ? 'বন্ধ করুন' : 'Close'"><i class="pi pi-times"></i></button>
         </div>
 
         <div class="review-modal-body">
@@ -266,7 +267,7 @@
                   [class.active]="star <= reviewStars()"
                   (click)="reviewStars.set(star)"
                 >
-                  ★
+                  <i [class]="'pi ' + (star <= reviewStars() ? 'pi-star-fill' : 'pi-star')"></i>
                 </button>
               }
             </div>

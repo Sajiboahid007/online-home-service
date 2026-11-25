@@ -22,7 +22,7 @@
 
       <!-- Location Badge -->
       <div class="location-chip" (click)="refreshLocation()" [title]="'লোকেশন রিফ্রেশ করতে চাপুন' | t">
-        <span class="loc-icon" [class.spinning]="isRefreshingLocation()">📍</span>
+        <i class="pi pi-map-marker loc-icon" [class.spinning]="isRefreshingLocation()"></i>
         <div class="loc-info">
           <span class="loc-label">{{ 'আপনার অবস্থান' | t }}</span>
           <span class="loc-val">{{ userLocation().address || ('সাভার বাজার, সাভার, ঢাকা' | t) }}</span>
@@ -36,13 +36,13 @@
     <div class="header-right">
       <!-- Post Work Request Button -->
       <a routerLink="/customer/create-request" class="create-req-header-btn" [title]="'কাজের চাহিদা পোস্ট করুন' | t">
-        <span class="cr-icon">📝</span>
+        <i class="pi pi-plus-circle cr-icon"></i>
         <span class="cr-text">{{ 'কাজের রিকোয়েস্ট' | t }}</span>
       </a>
 
       <!-- Favorites Trigger Button -->
       <button class="fav-header-btn" type="button" (click)="openFavorites()" [title]="'প্রিয় কারিগর তালিকা' | t">
-        <span class="fav-icon">❤️</span>
+        <i class="pi pi-heart fav-icon"></i>
         <span class="fav-text">{{ 'প্রিয় কারিগর' | t }}</span>
         @if (favoriteWorkers().length > 0) {
           <span class="fav-counter">{{ favoriteWorkers().length | bnNumber }}</span>
@@ -61,20 +61,20 @@
       <!-- SOS Button -->
       <button class="sos-btn" type="button" (click)="openSOS()" [title]="'জরুরি পরিস্থিতিতে অবিলম্বে সহায়তা পান' | t">
         <span class="sos-pulse"></span>
-        <span class="sos-icon">🚨</span>
+        <i class="pi pi-exclamation-triangle sos-icon"></i>
         <span class="sos-text">{{ 'SOS জরুরি' | t }}</span>
       </button>
 
       <!-- Quick Portal Jump Buttons (when logged in as Worker or Admin) -->
       @if (isWorker()) {
         <a routerLink="/worker/dashboard" class="role-portal-btn worker-portal" [title]="'ওয়ার্কার / কারিগর ড্যাশবোর্ডে যান' | t">
-          <span class="portal-icon">🛠️</span>
+          <i class="pi pi-wrench portal-icon"></i>
           <span class="portal-text">{{ 'কারিগর প্যানেল' | t }}</span>
         </a>
       }
       @if (isAdmin()) {
         <a routerLink="/admin/dashboard" class="role-portal-btn admin-portal" [title]="'অ্যাডমিন ড্যাশবোর্ডে যান' | t">
-          <span class="portal-icon">🛡️</span>
+          <i class="pi pi-shield portal-icon"></i>
           <span class="portal-text">{{ 'অ্যাডমিন প্যানেল' | t }}</span>
         </a>
       }
@@ -244,17 +244,17 @@
   <!-- Mobile Bottom Navigation -->
   <nav class="customer-bottom-nav">
     <a routerLink="/customer/home" routerLinkActive="active" class="nav-item">
-      <span class="nav-icon">🗺️</span>
+      <i class="pi pi-map nav-icon"></i>
       <span class="nav-text">{{ 'ম্যাপ' | t }}</span>
     </a>
 
     <a routerLink="/customer/create-request" routerLinkActive="active" class="nav-item special-req-nav">
-      <span class="nav-icon">➕</span>
+      <i class="pi pi-plus nav-icon"></i>
       <span class="nav-text">{{ 'রিকোয়েস্ট' | t }}</span>
     </a>
 
     <a routerLink="/customer/bookings" routerLinkActive="active" class="nav-item">
-      <span class="nav-icon">📋</span>
+      <i class="pi pi-calendar nav-icon"></i>
       <span class="nav-text">{{ 'বুকিং' | t }}</span>
     </a>
 
@@ -266,7 +266,7 @@
       (click)="navigateToTracking()"
       [title]="activeJobsCount() > 0 ? ('সক্রিয় কাজের লাইভ ট্র্যাকিং' | t) : ('কোনো সক্রিয় কাজ নেই (ট্র্যাকিং নিষ্ক্রিয়)' | t)"
     >
-      <span class="nav-icon">🛰️</span>
+      <i class="pi pi-send nav-icon"></i>
       <span class="nav-text">{{ 'ট্র্যাকিং' | t }}</span>
       @if (activeJobsCount() > 0) {
         <span class="active-badge">{{ activeJobsCount() | bnNumber }}</span>
@@ -274,13 +274,13 @@
     </button>
 
     <button type="button" class="nav-item" (click)="toggleProfileModal()">
-      <span class="nav-icon">👤</span>
+      <i class="pi pi-user nav-icon"></i>
       <span class="nav-text">{{ 'প্রোফাইল' | t }}</span>
     </button>
 
     @if (isWorker()) {
       <a routerLink="/worker/dashboard" class="nav-item">
-        <span class="nav-icon">🛠️</span>
+        <i class="pi pi-wrench nav-icon"></i>
         <span class="nav-text">{{ 'কারিগর' | t }}</span>
       </a>
     }
@@ -291,12 +291,12 @@
     <div class="modal-backdrop" (click)="closeSOS()">
       <div class="modal-card sos-modal" (click)="$event.stopPropagation()">
         <div class="sos-modal-header">
-          <div class="sos-siren-box">🚨</div>
+          <div class="sos-siren-box"><i class="pi pi-exclamation-triangle"></i></div>
           <div class="sos-title-wrap">
             <h3 class="sos-title">{{ 'জরুরি SOS সহায়তা' | t }}</h3>
             <p class="sos-subtitle">{{ 'আপনার বর্তমান অবস্থান ও জরুরি সতর্কতা অবিলম্বে পাঠানো হবে' | t }}</p>
           </div>
-          <button class="close-btn" (click)="closeSOS()">✕</button>
+          <button class="close-btn" (click)="closeSOS()"><i class="pi pi-times"></i></button>
         </div>
 
         @if (!sosSent()) {
@@ -327,7 +327,7 @@
 
             <div class="emergency-quick-actions">
               <a href="tel:999" class="quick-call-btn">
-                <span class="qc-icon">📞</span>
+                <i class="pi pi-phone qc-icon"></i>
                 <span class="qc-text">{{ 'জাতীয় জরুরি সেবা (৯৯৯) এ সরাসরি কল করুন' | t }}</span>
               </a>
             </div>
@@ -341,14 +341,14 @@
           </div>
         } @else {
           <div class="sos-success-body">
-            <div class="success-icon-wrap">✅</div>
+            <div class="success-icon-wrap"><i class="pi pi-check-circle" style="color:#16a34a;"></i></div>
             <h4 class="success-title">{{ 'SOS এলার্ট সফলভাবে পাঠানো হয়েছে!' | t }}</h4>
             <p class="success-desc">
               {{ 'আপনার সাভার এলাকার কন্ট্রোল রুম ও প্রশাসনিক কর্মকর্তাদের নিকট জরুরি সিগন্যাল পাঠানো হয়েছে। অতি দ্রুত সাপোর্ট টিম আপনার সাথে ফোনে যোগাযোগ করবে।' | t }}
             </p>
             <div class="sos-help-box">
               <span>{{ 'প্রয়োজনে সরাসরি আমাদের সার্বক্ষণিক হটলাইনে যোগাযোগ করুন:' | t }}</span>
-              <a href="tel:01700000000" class="hotline-link">📞 {{ '০১৭০০-০০০০০০' | bnNumber }}</a>
+              <a href="tel:01700000000" class="hotline-link"><i class="pi pi-phone"></i> {{ '০১৭০০-০০০০০০' | bnNumber }}</a>
             </div>
             <button class="btn-primary w-full" (click)="closeSOS()">{{ 'বুঝেছি, বন্ধ করুন' | t }}</button>
           </div>
@@ -363,10 +363,10 @@
       <div class="modal-card profile-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <div class="modal-title-wrap">
-            <span class="modal-icon">👤</span>
+            <i class="pi pi-user modal-icon"></i>
             <h3 class="modal-title">{{ 'কাস্টমার প্রোফাইল' | t }}</h3>
           </div>
-          <button class="close-btn" (click)="closeProfileModal()">✕</button>
+          <button class="close-btn" (click)="closeProfileModal()"><i class="pi pi-times"></i></button>
         </div>
 
         <div class="profile-hero">
@@ -390,7 +390,7 @@
 
         <div class="profile-section-list">
           <div class="info-tile">
-            <span class="it-icon">📍</span>
+            <i class="pi pi-map-marker it-icon" style="color:#0f766e;"></i>
             <div class="it-content">
               <label>{{ 'বর্তমান ঠিকানা / এলাকা' | t }}</label>
               <strong>{{ currentUser()?.savedAddresses?.[0]?.address || (themeService.currentLang() === 'en' ? 'Not added yet' : 'এখনো যোগ করা হয়নি') }}</strong>
@@ -398,7 +398,7 @@
           </div>
 
           <div class="info-tile">
-            <span class="it-icon">🚨</span>
+            <i class="pi pi-shield it-icon" style="color:#ea580c;"></i>
             <div class="it-content">
               <label>{{ 'জরুরি যোগাযোগ (Emergency Contact)' | t }}</label>
               <strong>
@@ -412,7 +412,7 @@
           </div>
 
           <div class="info-tile">
-            <span class="it-icon">⭐</span>
+            <i class="pi pi-star-fill it-icon" style="color:#f59e0b;"></i>
             <div class="it-content">
               <label>{{ 'কাস্টমার রেটিং' | t }}</label>
               <strong>{{ '৫.০ / ৫.০ (৩টি সফল কাজ সম্পন্ন)' | t }}</strong>
@@ -438,17 +438,17 @@
       <div class="modal-card favorites-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <div class="modal-title-wrap">
-            <span class="modal-icon">❤️</span>
+            <i class="pi pi-heart modal-icon" style="color:#e11d48;"></i>
             <h3 class="modal-title">{{ 'প্রিয় কারিগর তালিকা (Favorite Workers)' | t }}</h3>
           </div>
-          <button class="close-btn" (click)="closeFavorites()">✕</button>
+          <button class="close-btn" (click)="closeFavorites()"><i class="pi pi-times"></i></button>
         </div>
 
         <p class="fav-desc">{{ 'আপনার পূর্বে সংরক্ষিত বিশ্বস্ত কারিগরদের তালিকা। যে কাউকে ১-ক্লিকে আবার ডাকতে পারেন:' | t }}</p>
 
         @if (favoriteWorkers().length === 0) {
           <div class="empty-favs">
-            <span class="ef-icon">🤍</span>
+            <i class="pi pi-heart ef-icon" style="color:#cbd5e1;"></i>
             <h4>{{ 'কোনো প্রিয় কারিগর সংরক্ষিত নেই' | t }}</h4>
             <p>{{ 'ম্যাপে যেকোনো ওয়ার্কারের প্রোফাইলে গিয়ে "প্রিয়তে রাখুন" বাটনে ক্লিক করে যোগ করুন।' | t }}</p>
           </div>
@@ -475,7 +475,7 @@
                     }
                   </div>
                   <div class="fwi-metrics">
-                    <span>⭐ {{ w.rating | bnNumber }} ({{ w.totalJobs | bnNumber }} {{ 'কাজ' | t }})</span>
+                    <span><i class="pi pi-star-fill" style="color:#f59e0b;font-size:11px;"></i> {{ w.rating | bnNumber }} ({{ w.totalJobs | bnNumber }} {{ 'কাজ' | t }})</span>
                     <span class="dot">•</span>
                     <span class="rate">{{ w.rate | taka }} / {{ (w.rateUnit === 'job' ? 'কাজ' : w.rateUnit === 'hour' ? 'ঘণ্টা' : 'দিন') | t }}</span>
                   </div>
@@ -489,7 +489,7 @@
                     {{ (w.isBusy ? 'ব্যস্ত' : 'আবার ডাকুন') | t }}
                   </button>
                   <button type="button" class="btn-remove-fav" (click)="promptRemoveFavorite(w); $event.stopPropagation()" [title]="'প্রিয় তালিকা থেকে সরান' | t" aria-label="প্রিয় তালিকা থেকে সরান">
-                    🗑️
+                    <i class="pi pi-trash"></i>
                   </button>
                 </div>
               </div>
@@ -510,10 +510,10 @@
       <div class="modal-card delete-fav-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <div class="modal-title-wrap">
-            <span class="modal-icon">⚠️</span>
+            <i class="pi pi-exclamation-triangle modal-icon" style="color:#ef4444;"></i>
             <h3 class="modal-title">{{ 'প্রিয় তালিকা থেকে অপসারণ' | t }}</h3>
           </div>
-          <button class="close-btn" (click)="cancelDeleteFavorite()">✕</button>
+          <button class="close-btn" (click)="cancelDeleteFavorite()"><i class="pi pi-times"></i></button>
         </div>
 
         <div class="modal-body-content">

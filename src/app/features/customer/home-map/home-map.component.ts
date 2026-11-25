@@ -14,6 +14,7 @@ import { Job, PaymentMethod } from '../../../core/models/job.model';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
 import { DoorstepPin, DoorstepPinPickerComponent } from '../../../shared/components/doorstep-pin-picker/doorstep-pin-picker.component';
+import { CategoryIconComponent } from '../../../shared/components/category-icon/category-icon.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ThemeService } from '../../../core/services/theme.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -24,7 +25,7 @@ const NEARBY_RADIUS_KM = 30;
 @Component({
   selector: 'app-home-map',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, BnNumberPipe, TakaPipe, TranslatePipe, DoorstepPinPickerComponent],
+  imports: [CommonModule, FormsModule, RouterModule, BnNumberPipe, TakaPipe, TranslatePipe, DoorstepPinPickerComponent, CategoryIconComponent],
   templateUrl: './home-map.component.html',
   styleUrl: './home-map.component.scss'
 })

@@ -13,6 +13,7 @@ import { TakaPipe } from '../../../shared/pipes/taka.pipe';
 import { MaskPhonePipe } from '../../../shared/pipes/mask-phone.pipe';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { LangToggleComponent } from '../../../shared/components/lang-toggle/lang-toggle.component';
+import { CategoryIconComponent } from '../../../shared/components/category-icon/category-icon.component';
 import { WorkerProfile, WorkerPrivate, RateUnit, GeoPoint } from '../../../core/models/worker.model';
 import { User } from '../../../core/models/user.model';
 import { FirebaseService } from '../../../core/services/firebase.service';
@@ -22,7 +23,7 @@ import { doc, setDoc } from 'firebase/firestore';
 @Component({
   selector: 'app-register-worker',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, BnNumberPipe, TakaPipe, MaskPhonePipe, TranslatePipe, LangToggleComponent],
+  imports: [CommonModule, FormsModule, RouterModule, BnNumberPipe, TakaPipe, MaskPhonePipe, TranslatePipe, LangToggleComponent, CategoryIconComponent],
   templateUrl: './register-worker.component.html',
   styleUrl: './register-worker.component.scss'
 })
@@ -77,7 +78,7 @@ export class RegisterWorkerComponent implements OnInit {
     const en = this.isEn();
     return this.categories()
       .filter(c => ids.includes(c.id))
-      .map(c => `${c.icon} ${en ? c.nameEn : c.nameBn}`)
+      .map(c => en ? c.nameEn : c.nameBn)
       .join(', ');
   });
 

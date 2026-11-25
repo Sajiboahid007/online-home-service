@@ -14,13 +14,14 @@ import { TakaPipe } from '../../../shared/pipes/taka.pipe';
 import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
 import { MaskPhonePipe } from '../../../shared/pipes/mask-phone.pipe';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { CategoryIconComponent } from '../../../shared/components/category-icon/category-icon.component';
 
 type FilterTab = 'all' | 'active' | 'completed' | 'cancelled';
 
 @Component({
   selector: 'app-my-bookings',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, BnNumberPipe, TakaPipe, TimeAgoPipe, MaskPhonePipe, TranslatePipe],
+  imports: [CommonModule, RouterModule, FormsModule, BnNumberPipe, TakaPipe, TimeAgoPipe, MaskPhonePipe, TranslatePipe, CategoryIconComponent],
   templateUrl: './my-bookings.component.html',
   styleUrl: './my-bookings.component.scss'
 })
@@ -126,7 +127,7 @@ export class MyBookingsComponent implements OnInit, OnDestroy {
 
   public getCategoryIcon(catId: string): string {
     const cat = this.categoryService.getCategoryById(catId);
-    return cat ? cat.icon : '🔨';
+    return cat ? cat.icon : 'pi pi-wrench';
   }
 
   public getCategoryName(job: Job): string {

@@ -12,13 +12,13 @@ import { ToastService, ToastMessage } from '../../../core/services/toast.service
         <div class="toast-bubble" [ngClass]="toast.type">
           <div class="toast-icon">
             @if (toast.type === 'success') {
-              <span>✓</span>
+              <span><i class="pi pi-check"></i></span>
             } @else if (toast.type === 'error') {
-              <span>✕</span>
+              <span><i class="pi pi-times"></i></span>
             } @else if (toast.type === 'warn') {
-              <span>⚠️</span>
+              <span><i class="pi pi-exclamation-triangle"></i></span>
             } @else {
-              <span>ℹ️</span>
+              <span><i class="pi pi-info-circle"></i></span>
             }
           </div>
           <div class="toast-body">
@@ -28,7 +28,7 @@ import { ToastService, ToastMessage } from '../../../core/services/toast.service
             <div class="toast-msg">{{ toast.message }}</div>
           </div>
           <button type="button" class="toast-close" (click)="toastService.remove(toast.id)" aria-label="Close">
-            ✕
+            <i class="pi pi-times"></i>
           </button>
         </div>
       }

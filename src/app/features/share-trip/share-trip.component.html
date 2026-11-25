@@ -1,7 +1,7 @@
 <div class="share-trip-container" *ngIf="job(); else loading">
   <div class="top-brand-bar">
     <div class="brand">
-      <span class="logo-icon">🛠️</span>
+      <span class="logo-icon"><i class="pi pi-wrench"></i></span>
       <span class="brand-name">কাজখোঁজ</span>
     </div>
     <div class="live-pill">
@@ -35,7 +35,7 @@
       <div class="worker-meta">
         <h3>{{ job()!.workerName || 'মো: রহিম উদ্দিন' }}</h3>
         <p class="category-text">{{ job()!.categoryName }}</p>
-        <span class="rating-badge">⭐ ৪.৮ (৩৮টি কাজ)</span>
+        <span class="rating-badge"><i class="pi pi-star-fill" style="color: #f59e0b;"></i> ৪.৮ (৩৮টি কাজ)</span>
       </div>
       <a [href]="'tel:' + (job()!.workerPhone || '01711223344')" class="call-btn" title="ফোন করুন">
         <i class="pi pi-phone"></i>

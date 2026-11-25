@@ -12,23 +12,23 @@
             <h4 class="partner-name">{{ partnerName }}</h4>
             <span class="partner-badge">{{ partnerRoleBn }}</span>
           </div>
-          <span class="connection-status">🟢 সক্রিয় যোগাযোগ • কাজখোঁজ লাইভ চ্যাট</span>
+          <span class="connection-status"><i class="pi pi-circle-fill" style="font-size: 8px; color: #22c55e;"></i> সক্রিয় যোগাযোগ • কাজখোঁজ লাইভ চ্যাট</span>
         </div>
       </div>
 
-      <button type="button" class="btn-close" (click)="onClose()" title="চ্যাট বন্ধ করুন">✕</button>
+      <button type="button" class="btn-close" (click)="onClose()" title="চ্যাট বন্ধ করুন"><i class="pi pi-times"></i></button>
     </div>
 
     <!-- Messages Scroll Thread -->
     <div #messagesScroll class="messages-thread">
       <div class="chat-security-banner">
-        <span class="cs-icon">🔒</span>
+        <span class="cs-icon"><i class="pi pi-lock"></i></span>
         <span>নিরাপত্তা নিশ্চিত করতে ও যে কোনো বিরোধে প্রমাণের জন্য কাজখোঁজ সিস্টেমে এই বার্তাগুলো সংরক্ষিত থাকে।</span>
       </div>
 
       @if (messages().length === 0) {
         <div class="empty-chat">
-          <span class="empty-icon">💬</span>
+          <span class="empty-icon"><i class="pi pi-comments"></i></span>
           <p class="empty-title">কথোপকথন শুরু করুন</p>
           <p class="empty-sub">নিচের কুইক প্রিসেট বা লিখে বার্তা পাঠান অথবা ভয়েস নোট রেকর্ড করুন।</p>
         </div>
@@ -73,7 +73,7 @@
       <div class="presets-scroll">
         @for (preset of quickPresets(); track preset) {
           <button type="button" class="preset-chip" (click)="sendPreset(preset)">
-            <span>💬 {{ preset }}</span>
+            <span><i class="pi pi-comment"></i> {{ preset }}</span>
           </button>
         }
       </div>
@@ -89,7 +89,7 @@
         <div class="recording-actions">
           <button type="button" class="btn-cancel-rec" (click)="cancelVoiceRecording()">বাতিল</button>
           <button type="button" class="btn-finish-rec" (click)="finishVoiceRecording()">
-            <span>পাঠান 🚀</span>
+            <span>পাঠান <i class="pi pi-send"></i></span>
           </button>
         </div>
       </div>

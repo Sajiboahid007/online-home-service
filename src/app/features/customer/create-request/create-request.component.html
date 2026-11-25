@@ -17,7 +17,7 @@
     <div class="form-column">
       <!-- FCFS Grab Rule Explainer Banner -->
       <div class="grab-rule-banner">
-        <div class="grb-icon">⚡</div>
+        <div class="grb-icon"><i class="pi pi-bolt"></i></div>
         <div class="grb-text">
           <h3>{{ isEn() ? 'Open Work Request (First-Come, First-Served Grab)' : 'উন্মুক্ত কাজের চাহিদা (First-Come, First-Served Grab)' }}</h3>
           <p>
@@ -74,7 +74,7 @@
                        so updating the old nodes in place would leave a stale label. -->
                   @for (sel of [selected]; track sel.id) {
                     <div class="pselect-selected-row">
-                      <span class="pselect-icon">{{ sel.icon }}</span>
+                      <app-cat-icon class="pselect-icon" [icon]="sel.icon" />
                       <div class="pselect-text-wrap">
                         <strong class="pselect-title">{{ isEn() ? sel.nameEn : sel.nameBn }}</strong>
                         <span class="pselect-sub">({{ isEn() ? sel.nameBn : sel.nameEn }})</span>
@@ -89,7 +89,7 @@
 
               <ng-template let-cat #item>
                 <div class="pselect-option-row">
-                  <span class="pselect-icon">{{ cat.icon }}</span>
+                  <app-cat-icon class="pselect-icon" [icon]="cat.icon" />
                   <div class="pselect-text-wrap">
                     <strong class="pselect-name">{{ isEn() ? cat.nameEn : cat.nameBn }}</strong>
                     <span class="pselect-en">{{ isEn() ? cat.nameBn : cat.nameEn }}</span>
@@ -137,7 +137,7 @@
                   <!-- Keyed rebuild: see the category select above. -->
                   @for (sel of [preset]; track sel.id) {
                     <div class="pselect-selected-row">
-                      <span class="pselect-icon">{{ sel.icon }}</span>
+                      <app-cat-icon class="pselect-icon" [icon]="sel.icon" />
                       <div class="pselect-text-wrap">
                         <strong class="pselect-title">{{ sel.label | t }}</strong>
                       </div>
@@ -149,7 +149,7 @@
 
               <ng-template let-preset #item>
                 <div class="pselect-option-row preset-option">
-                  <span class="pselect-icon">{{ preset.icon }}</span>
+                  <app-cat-icon class="pselect-icon" [icon]="preset.icon" />
                   <div class="pselect-text-wrap">
                     <strong class="pselect-name">{{ preset.label | t }}</strong>
                     <span class="pselect-desc-short">{{ preset.title | t }}</span>
@@ -247,7 +247,7 @@
                   [checked]="paymentMethod() === 'cash'"
                   (change)="paymentMethod.set('cash')"
                 />
-                <span class="pill-icon">💵</span>
+                <span class="pill-icon"><i class="pi pi-money-bill" style="color: #16a34a;"></i></span>
                 <span class="pill-text">{{ isEn() ? 'Cash after work' : 'কাজ শেষে নগদ (Cash)' }}</span>
               </label>
 
@@ -259,7 +259,7 @@
                   [checked]="paymentMethod() === 'bkash'"
                   (change)="paymentMethod.set('bkash')"
                 />
-                <span class="pill-icon">📱</span>
+                <span class="pill-icon"><i class="pi pi-mobile" style="color: #e2136e;"></i></span>
                 <span class="pill-text">{{ isEn() ? 'bKash' : 'বিকাশ (bKash)' }}</span>
               </label>
 
@@ -271,7 +271,7 @@
                   [checked]="paymentMethod() === 'nagad'"
                   (change)="paymentMethod.set('nagad')"
                 />
-                <span class="pill-icon">🟧</span>
+                <span class="pill-icon"><i class="pi pi-wallet" style="color: #f97316;"></i></span>
                 <span class="pill-text">{{ isEn() ? 'Nagad' : 'নগদ (Nagad)' }}</span>
               </label>
             </div>
@@ -291,7 +291,7 @@
               <span>{{ 'কাজের রিকোয়েস্ট পোস্ট করা হচ্ছে...' | t }}</span>
             } @else {
               <span class="pi pi-send"></span>
-              <span>{{ isEn() ? '🚀 Publish Work Request (First to Grab Gets the Job)' : '🚀 কাজের রিকোয়েস্ট পোস্ট করুন (যিনি আগে গ্রহণ করবেন তিনিই কাজ পাবেন)' }}</span>
+              <span>{{ isEn() ? 'Publish Work Request (First to Grab Gets the Job)' : 'কাজের রিকোয়েস্ট পোস্ট করুন (যিনি আগে গ্রহণ করবেন তিনিই কাজ পাবেন)' }}</span>
             }
           </button>
         </div>
@@ -342,19 +342,19 @@
 
         <!-- Trust & Security Box -->
         <div class="sidebar-card safety-guarantee-card">
-          <div class="safety-icon">🛡️</div>
+          <div class="safety-icon"><i class="pi pi-shield"></i></div>
           <h4>{{ isEn() ? 'KajKhoj 100% Trust Guarantee' : 'কাজখোঁজ ১০০% বিশ্বস্ততা গ্যারান্টি' }}</h4>
           <ul class="safety-list">
-            <li>{{ isEn() ? '✓ All workers are NID & background verified' : '✓ সকল কারিগরের এনআইডি ও পুলিশ ব্যাকগ্রাউন্ড ভেরিফায়েড' }}</li>
-            <li>{{ isEn() ? '✓ 4-digit secret OTP protection at start & finish' : '✓ সরাসরি ৪-সংখ্যার গোপন ওটিপি সুরক্ষা' }}</li>
-            <li>{{ isEn() ? '✓ Fair pricing & live in-app chat' : '✓ ন্যায্য মূল্যের নিশ্চয়তা ও ইন-অ্যাপ লাইভ চ্যাট' }}</li>
-            <li>{{ isEn() ? '✓ 24/7 customer support & emergency SOS' : '✓ ২৪/৭ কাস্টমার সাপোর্ট ও এসওএস জরুরি সুরক্ষা' }}</li>
+            <li><i class="pi pi-check-circle" style="color: #16a34a;"></i> {{ isEn() ? 'All workers are NID & background verified' : 'সকল কারিগরের এনআইডি ও পুলিশ ব্যাকগ্রাউন্ড ভেরিফায়েড' }}</li>
+            <li><i class="pi pi-check-circle" style="color: #16a34a;"></i> {{ isEn() ? '4-digit secret OTP protection at start & finish' : 'সরাসরি ৪-সংখ্যার গোপন ওটিপি সুরক্ষা' }}</li>
+            <li><i class="pi pi-check-circle" style="color: #16a34a;"></i> {{ isEn() ? 'Fair pricing & live in-app chat' : 'ন্যায্য মূল্যের নিশ্চয়তা ও ইন-অ্যাপ লাইভ চ্যাট' }}</li>
+            <li><i class="pi pi-check-circle" style="color: #16a34a;"></i> {{ isEn() ? '24/7 customer support & emergency SOS' : '২৪/৭ কাস্টমার সাপোর্ট ও এসওএস জরুরি সুরক্ষা' }}</li>
           </ul>
         </div>
 
         <!-- Quick Call Assistance -->
         <div class="sidebar-card support-box">
-          <span class="sup-icon">📞</span>
+          <i class="pi pi-phone sup-icon"></i>
           <div class="sup-text">
             <strong>{{ isEn() ? 'Need Help?' : 'সাহায্য প্রয়োজন?' }}</strong>
             <p>{{ isEn() ? 'Call our customer care for any issue: 01700-000000' : 'যেকোনো সমস্যায় আমাদের কাস্টমার কেয়ারে কল করুন: ০১৭০০-০০০০০০' }}</p>

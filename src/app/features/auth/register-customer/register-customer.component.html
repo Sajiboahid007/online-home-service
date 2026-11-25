@@ -11,14 +11,14 @@
           <app-lang-toggle></app-lang-toggle>
         </div>
         <div class="header-content">
-          <div class="brand-badge">🏠</div>
+          <div class="brand-badge"><i class="pi pi-home"></i></div>
           <h1 class="page-title">{{ isEn() ? 'Customer Registration' : 'কাস্টমার রেজিস্ট্রেশন' }}</h1>
           <p class="page-subtitle">{{ isEn() ? 'Book trusted home service professionals quickly & easily' : 'দ্রুত ও সহজে বাসাবাড়ির বিশ্বস্ত সেবা গ্রহণ করুন' }}</p>
         </div>
 
         <!-- 1-Click Demo Fill -->
         <button type="button" class="btn-demo-fill" (click)="fillDemoData()">
-          ⚡ {{ isEn() ? 'Fill Demo Data' : 'ডেমো তথ্য পূরণ করুন' }}
+          <i class="pi pi-bolt"></i> {{ isEn() ? 'Fill Demo Data' : 'ডেমো তথ্য পূরণ করুন' }}
         </button>
       </div>
 
@@ -56,14 +56,14 @@
                 <span class="gc-avatar-fallback">G</span>
               }
               <div class="gc-meta">
-                <span class="gc-badge">✓ {{ isEn() ? 'Google Account Linked' : 'Google অ্যাকাউন্ট সংযুক্ত' }}</span>
+                <span class="gc-badge"><i class="pi pi-check"></i> {{ isEn() ? 'Google Account Linked' : 'Google অ্যাকাউন্ট সংযুক্ত' }}</span>
                 <strong class="gc-name">{{ googleAccount()?.name || name() }}</strong>
                 <span class="gc-email">{{ googleAccount()?.email }}</span>
               </div>
             </div>
             <div class="gc-actions">
               <button type="button" class="btn-quick-google" (click)="quickCompleteGoogleCustomer()" [disabled]="isLoading()">
-                ⚡ {{ isEn() ? 'Instant Continue' : '১-ক্লিকে প্রবেশ' }}
+                <i class="pi pi-bolt"></i> {{ isEn() ? 'Instant Continue' : '১-ক্লিকে প্রবেশ' }}
               </button>
               <button type="button" class="btn-unlink-google" (click)="unlinkGoogleAccount()">
                 {{ isEn() ? 'Switch' : 'পরিবর্তন' }}
@@ -82,14 +82,14 @@
       <!-- Alerts -->
       @if (errorMessage()) {
         <div class="alert-box alert-error">
-          <span class="alert-icon">⚠️</span>
+          <i class="pi pi-exclamation-triangle alert-icon"></i>
           <span>{{ errorMessage() }}</span>
         </div>
       }
 
       @if (successMessage()) {
         <div class="alert-box alert-success">
-          <span class="alert-icon">✓</span>
+          <i class="pi pi-check alert-icon"></i>
           <span>{{ successMessage() }}</span>
         </div>
       }
@@ -99,7 +99,7 @@
         <!-- Personal Info Section -->
         <div class="form-section">
           <h3 class="section-title">
-            <span class="section-icon">👤</span>
+            <i class="pi pi-user section-icon"></i>
             <span>ব্যক্তিগত তথ্য</span>
           </h3>
 
@@ -151,7 +151,7 @@
         <!-- Address Section -->
         <div class="form-section">
           <h3 class="section-title">
-            <span class="section-icon">📍</span>
+            <i class="pi pi-map-marker section-icon"></i>
             <span>ঠিকানা ও অবস্থান</span>
           </h3>
 
@@ -185,7 +185,7 @@
         <div class="form-section emergency-section">
           <div class="section-header-row">
             <h3 class="section-title">
-              <span class="section-icon">🚨</span>
+              <i class="pi pi-shield section-icon"></i>
               <span>জরুরি কন্টাক্ট নম্বর ও সম্পর্ক</span>
             </h3>
             <span class="badge-safety">সুরক্ষা ফিচার</span>
@@ -258,7 +258,7 @@
             <span>অ্যাকাউন্ট তৈরি হচ্ছে...</span>
           } @else {
             <span>নিবন্ধন সম্পন্ন করুন</span>
-            <span class="btn-arrow">➔</span>
+            <i class="pi pi-arrow-right btn-arrow"></i>
           }
         </button>
       </form>

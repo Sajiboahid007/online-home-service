@@ -5,7 +5,7 @@
       <div class="quick-bar-top-row">
         <div class="quick-bar-title">
           <span class="pulse-dot"></span>
-          <span class="title-text">⚡ ডেমো কুইক-লগইন (১-ক্লিক টেস্টিং • Firebase DB):</span>
+          <span class="title-text"><i class="pi pi-bolt"></i> ডেমো কুইক-লগইন (১-ক্লিক টেস্টিং • Firebase DB):</span>
         </div>
         <!-- Role Filter Tabs -->
         <div class="role-filter-tabs">
@@ -15,7 +15,7 @@
             [class.active]="activeRoleTab() === 'customer'"
             (click)="setRoleTab('customer')"
           >
-            👤 {{ isEn() ? 'Customer' : 'কাস্টমার' }} ({{ customerCount() | bnNumber }})
+            <i class="pi pi-user"></i> {{ isEn() ? 'Customer' : 'কাস্টমার' }} ({{ customerCount() | bnNumber }})
           </button>
           <button
             type="button"
@@ -23,7 +23,7 @@
             [class.active]="activeRoleTab() === 'worker'"
             (click)="setRoleTab('worker')"
           >
-            🔧 {{ isEn() ? 'Worker' : 'ওয়ার্কার' }} ({{ workerCount() | bnNumber }})
+            <i class="pi pi-wrench"></i> {{ isEn() ? 'Worker' : 'ওয়ার্কার' }} ({{ workerCount() | bnNumber }})
           </button>
           <button
             type="button"
@@ -31,7 +31,7 @@
             [class.active]="activeRoleTab() === 'admin'"
             (click)="setRoleTab('admin')"
           >
-            👑 {{ isEn() ? 'Admin' : 'অ্যাডমিন' }} ({{ adminCount() | bnNumber }})
+            <i class="pi pi-shield"></i> {{ isEn() ? 'Admin' : 'অ্যাডমিন' }} ({{ adminCount() | bnNumber }})
           </button>
           <button
             type="button"
@@ -39,7 +39,7 @@
             [class.active]="activeRoleTab() === 'all'"
             (click)="setRoleTab('all')"
           >
-            ⚡ {{ isEn() ? 'All' : 'সকল' }} ({{ demoAccounts.length | bnNumber }})
+            <i class="pi pi-bolt"></i> {{ isEn() ? 'All' : 'সকল' }} ({{ demoAccounts.length | bnNumber }})
           </button>
           <button
             type="button"
@@ -47,7 +47,7 @@
             (click)="openDirectoryModal()"
             [title]="isEn() ? 'View all users' : 'সকল কাস্টমার ও ইউজার তালিকা দেখুন'"
           >
-            📋 {{ isEn() ? 'User Directory' : 'ইউজার ডিরেক্টরি' }}
+            <i class="pi pi-list"></i> {{ isEn() ? 'User Directory' : 'ইউজার ডিরেক্টরি' }}
           </button>
           <app-lang-toggle></app-lang-toggle>
         </div>
@@ -77,8 +77,8 @@
       <!-- Brand Header -->
       <div class="brand-section">
         <div class="logo-badge">
-          <span class="logo-icon">🛠️</span>
-          <span class="logo-spark">✨</span>
+          <i class="pi pi-wrench logo-icon"></i>
+          <i class="pi pi-sparkles logo-spark"></i>
         </div>
         <h1 class="brand-title">{{ 'কাজখোঁজ' | t }}</h1>
         <p class="brand-subtitle">{{ isEn() ? 'Trusted Home Service Platform • Savar & Dhaka' : 'বিশ্বস্ত হোম সার্ভিস প্ল্যাটফর্ম • সাভার ও ঢাকা' }}</p>
@@ -88,7 +88,7 @@
       @if (currentUser()) {
         <div class="active-session-banner">
           <div class="session-info">
-            <span class="avatar-ring">👤</span>
+            <span class="avatar-ring"><i class="pi pi-user"></i></span>
             <div>
               <p class="logged-text">{{ isEn() ? 'Active session:' : 'বর্তমান সেশন:' }} <strong>{{ currentUser()?.name }}</strong></p>
               <span class="role-pill">
@@ -106,11 +106,11 @@
           </div>
           <div class="session-actions">
             @if (currentUser()?.role === 'superadmin' || currentUser()?.role === 'admin') {
-              <a routerLink="/admin" class="btn-go-dash">{{ isEn() ? 'Admin Panel ➔' : 'অ্যাডমিন প্যানেল ➔' }}</a>
+              <a routerLink="/admin" class="btn-go-dash">{{ isEn() ? 'Admin Panel' : 'অ্যাডমিন প্যানেল' }} <i class="pi pi-arrow-right"></i></a>
             } @else if (currentUser()?.role === 'worker') {
-              <a routerLink="/worker" class="btn-go-dash">{{ isEn() ? 'Worker Dashboard ➔' : 'ওয়ার্কার ড্যাশবোর্ড ➔' }}</a>
+              <a routerLink="/worker" class="btn-go-dash">{{ isEn() ? 'Worker Dashboard' : 'ওয়ার্কার ড্যাশবোর্ড' }} <i class="pi pi-arrow-right"></i></a>
             } @else {
-              <a routerLink="/customer" class="btn-go-dash">{{ isEn() ? 'Customer Portal ➔' : 'কাস্টমার পোর্টাল ➔' }}</a>
+              <a routerLink="/customer" class="btn-go-dash">{{ isEn() ? 'Customer Portal' : 'কাস্টমার পোর্টাল' }} <i class="pi pi-arrow-right"></i></a>
             }
             <button type="button" class="btn-logout-link" (click)="authService.logout()">{{ isEn() ? 'Logout' : 'লগআউট' }}</button>
           </div>
@@ -120,14 +120,14 @@
       <!-- Alert Messages -->
       @if (errorMessage()) {
         <div class="alert-box alert-error">
-          <span class="alert-icon">⚠️</span>
+          <i class="pi pi-exclamation-triangle alert-icon"></i>
           <span>{{ errorMessage() }}</span>
         </div>
       }
 
       @if (successMessage()) {
         <div class="alert-box alert-success">
-          <span class="alert-icon">✓</span>
+          <i class="pi pi-check alert-icon"></i>
           <span>{{ successMessage() }}</span>
         </div>
       }
@@ -175,7 +175,7 @@
                     <span>{{ isEn() ? 'Sending OTP...' : 'ওটিপি পাঠানো হচ্ছে...' }}</span>
                   } @else {
                     <span>{{ 'ওটিপি কোড পাঠান' | t }}</span>
-                    <span class="btn-arrow">➔</span>
+                    <i class="pi pi-arrow-right btn-arrow"></i>
                   }
                 </button>
               </form>
@@ -192,21 +192,21 @@
                   {{ isEn() ? '— enter the 6-digit code generated below.' : 'নম্বরে প্রেরিত কোডটি লিখুন।' }}
                 </p>
                 <button type="button" class="btn-change-phone" (click)="changePhone()">
-                  ✏️ {{ isEn() ? 'Change phone number' : 'নম্বর পরিবর্তন করুন' }}
+                  <i class="pi pi-pencil"></i> {{ isEn() ? 'Change phone number' : 'নম্বর পরিবর্তন করুন' }}
                 </button>
               </div>
 
               <!-- In-App OTP Display (Only visible to current user, no SMS API required) -->
               <div class="simulation-banner">
                 <div class="sim-content">
-                  <span class="sim-icon">🔐</span>
+                  <i class="pi pi-lock sim-icon"></i>
                   <div class="sim-text">
                     <strong>{{ isEn() ? 'Your OTP Code:' : 'আপনার ওটিপি কোড:' }}</strong> {{ generatedOtp() }}
                     ({{ isEn() ? 'Visible only to you' : 'শুধুমাত্র আপনার জন্য দৃশ্যমান' }})
                   </div>
                 </div>
                 <button type="button" class="btn-autofill" (click)="autoFillOtp()">
-                  ⚡ {{ isEn() ? 'Auto-fill OTP' : 'অটো-ফিল ওটিপি' }}
+                  <i class="pi pi-bolt"></i> {{ isEn() ? 'Auto-fill OTP' : 'অটো-ফিল ওটিপি' }}
                 </button>
               </div>
 
@@ -240,7 +240,7 @@
                     </span>
                   } @else {
                     <button type="button" class="btn-resend" (click)="resendOtp()" [disabled]="isLoading()">
-                      🔄 {{ isEn() ? 'Resend Code' : 'কোড পুনরায় পাঠান' }}
+                      <i class="pi pi-refresh"></i> {{ isEn() ? 'Resend Code' : 'কোড পুনরায় পাঠান' }}
                     </button>
                   }
                 </div>
@@ -251,7 +251,7 @@
                     <span>{{ isEn() ? 'Verifying...' : 'যাচাই করা হচ্ছে...' }}</span>
                   } @else {
                     <span>{{ 'যাচাই করুন ও প্রবেশ করুন' | t }}</span>
-                    <span class="btn-arrow">✓</span>
+                    <i class="pi pi-check btn-arrow"></i>
                   }
                 </button>
               </form>
@@ -307,7 +307,7 @@
           <!-- Registration Options Cards -->
           <div class="registration-cards-grid">
             <a routerLink="/auth/register-customer" class="reg-card customer-card">
-              <div class="reg-icon-box">🏠</div>
+              <div class="reg-icon-box"><i class="pi pi-home"></i></div>
               <div class="reg-card-content">
                 <h3 class="reg-card-title">{{ 'কাস্টমার রেজিস্ট্রেশন' | t }}</h3>
                 <p class="reg-card-desc">{{ isEn() ? 'Book trusted home service professionals' : 'বাসাবাড়ির কাজের জন্য বিশ্বস্ত কারিগর বুকিং করুন' }}</p>
@@ -316,7 +316,7 @@
             </a>
 
             <a routerLink="/auth/register-worker" class="reg-card worker-card">
-              <div class="reg-icon-box worker-icon-box">🔧</div>
+              <div class="reg-icon-box worker-icon-box"><i class="pi pi-wrench"></i></div>
               <div class="reg-card-content">
                 <h3 class="reg-card-title">{{ 'ওয়ার্কার হিসেবে যুক্ত হন' | t }}</h3>
                 <p class="reg-card-desc">{{ isEn() ? 'Work flexibility, fair earnings & live job alerts' : 'কাজের স্বাধীনতা, সম্মানজনক আয় ও লাইভ জব রিকোয়েস্ট' }}</p>
@@ -330,17 +330,17 @@
       <!-- Trust Badges Footer -->
       <div class="trust-footer">
         <div class="trust-item">
-          <span class="trust-icon">🛡️</span>
+          <i class="pi pi-shield trust-icon"></i>
           <span>{{ isEn() ? 'NID Verified Workers' : 'NID ভেরিফাইড কারিগর' }}</span>
         </div>
         <div class="trust-dot">•</div>
         <div class="trust-item">
-          <span class="trust-icon">📍</span>
+          <i class="pi pi-map-marker trust-icon"></i>
           <span>{{ isEn() ? 'Live Tracking' : 'লাইভ ট্র্যাকিং' }}</span>
         </div>
         <div class="trust-dot">•</div>
         <div class="trust-item">
-          <span class="trust-icon">⚡</span>
+          <i class="pi pi-bolt trust-icon"></i>
           <span>{{ isEn() ? 'Emergency Service' : 'জরুরি সার্ভিস' }}</span>
         </div>
       </div>
@@ -353,14 +353,14 @@
       <div class="directory-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <div>
-            <h2 class="modal-title">📋 ফায়ারবেস ডেটাবেস ইউজার ও কাস্টমার ডিরেক্টরি</h2>
+            <h2 class="modal-title"><i class="pi pi-list"></i> ফায়ারবেস ডেটাবেস ইউজার ও কাস্টমার ডিরেক্টরি</h2>
             <p class="modal-subtitle">মোট {{ demoAccounts.length | bnNumber }}টি ডেমো অ্যাকাউন্ট • যেকোনো অ্যাকাউন্টে ১-ক্লিকে লগইন করুন বা নম্বর বসান</p>
           </div>
-          <button type="button" class="btn-close-modal" (click)="closeDirectoryModal()">✕</button>
+          <button type="button" class="btn-close-modal" (click)="closeDirectoryModal()"><i class="pi pi-times"></i></button>
         </div>
 
         <div class="modal-search-box">
-          <span class="search-icon">🔍</span>
+          <i class="pi pi-search search-icon"></i>
           <input
             type="text"
             class="modal-search-input"
@@ -381,9 +381,9 @@
                   <span class="acc-badge">{{ acc.category === 'customer' ? 'কাস্টমার' : acc.category === 'worker' ? 'ওয়ার্কার' : 'অ্যাডমিন' }}</span>
                 </div>
                 <div class="acc-meta-row">
-                  <span class="acc-phone">📞 {{ acc.phone }}</span>
+                  <span class="acc-phone"><i class="pi pi-phone"></i> {{ acc.phone }}</span>
                   <span class="acc-dot">•</span>
-                  <span class="acc-area">📍 {{ acc.area }}</span>
+                  <span class="acc-area"><i class="pi pi-map-marker"></i> {{ acc.area }}</span>
                 </div>
                 <p class="acc-desc">{{ acc.desc }}</p>
               </div>
@@ -393,7 +393,7 @@
                   class="btn-quick-login-direct"
                   (click)="quickLogin(acc); closeDirectoryModal()"
                 >
-                  ⚡ ১-ক্লিকে লগইন
+                  <i class="pi pi-bolt"></i> ১-ক্লিকে লগইন
                 </button>
                 <button
                   type="button"

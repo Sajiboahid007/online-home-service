@@ -12,7 +12,7 @@
           <app-lang-toggle></app-lang-toggle>
         </div>
         <div class="header-titles">
-          <div class="badge-role">🔧 {{ isEn() ? 'Technician & Worker Onboarding' : 'কারিগর ও টেকনিশিয়ান অনবোর্ডিং' }}</div>
+          <div class="badge-role"><i class="pi pi-wrench"></i> {{ isEn() ? 'Technician & Worker Onboarding' : 'কারিগর ও টেকনিশিয়ান অনবোর্ডিং' }}</div>
           <h1 class="main-title">{{ 'ওয়ার্কার অ্যাকাউন্ট রেজিস্ট্রেশন' | t }}</h1>
           <p class="subtitle">{{ isEn() ? 'Join KajKhoj in 5 simple steps and start earning' : '৫টি সহজ ধাপে কাজখোঁজে যুক্ত হয়ে আয় শুরু করুন' }}</p>
         </div>
@@ -31,7 +31,7 @@
               (click)="goToStep(1)"
             >
               <div class="circle-badge">
-                @if (currentStep() > 1) { <span>✓</span> } @else { <span>১</span> }
+                @if (currentStep() > 1) { <i class="pi pi-check"></i> } @else { <span>১</span> }
               </div>
               <span class="step-label">মৌলিক তথ্য</span>
             </button>
@@ -46,7 +46,7 @@
               (click)="goToStep(2)"
             >
               <div class="circle-badge">
-                @if (currentStep() > 2) { <span>✓</span> } @else { <span>২</span> }
+                @if (currentStep() > 2) { <i class="pi pi-check"></i> } @else { <span>২</span> }
               </div>
               <span class="step-label">ক্যাটাগরি ও স্কিল</span>
             </button>
@@ -61,9 +61,9 @@
               (click)="goToStep(3)"
             >
               <div class="circle-badge location-badge">
-                @if (currentStep() > 3) { <span>✓</span> } @else { <span>৩</span> }
+                @if (currentStep() > 3) { <i class="pi pi-check"></i> } @else { <span>৩</span> }
               </div>
-              <span class="step-label highlight-label">📍 হোম লোকেশন</span>
+              <span class="step-label highlight-label"><i class="pi pi-map-marker"></i> হোম লোকেশন</span>
             </button>
 
             <div class="step-connector" [class.filled]="currentStep() > 3"></div>
@@ -76,7 +76,7 @@
               (click)="goToStep(4)"
             >
               <div class="circle-badge">
-                @if (currentStep() > 4) { <span>✓</span> } @else { <span>৪</span> }
+                @if (currentStep() > 4) { <i class="pi pi-check"></i> } @else { <span>৪</span> }
               </div>
               <span class="step-label">KYC ডকুমেন্ট</span>
             </button>
@@ -111,14 +111,14 @@
       <!-- Alert Messages -->
       @if (errorMessage()) {
         <div class="alert-box alert-error">
-          <span class="alert-icon">⚠️</span>
+          <i class="pi pi-exclamation-triangle alert-icon"></i>
           <span>{{ errorMessage() }}</span>
         </div>
       }
 
       @if (successMessage()) {
         <div class="alert-box alert-success">
-          <span class="alert-icon">✓</span>
+          <i class="pi pi-check alert-icon"></i>
           <span>{{ successMessage() }}</span>
         </div>
       }
@@ -233,11 +233,11 @@
                 @if (photoURL()) {
                   <img [src]="photoURL()" alt="Profile Preview" class="avatar-preview-img" />
                 } @else {
-                  <div class="avatar-preview-img" style="display:flex;align-items:center;justify-content:center;background:#f1f5f9;font-size:24px;">👤</div>
+                  <div class="avatar-preview-img" style="display:flex;align-items:center;justify-content:center;background:#f1f5f9;font-size:24px;color:#64748b;"><i class="pi pi-user"></i></div>
                 }
                 <div class="upload-controls">
                   <label class="btn-upload-file">
-                    📷 ছবি পরিবর্তন করুন
+                    <i class="pi pi-camera"></i> ছবি পরিবর্তন করুন
                     <input type="file" accept="image/*" (change)="onFileUpload($event, 'photo')" hidden />
                   </label>
                   <span class="file-note">পরিষ্কার মুখমণ্ডলের ছবি দিন</span>
@@ -282,9 +282,9 @@
                   (click)="toggleCategory(cat.id)"
                 >
                   <div class="cat-check-badge">
-                    @if (isCategorySelected(cat.id)) { <span>✓</span> }
+                    @if (isCategorySelected(cat.id)) { <i class="pi pi-check"></i> }
                   </div>
-                  <span class="cat-icon">{{ cat.icon }}</span>
+                  <app-cat-icon class="cat-icon" [icon]="cat.icon" />
                   <span class="cat-name">{{ isEn() ? cat.nameEn : cat.nameBn }}</span>
                 </div>
               }
@@ -298,7 +298,7 @@
               @for (skill of skills(); track skill) {
                 <span class="skill-chip">
                   <span>{{ skill | t }}</span>
-                  <button type="button" class="btn-remove-skill" (click)="removeSkill(skill)">✕</button>
+                  <button type="button" class="btn-remove-skill" (click)="removeSkill(skill)"><i class="pi pi-times"></i></button>
                 </span>
               }
               @if (skills().length === 0) {
@@ -318,7 +318,7 @@
                       [class.already-added]="hasSkill(s)"
                       (click)="toggleSkill(s)"
                     >
-                      <span class="plus-icon">{{ hasSkill(s) ? '✓' : '+' }}</span>
+                      <span class="plus-icon"><i [class]="'pi ' + (hasSkill(s) ? 'pi-check' : 'pi-plus')"></i></span>
                       <span>{{ s | t }}</span>
                     </button>
                   }
@@ -372,7 +372,7 @@
                 <span class="spinner"></span>
                 <span>বর্তমান লোকেশন শনাক্ত করা হচ্ছে...</span>
               } @else {
-                <span class="gps-icon">📍</span>
+                <i class="pi pi-map-marker gps-icon"></i>
                 <span>আমার বর্তমান লোকেশন পিন করুন</span>
               }
             </button>
@@ -380,7 +380,7 @@
 
           <!-- Quick Preset Locations -->
           <div class="presets-section">
-            <span class="presets-label">⚡ দ্রুত পিন করুন (সাভার ও ঢাকার পরিচিত পয়েন্ট):</span>
+            <span class="presets-label"><i class="pi pi-bolt"></i> দ্রুত পিন করুন (সাভার ও ঢাকার পরিচিত পয়েন্ট):</span>
             <div class="presets-pills-row">
               @for (preset of presetLocations; track preset.label) {
                 <button
@@ -389,7 +389,7 @@
                   [class.active]="lat() === preset.lat && lng() === preset.lng"
                   (click)="selectPresetLocation(preset)"
                 >
-                  <span class="pin-symbol">📌</span>
+                  <i class="pi pi-map-marker pin-symbol"></i>
                   <span>{{ preset.label }}</span>
                 </button>
               }
@@ -399,10 +399,10 @@
           <!-- Visual Coordinates & Location Card -->
           <div class="coordinates-preview-card">
             <div class="coord-header">
-              <span class="coord-icon">🧭</span>
+              <i class="pi pi-compass coord-icon"></i>
               <span class="coord-title">চিহ্নিত স্থানাঙ্ক (GeoPoint Pin)</span>
               @if (lat() && lng()) {
-                <span class="coord-status">✓ পিন নিশ্চিত</span>
+                <span class="coord-status"><i class="pi pi-check"></i> পিন নিশ্চিত</span>
               } @else {
                 <span class="coord-status" style="background:#fef3c7;color:#92400e;">অনির্ধারিত</span>
               }
@@ -459,7 +459,7 @@
               <p class="pane-desc">সুরক্ষা ও গ্রাহকের আস্থার স্বার্থে NID কার্ড ও সেলফি ভেরিফিকেশন আবশ্যক।</p>
             </div>
             <button type="button" class="btn-sample-kyc" (click)="setSampleKYC()">
-              ⚡ নমুনা KYC লোড করুন
+              <i class="pi pi-bolt"></i> নমুনা KYC লোড করুন
             </button>
           </div>
 
@@ -489,13 +489,13 @@
                   <img [src]="nidFrontURL()" alt="NID Front Preview" class="doc-img" />
                 } @else {
                   <div class="empty-upload-placeholder">
-                    <span class="empty-icon">🪪</span>
+                    <i class="pi pi-id-card empty-icon"></i>
                     <span>সামনের অংশ আপলোড করুন</span>
                   </div>
                 }
               </div>
               <label class="btn-card-upload">
-                📁 ফাইল নির্বাচন করুন
+                <i class="pi pi-folder-open"></i> ফাইল নির্বাচন করুন
                 <input type="file" accept="image/*" (change)="onFileUpload($event, 'nidFront')" hidden />
               </label>
             </div>
@@ -511,13 +511,13 @@
                   <img [src]="nidBackURL()" alt="NID Back Preview" class="doc-img" />
                 } @else {
                   <div class="empty-upload-placeholder">
-                    <span class="empty-icon">🪪</span>
+                    <i class="pi pi-id-card empty-icon"></i>
                     <span>পেছনের অংশ আপলোড করুন</span>
                   </div>
                 }
               </div>
               <label class="btn-card-upload">
-                📁 ফাইল নির্বাচন করুন
+                <i class="pi pi-folder-open"></i> ফাইল নির্বাচন করুন
                 <input type="file" accept="image/*" (change)="onFileUpload($event, 'nidBack')" hidden />
               </label>
             </div>
@@ -533,13 +533,13 @@
                   <img [src]="selfieURL()" alt="Selfie Preview" class="doc-img round-selfie" />
                 } @else {
                   <div class="empty-upload-placeholder">
-                    <span class="empty-icon">🤳</span>
+                    <i class="pi pi-user empty-icon"></i>
                     <span>সেলফি ছবি তুলুন</span>
                   </div>
                 }
               </div>
               <label class="btn-card-upload">
-                📷 ছবি আপলোড করুন
+                <i class="pi pi-camera"></i> ছবি আপলোড করুন
                 <input type="file" accept="image/*" (change)="onFileUpload($event, 'selfie')" hidden />
               </label>
             </div>
@@ -547,7 +547,7 @@
 
           <!-- Security note -->
           <div class="kyc-security-note">
-            <span class="lock-icon">🔒</span>
+            <i class="pi pi-lock lock-icon"></i>
             <span>
               আপনার ব্যক্তিগত KYC ডকুমেন্টস সুরক্ষিতভাবে এনক্রিপ্ট থাকে। শুধুমাত্র কাজখোঁজ অ্যাডমিন ভেরিফিকেশনের জন্য এটি ব্যবহৃত হবে।
             </span>
@@ -658,7 +658,7 @@
 
           <!-- Summary Review Card -->
           <div class="summary-review-card">
-            <h4 class="summary-title">📋 আবেদন সারসংক্ষেপ পর্যালোচনা</h4>
+            <h4 class="summary-title"><i class="pi pi-list"></i> আবেদন সারসংক্ষেপ পর্যালোচনা</h4>
             <div class="summary-grid">
               <div class="summary-item">
                 <span class="sum-label">নাম:</span>
@@ -695,8 +695,8 @@
       @if (currentStep() === 6) {
         <div class="step-content-pane success-confirmation-pane">
           <div class="success-icon-animation">
-            <span class="hourglass-icon">⏳</span>
-            <span class="success-check-badge">✓</span>
+            <i class="pi pi-clock hourglass-icon"></i>
+            <span class="success-check-badge"><i class="pi pi-check"></i></span>
           </div>
 
           <h2 class="success-title">আপনার আবেদন সফলভাবে জমা হয়েছে!</h2>
@@ -713,7 +713,7 @@
           </p>
 
           <div class="next-steps-info-card">
-            <h4 class="next-title">💡 পরবর্তী ধাপসমূহ:</h4>
+            <h4 class="next-title"><i class="pi pi-info-circle"></i> পরবর্তী ধাপসমূহ:</h4>
             <ul class="next-steps-list">
               <li>অ্যাডমিন আপনার NID এবং হোম লোকেশন যাচাই করবেন (সাধারণত ১২-২৪ ঘণ্টার মধ্যে)।</li>
               <li>ভেরিফিকেশন সম্পন্ন হলে আপনার ফোনে SMS নোটিফিকেশন পাঠানো হবে।</li>
@@ -724,7 +724,7 @@
           <div class="success-actions-row">
             <button type="button" class="btn-primary-action" (click)="navigateToWorkerDashboard()">
               <span>ওয়ার্কার ড্যাশবোর্ডে প্রবেশ করুন</span>
-              <span class="btn-arrow">➔</span>
+              <i class="pi pi-arrow-right btn-arrow"></i>
             </button>
 
             <button type="button" class="btn-secondary-link" (click)="navigateToLogin()">
@@ -749,7 +749,7 @@
             @if (currentStep() < 5) {
               <button type="button" class="btn-next-step" (click)="nextStep()">
                 <span>{{ 'পরবর্তী ধাপ' | t }}</span>
-                <span class="btn-arrow">➔</span>
+                <i class="pi pi-arrow-right btn-arrow"></i>
               </button>
             } @else {
               <button type="button" class="btn-submit-onboarding" (click)="submitOnboarding()" [disabled]="isLoading()">
@@ -758,7 +758,7 @@
                   <span>{{ isEn() ? 'Processing...' : 'প্রক্রিয়াকরণ হচ্ছে...' }}</span>
                 } @else {
                   <span>{{ 'অনবোর্ডিং আবেদন জমা দিন' | t }}</span>
-                  <span class="btn-arrow">✓</span>
+                  <i class="pi pi-check btn-arrow"></i>
                 }
               </button>
             }

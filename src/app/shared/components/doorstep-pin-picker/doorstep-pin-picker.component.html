@@ -19,7 +19,7 @@
   </div>
 
   <div class="dp-address">
-    <span class="dp-address-icon">📍</span>
+    <i class="pi pi-map-marker dp-address-icon"></i>
     <span class="dp-address-text">
       {{ location().address || ('ঠিকানা খোঁজা হচ্ছে...' | t) }}
       @if (isResolvingAddress()) {
@@ -44,7 +44,7 @@
     @if (doorPhotoURL(); as photo) {
       <div class="dp-photo-preview">
         <img [src]="photo" [alt]="'গেটের ছবি' | t" />
-        <button type="button" class="dp-photo-remove" (click)="removePhoto()" [title]="'ছবি সরান' | t">✕</button>
+        <button type="button" class="dp-photo-remove" (click)="removePhoto()" [title]="'ছবি সরান' | t"><i class="pi pi-times"></i></button>
       </div>
     } @else {
       <label class="dp-photo-btn">

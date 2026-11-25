@@ -39,7 +39,7 @@
         [class.active]="selectedCategoryId() === 'all'"
         (click)="selectCategory('all')"
       >
-        <span class="cat-chip-icon">✨</span>
+        <i class="pi pi-sparkles cat-chip-icon"></i>
         <span class="cat-chip-text">{{ 'সব কাজ' | t }}</span>
       </button>
 
@@ -51,7 +51,7 @@
         (click)="toggleTrustedFilter()"
         [title]="'শুধুমাত্র বিশ্বস্ত ও ভেরিফাইড কারিগর ফিল্টার' | t"
       >
-        <span class="cat-chip-icon">🛡️</span>
+        <i class="pi pi-shield cat-chip-icon" style="color:#0284c7;"></i>
         <span class="cat-chip-text">{{ 'বিশ্বস্ত কারিগর' | t }}</span>
       </button>
 
@@ -62,7 +62,7 @@
           [class.active]="selectedCategoryId() === cat.id"
           (click)="selectCategory(cat.id)"
         >
-          <span class="cat-chip-icon">{{ cat.icon }}</span>
+          <app-cat-icon class="cat-chip-icon" [icon]="cat.icon" />
           <span class="cat-chip-text">{{ isEn() ? cat.nameEn : cat.nameBn }}</span>
         </button>
       }
@@ -87,19 +87,19 @@
       <!-- Quick Action Row Embedded into Sheet -->
       <div class="sheet-actions-row" (click)="$event.stopPropagation()">
         <a routerLink="/customer/create-request" class="action-card request-card" [title]="'কাজের চাহিদা পোস্ট করুন' | t">
-          <div class="ac-icon-badge">📢</div>
+          <div class="ac-icon-badge"><i class="pi pi-megaphone"></i></div>
           <div class="ac-body">
             <div class="ac-title-line">
               <span class="ac-title">{{ 'কাজের রিকোয়েস্ট পোস্ট' | t }}</span>
-              <span class="badge-grab">⚡ First Grab</span>
+              <span class="badge-grab"><i class="pi pi-bolt" style="font-size:10px;"></i> First Grab</span>
             </div>
             <span class="ac-sub">{{ 'যে প্লাম্বার আগে গ্রহণ করবেন তিনিই পাবেন' | t }}</span>
           </div>
-          <span class="ac-arrow">➔</span>
+          <i class="pi pi-arrow-right ac-arrow"></i>
         </a>
 
         <button type="button" class="action-card instant-card" (click)="openInstantBooking()">
-          <div class="ac-icon-badge orange">⚡</div>
+          <div class="ac-icon-badge orange"><i class="pi pi-bolt"></i></div>
           <div class="ac-body">
             <div class="ac-title-line">
               <span class="ac-title">{{ 'তাৎক্ষণিক বুকিং' | t }}</span>
@@ -107,7 +107,7 @@
             </div>
             <span class="ac-sub">{{ 'নিকটস্থ সেরা টেকনিশিয়ান কল' | t }}</span>
           </div>
-          <span class="ac-arrow">➔</span>
+          <i class="pi pi-arrow-right ac-arrow"></i>
         </button>
       </div>
 
@@ -145,7 +145,7 @@
       <div class="peek-carousel-container">
         @if (sortedWorkers().length === 0) {
           <div class="peek-empty-state">
-            <span class="empty-emoji">🔍</span>
+            <i class="pi pi-search empty-emoji"></i>
             <span class="empty-msg">{{ 'এই ফিল্টারে কাছাকাছি কোনো কর্মী নেই' | t }}</span>
             <button type="button" class="btn-peek-reset" (click)="selectCategory('all')">{{ 'সব দেখুন' | t }}</button>
           </div>
@@ -161,11 +161,11 @@
                   <div class="pwc-title-col">
                     <h4 class="pwc-name">{{ worker.name | t }}</h4>
                     <div class="pwc-meta-line">
-                      <span class="pwc-rating">⭐ {{ worker.rating | bnNumber }}</span>
+                      <span class="pwc-rating"><i class="pi pi-star-fill" style="color: #f59e0b; font-size: 11px;"></i> {{ worker.rating | bnNumber }}</span>
                       <span>•</span>
-                      <span class="pwc-dist">📍 {{ worker.distanceKm | bnNumber }} {{ 'কিমি' | t }}</span>
+                      <span class="pwc-dist"><i class="pi pi-map-marker" style="color: #ef4444; font-size: 11px;"></i> {{ worker.distanceKm | bnNumber }} {{ 'কিমি' | t }}</span>
                       <span>•</span>
-                      <span class="pwc-eta">⏱️ {{ getEtaMinutes(worker) | bnNumber }} {{ 'মি' | t }}</span>
+                      <span class="pwc-eta"><i class="pi pi-clock" style="color: #0284c7; font-size: 11px;"></i> {{ getEtaMinutes(worker) | bnNumber }} {{ 'মি' | t }}</span>
                     </div>
                   </div>
                 </div>
@@ -232,7 +232,7 @@
         <div class="worker-cards-grid">
           @if (sortedWorkers().length === 0) {
             <div class="empty-workers-state">
-              <span class="empty-icon">🔍</span>
+              <i class="pi pi-search empty-icon"></i>
               <p class="empty-title">{{ 'এই ক্যাটাগরিতে কোনো কর্মী পাওয়া যায়নি' | t }}</p>
               <p class="empty-sub">{{ 'অন্য ক্যাটাগরি বেছে নিন অথবা একটু পরে আবার চেষ্টা করুন।' | t }}</p>
               <button class="btn-outline btn-sm" (click)="selectCategory('all')">{{ 'সব ক্যাটাগরি দেখুন' | t }}</button>
@@ -265,16 +265,16 @@
 
                   <div class="worker-metrics">
                     <span class="rating-badge">
-                      ⭐ {{ worker.rating | bnNumber }} <small>({{ worker.ratingCount | bnNumber }})</small>
+                      <i class="pi pi-star-fill" style="color: #f59e0b; font-size: 11px;"></i> {{ worker.rating | bnNumber }} <small>({{ worker.ratingCount | bnNumber }})</small>
                     </span>
                     <span class="divider-dot">•</span>
                     <span class="experience-text">{{ worker.experienceYears | bnNumber }} {{ 'বছর অভিজ্ঞতা' | t }}</span>
                     @if (worker.distanceKm !== undefined) {
                       <span class="divider-dot">•</span>
-                      <span class="distance-text">📍 {{ worker.distanceKm | bnNumber }} {{ 'কিমি' | t }}</span>
+                      <span class="distance-text"><i class="pi pi-map-marker" style="color: #ef4444; font-size: 11px;"></i> {{ worker.distanceKm | bnNumber }} {{ 'কিমি' | t }}</span>
                     }
                     <span class="divider-dot">•</span>
-                    <span class="eta-text">⏱️ {{ 'প্রায়' | t }} {{ getEtaMinutes(worker) | bnNumber }} {{ 'মিনিট' | t }}</span>
+                    <span class="eta-text"><i class="pi pi-clock" style="color: #0284c7; font-size: 11px;"></i> {{ 'প্রায়' | t }} {{ getEtaMinutes(worker) | bnNumber }} {{ 'মিনিট' | t }}</span>
                   </div>
 
                   <div class="worker-skills-tags">
@@ -319,7 +319,7 @@
       <div class="modal-card worker-profile-modal" (click)="$event.stopPropagation()">
         <!-- Header -->
         <div class="profile-header-banner">
-          <button class="close-profile-btn" (click)="closeWorkerProfile()">✕</button>
+          <button class="close-profile-btn" (click)="closeWorkerProfile()"><i class="pi pi-times"></i></button>
           <div class="profile-avatar-large">
             <img [src]="w.photoURL" [alt]="w.name" />
             <span class="status-badge" [class.online]="w.isOnline && !w.isBusy" [class.busy]="w.isBusy" [class.offline]="!w.isOnline">
@@ -348,7 +348,7 @@
           <!-- Stats Grid -->
           <div class="profile-stats-grid">
             <div class="stat-box">
-              <span class="stat-num">⭐ {{ w.rating | bnNumber }}</span>
+              <span class="stat-num"><i class="pi pi-star-fill" style="color: #f59e0b; font-size: 14px;"></i> {{ w.rating | bnNumber }}</span>
               <span class="stat-lbl">{{ w.ratingCount | bnNumber }} {{ 'টি রিভিউ' | t }}</span>
             </div>
             <div class="stat-box">
@@ -394,7 +394,7 @@
             </div>
             @if (w.distanceKm !== undefined) {
               <div class="pb-dist">
-                <span>📍 {{ 'প্রায়' | t }} {{ w.distanceKm | bnNumber }} {{ 'কিমি দূরে' | t }}</span>
+                <span><i class="pi pi-map-marker" style="color: #ef4444;"></i> {{ 'প্রায়' | t }} {{ w.distanceKm | bnNumber }} {{ 'কিমি দূরে' | t }}</span>
               </div>
             }
           </div>
@@ -423,7 +423,7 @@
         } @else {
           <!-- Step 2: confirm exact doorstep before direct booking -->
           <div class="profile-modal-content">
-            <h4 class="doorstep-step-title">📍 {{ 'আপনার দরজার সঠিক লোকেশন' | t }}</h4>
+            <h4 class="doorstep-step-title"><i class="pi pi-map-marker" style="color: #ef4444;"></i> {{ 'আপনার দরজার সঠিক লোকেশন' | t }}</h4>
             <app-doorstep-pin-picker [initial]="userLocation()" (pinChange)="doorstepPin.set($event)"></app-doorstep-pin-picker>
           </div>
           <div class="profile-modal-footer">
@@ -448,12 +448,12 @@
       <div class="modal-card instant-booking-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <div class="modal-title-wrap">
-            <span class="modal-icon">{{ bookingMode() === 'scheduled' ? '📅' : bookingMode() === 'bulk_labor' ? '👥' : '⚡' }}</span>
+            <i [class]="'pi modal-icon ' + (bookingMode() === 'scheduled' ? 'pi-calendar' : bookingMode() === 'bulk_labor' ? 'pi-users' : 'pi-bolt')"></i>
             <h3 class="modal-title">
               {{ (bookingMode() === 'scheduled' ? 'ভবিষ্যতের জন্য কাজ শিডিউল করুন' : bookingMode() === 'bulk_labor' ? 'দিনমজুর বাল্ক বুকিং (গ্রুপ সার্ভিস)' : 'তাৎক্ষণিক কর্মী ডাকুন (Instant Request)') | t }}
             </h3>
           </div>
-          <button class="close-btn" (click)="closeInstantBooking()">✕</button>
+          <button class="close-btn" (click)="closeInstantBooking()"><i class="pi pi-times"></i></button>
         </div>
 
         <div class="instant-modal-body">
@@ -465,7 +465,7 @@
               [class.active]="bookingMode() === 'instant'"
               (click)="setBookingMode('instant')"
             >
-              <span class="tab-icon">⚡</span>
+              <i class="pi pi-bolt tab-icon"></i>
               <span class="tab-name">{{ 'তাৎক্ষণিক কর্মী' | t }}</span>
             </button>
 
@@ -475,7 +475,7 @@
               [class.active]="bookingMode() === 'scheduled'"
               (click)="setBookingMode('scheduled')"
             >
-              <span class="tab-icon">📅</span>
+              <i class="pi pi-calendar tab-icon"></i>
               <span class="tab-name">{{ 'শিডিউল বুকিং' | t }}</span>
             </button>
 
@@ -485,7 +485,7 @@
               [class.active]="bookingMode() === 'bulk_labor'"
               (click)="setBookingMode('bulk_labor')"
             >
-              <span class="tab-icon">👥</span>
+              <i class="pi pi-users tab-icon"></i>
               <span class="tab-name">{{ 'দিনমজুর বাল্ক' | t }}</span>
             </button>
           </div>
@@ -554,7 +554,7 @@
                     [class.selected]="bookingCategory() === cat.id"
                     (click)="bookingCategory.set(cat.id)"
                   >
-                    <span class="co-icon">{{ cat.icon }}</span>
+                    <app-cat-icon class="co-icon" [icon]="cat.icon" />
                     <span class="co-name">{{ isEn() ? cat.nameEn : cat.nameBn }}</span>
                   </button>
                 }
