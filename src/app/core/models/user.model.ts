@@ -1,5 +1,6 @@
 export type UserRole = 'superadmin' | 'admin' | 'worker' | 'customer';
 export type UserStatus = 'active' | 'warned' | 'suspended' | 'banned';
+export type AuthProviderType = 'phone' | 'google' | 'demo';
 
 export interface EmergencyContact {
   name: string;
@@ -14,6 +15,8 @@ export interface User {
   phone: string;
   email?: string;
   photoURL?: string;
+  authProvider?: AuthProviderType;
+  googleLinked?: boolean;
   status: UserStatus;
   suspendedUntil?: string;
   banReason?: string;

@@ -239,4 +239,7 @@ export const SCREENS_EN: Record<string, string> = {
   'পূর্ববর্তী ধাপ': 'Previous Step',
   'পরবর্তী ধাপ': 'Next Step',
   'অনবোর্ডিং আবেদন জমা দিন': 'Submit Onboarding Application',
+  'Google দিয়ে প্রবেশ করুন': 'Continue with Google',
+  'Google অ্যাকাউন্ট দিয়ে সাইন আপ করুন': 'Sign up with Google',
+  'Google অ্যাকাউন্ট সংযুক্ত': 'Google Account Linked',
 };

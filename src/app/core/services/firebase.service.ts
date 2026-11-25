@@ -3,7 +3,18 @@ import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFirestore, Firestore, collection, doc, getDocs, getDoc, setDoc, updateDoc, addDoc, onSnapshot, query, where, QueryConstraint } from 'firebase/firestore';
 import { getDatabase, Database, ref, set, onValue, onDisconnect } from 'firebase/database';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
-import { getAuth, Auth } from 'firebase/auth';
+import {
+  getAuth,
+  Auth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  onAuthStateChanged,
+  signOut,
+  User as FirebaseUser,
+  UserCredential
+} from 'firebase/auth';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -39,6 +50,60 @@ export class FirebaseService {
       this.isConnected = false;
       console.warn('Firebase initialized in offline/fallback mode');
     }
+  }
+
+  /**
+   * Creates a configured GoogleAuthProvider instance for SSO login/signup.
+   */
+  public createGoogleProvider(): GoogleAuthProvider {
+    const provider = new GoogleAuthProvider();
+    provider.addScope('email');
+    provider.addScope('profile');
+    provider.setCustomParameters({
+      prompt: 'select_account'
+    });
+    return provider;
+  }
+
+  /**
+   * Initiates Google Sign-In via popup window.
+   */
+  public signInWithGooglePopup(): Promise<UserCredential> {
+    return signInWithPopup(this.auth, this.createGoogleProvider());
+  }
+
+  /**
+   * Initiates Google Sign-In via full-page redirect (fallback when popups are blocked).
+   */
+  public signInWithGoogleRedirect(): Promise<void> {
+    return signInWithRedirect(this.auth, this.createGoogleProvider());
+  }
+
+  /**
+   * Resolves pending Google redirect authentication result on app load.
+   */
+  public getGoogleRedirectResult(): Promise<UserCredential | null> {
+    return getRedirectResult(this.auth);
+  }
+
+  /**
+   * Signs out of the active Firebase Auth session.
+   */
+  public async signOutFirebase(): Promise<void> {
+    try {
+      if (this.auth?.currentUser) {
+        await signOut(this.auth);
+      }
+    } catch (err) {
+      console.warn('Firebase signOut skipped:', err);
+    }
+  }
+
+  /**
+   * Subscribes to Firebase Auth state changes.
+   */
+  public onAuthStateChange(callback: (user: FirebaseUser | null) => void): () => void {
+    return onAuthStateChanged(this.auth, callback);
   }
 
   // Realtime Database Live Location Writer

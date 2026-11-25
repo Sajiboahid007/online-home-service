@@ -4,7 +4,37 @@ import { User, UserRole } from '../models/user.model';
 import { WorkerProfile } from '../models/worker.model';
 import { SeedDataService } from './seed-data.service';
 import { FirebaseService } from './firebase.service';
+import { ThemeService } from './theme.service';
 import { doc, updateDoc, setDoc, getDoc } from 'firebase/firestore';
+import { User as FirebaseUser, UserCredential } from 'firebase/auth';
+
+export type SsoIntent = 'login' | 'register_customer' | 'register_worker';
+
+export interface SsoSignInOptions {
+  intent?: SsoIntent;
+  autoCreateCustomer?: boolean;
+  returnUrl?: string;
+}
+
+export interface PendingGoogleProfile {
+  uid: string;
+  name: string;
+  email: string;
+  photoURL: string;
+  phone: string;
+}
+
+export interface SsoResult {
+  status: 'signed_in' | 'needs_registration' | 'redirecting' | 'cancelled' | 'error';
+  user?: User;
+  worker?: WorkerProfile | null;
+  firebaseUser?: FirebaseUser;
+  route?: string;
+  isNewUser?: boolean;
+  error?: string;
+}
+
+const SSO_INTENT_STORAGE_KEY = 'kajkhoj_sso_intent';
 
 @Injectable({
   providedIn: 'root'
@@ -14,11 +44,17 @@ export class AuthService {
   private currentUserSignal = signal<User | null>(null);
   private currentWorkerSignal = signal<WorkerProfile | null>(null);
   private loadingSignal = signal<boolean>(false);
+  private ssoLoadingSignal = signal<boolean>(false);
+  private firebaseUserSignal = signal<FirebaseUser | null>(null);
+  private pendingGoogleProfileSignal = signal<PendingGoogleProfile | null>(null);
 
   // Readonly computed signals
   public currentUser = this.currentUserSignal.asReadonly();
   public currentWorker = this.currentWorkerSignal.asReadonly();
   public isLoading = this.loadingSignal.asReadonly();
+  public isSsoLoading = this.ssoLoadingSignal.asReadonly();
+  public firebaseUser = this.firebaseUserSignal.asReadonly();
+  public pendingGoogleProfile = this.pendingGoogleProfileSignal.asReadonly();
 
   public isAuthenticated = computed(() => !!this.currentUserSignal());
   public currentRole = computed(() => this.currentUserSignal()?.role || null);
@@ -31,9 +67,12 @@ export class AuthService {
   constructor(
     private router: Router,
     private seedData: SeedDataService,
-    private firebaseService: FirebaseService
+    private firebaseService: FirebaseService,
+    private themeService: ThemeService
   ) {
     this.restoreSession();
+    this.initFirebaseAuthListener();
+    void this.handlePendingGoogleRedirect();
   }
 
   private restoreSession(): void {
@@ -324,8 +363,444 @@ export class AuthService {
   public logout(): void {
     this.currentUserSignal.set(null);
     this.currentWorkerSignal.set(null);
+    this.pendingGoogleProfileSignal.set(null);
     localStorage.removeItem('kajkhoj_user');
     localStorage.removeItem('kajkhoj_worker');
+    void this.firebaseService.signOutFirebase();
     this.router.navigate(['/login']);
+  }
+
+  public clearPendingGoogleProfile(): void {
+    this.pendingGoogleProfileSignal.set(null);
+  }
+
+  public getDefaultRouteForRole(role?: UserRole | null): string {
+    if (role === 'superadmin' || role === 'admin') return '/admin';
+    if (role === 'worker') return '/worker';
+    return '/customer';
+  }
+
+  /**
+   * Signs in or signs up using Google SSO via Firebase Authentication.
+   * Falls back to redirect flow automatically if browser blocks popups.
+   */
+  public async signInWithGoogleSSO(options: SsoSignInOptions = {}): Promise<SsoResult> {
+    const intent: SsoIntent = options.intent || 'login';
+    const autoCreateCustomer = options.autoCreateCustomer ?? (intent === 'login');
+
+    this.ssoLoadingSignal.set(true);
+    try {
+      const credential = await this.firebaseService.signInWithGooglePopup();
+      const result = await this.resolveFirebaseUserSession(credential.user, {
+        intent,
+        autoCreateCustomer,
+        returnUrl: options.returnUrl
+      });
+      this.ssoLoadingSignal.set(false);
+      return result;
+    } catch (error: any) {
+      const code = error?.code || '';
+
+      if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-browser') {
+        try {
+          sessionStorage.setItem(
+            SSO_INTENT_STORAGE_KEY,
+            JSON.stringify({ intent, autoCreateCustomer, returnUrl: options.returnUrl || '' })
+          );
+          await this.firebaseService.signInWithGoogleRedirect();
+          return { status: 'redirecting' };
+        } catch (redirectErr: any) {
+          this.ssoLoadingSignal.set(false);
+          return {
+            status: 'error',
+            error: this.formatAuthError(redirectErr)
+          };
+        }
+      }
+
+      this.ssoLoadingSignal.set(false);
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        return {
+          status: 'cancelled',
+          error: this.formatAuthError(error)
+        };
+      }
+
+      return {
+        status: 'error',
+        error: this.formatAuthError(error)
+      };
+    }
+  }
+
+  /**
+   * Persists a newly registered or updated user document to Firestore under their Firebase UID.
+   */
+  public async syncGoogleUserToFirestore(user: User): Promise<boolean> {
+    try {
+      const db = this.firebaseService?.db;
+      const activeUid = this.firebaseService?.auth?.currentUser?.uid;
+      if (!db || !activeUid || activeUid !== user.uid) {
+        return false;
+      }
+      const userRef = doc(db, 'users', user.uid);
+      const existing = await getDoc(userRef);
+      if (existing.exists()) {
+        const safeUpdate = this.stripUndefined({
+          name: user.name,
+          phone: user.phone,
+          email: user.email,
+          photoURL: user.photoURL,
+          areaId: user.areaId,
+          emergencyContact: user.emergencyContact,
+          savedAddresses: user.savedAddresses,
+          authProvider: user.authProvider,
+          googleLinked: user.googleLinked,
+          lastLoginAt: new Date().toISOString()
+        });
+        await updateDoc(userRef, safeUpdate);
+      } else {
+        // Firestore rules allow client user doc creation when role == 'customer'
+        const payload = this.stripUndefined({
+          ...user,
+          role: 'customer' as const
+        });
+        await setDoc(userRef, payload);
+      }
+      return true;
+    } catch (err) {
+      console.warn('Firestore user sync skipped:', err);
+      return false;
+    }
+  }
+
+  public formatAuthError(error: any, isEn: boolean = this.themeService.currentLang() === 'en'): string {
+    const code = error?.code || '';
+    switch (code) {
+      case 'auth/popup-closed-by-user':
+      case 'auth/cancelled-popup-request':
+        return isEn
+          ? 'Google sign-in popup was closed before completing.'
+          : 'Google সাইন-ইন পপআপ সম্পন্ন হওয়ার আগেই বন্ধ করা হয়েছে।';
+      case 'auth/popup-blocked':
+        return isEn
+          ? 'Browser blocked the Google sign-in popup. Redirecting...'
+          : 'ব্রাউজার পপআপ ব্লক করেছে। রিডাইরেক্ট করা হচ্ছে...';
+      case 'auth/network-request-failed':
+        return isEn
+          ? 'Network error while connecting to Google Firebase. Please check your internet connection.'
+          : 'নেটওয়ার্ক সমস্যার কারণে Google Firebase-এ সংযোগ করা যায়নি। ইন্টারনেট সংযোগ পরীক্ষা করুন।';
+      case 'auth/unauthorized-domain':
+        return isEn
+          ? 'This domain is not authorized in Firebase Auth settings. Add it under Firebase Console → Authentication → Settings → Authorized domains.'
+          : 'এই ডোমেইনটি Firebase Auth-এ অনুমোদিত নয়। Firebase Console → Authentication → Settings → Authorized domains-এ ডোমেইনটি যোগ করুন।';
+      case 'auth/operation-not-allowed':
+        return isEn
+          ? 'Google Sign-In provider is not enabled yet in Firebase Console → Authentication → Sign-in method.'
+          : 'Firebase Console → Authentication → Sign-in method-এ Google প্রদানকারী এখনো সক্রিয় করা হয়নি।';
+      case 'auth/account-exists-with-different-credential':
+        return isEn
+          ? 'An account already exists with the same email using a different sign-in method.'
+          : 'এই ইমেইল দিয়ে ইতিমধ্যে অন্য লগইন মাধ্যমে একটি অ্যাকাউন্ট রয়েছে।';
+      default:
+        return error?.message || (isEn
+          ? 'Google authentication failed. Please try again.'
+          : 'Google অথেন্টিকেশন সম্পন্ন করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।');
+    }
+  }
+
+  private initFirebaseAuthListener(): void {
+    try {
+      this.firebaseService.onAuthStateChange((fbUser) => {
+        this.firebaseUserSignal.set(fbUser);
+      });
+    } catch (err) {
+      console.warn('Firebase Auth listener setup skipped:', err);
+    }
+  }
+
+  private async handlePendingGoogleRedirect(): Promise<void> {
+    try {
+      const credential: UserCredential | null = await this.firebaseService.getGoogleRedirectResult();
+      if (!credential?.user) return;
+
+      let stored: { intent?: SsoIntent; autoCreateCustomer?: boolean; returnUrl?: string } = {};
+      try {
+        const raw = sessionStorage.getItem(SSO_INTENT_STORAGE_KEY);
+        if (raw) {
+          stored = JSON.parse(raw);
+          sessionStorage.removeItem(SSO_INTENT_STORAGE_KEY);
+        }
+      } catch {}
+
+      const intent: SsoIntent = stored.intent || 'login';
+      const autoCreateCustomer = stored.autoCreateCustomer ?? (intent === 'login');
+
+      const result = await this.resolveFirebaseUserSession(credential.user, {
+        intent,
+        autoCreateCustomer,
+        returnUrl: stored.returnUrl
+      });
+
+      if (result.status === 'signed_in' && result.route) {
+        const target = stored.returnUrl && stored.returnUrl.startsWith('/') && !stored.returnUrl.startsWith('/auth') && !stored.returnUrl.startsWith('/login')
+          ? stored.returnUrl
+          : result.route;
+        await this.router.navigateByUrl(target);
+      } else if (result.status === 'needs_registration') {
+        const regRoute = intent === 'register_worker' ? '/auth/register-worker' : '/auth/register-customer';
+        await this.router.navigate([regRoute]);
+      }
+    } catch (err: any) {
+      if (err?.code !== 'auth/operation-not-supported-in-this-environment') {
+        console.warn('Google redirect result handling skipped:', err);
+      }
+    }
+  }
+
+  private async resolveFirebaseUserSession(
+    fbUser: FirebaseUser,
+    options: { intent: SsoIntent; autoCreateCustomer: boolean; returnUrl?: string }
+  ): Promise<SsoResult> {
+    const db = this.firebaseService?.db;
+    const uid = fbUser.uid;
+    const nowIso = new Date().toISOString();
+    const isEn = this.themeService.currentLang() === 'en';
+
+    let userDoc: User | null = null;
+    let workerDoc: WorkerProfile | null = null;
+
+    if (db) {
+      try {
+        const userSnap = await getDoc(doc(db, 'users', uid));
+        if (userSnap.exists()) {
+          userDoc = userSnap.data() as User;
+        }
+      } catch (err) {
+        console.warn('Firestore user lookup skipped:', err);
+      }
+
+      try {
+        const workerSnap = await getDoc(doc(db, 'workers', uid));
+        if (workerSnap.exists()) {
+          workerDoc = workerSnap.data() as WorkerProfile;
+        }
+      } catch (err) {
+        console.warn('Firestore worker lookup skipped:', err);
+      }
+    }
+
+    // Fallback check in local workers storage / seed data
+    if (!workerDoc) {
+      workerDoc = this.findLocalWorkerByUid(uid);
+    }
+
+    const activeStatus = userDoc?.status;
+    if (activeStatus === 'banned' || activeStatus === 'suspended') {
+      await this.firebaseService.signOutFirebase();
+      const statusText = isEn
+        ? (activeStatus === 'banned' ? 'permanently banned' : 'temporarily suspended')
+        : (activeStatus === 'banned' ? 'স্থায়ীভাবে নিষিদ্ধ' : 'সাময়িক বরখাস্ত');
+      return {
+        status: 'error',
+        error: isEn
+          ? `Account ${statusText}. Reason: ${userDoc?.banReason || 'Admin decision'}`
+          : `অ্যাকাউন্ট ${statusText}। কারণ: ${userDoc?.banReason || 'কর্তৃপক্ষের সিদ্ধান্ত'}`
+      };
+    }
+
+    // 1. Existing Admin / Superadmin
+    if (userDoc && (userDoc.role === 'admin' || userDoc.role === 'superadmin')) {
+      const mergedAdmin: User = {
+        ...userDoc,
+        email: userDoc.email || fbUser.email || undefined,
+        photoURL: userDoc.photoURL || fbUser.photoURL || undefined,
+        googleLinked: true,
+        lastLoginAt: nowIso
+      };
+      await this.updateLastLoginSafe(uid, mergedAdmin);
+      this.setUser(mergedAdmin, null);
+      return {
+        status: 'signed_in',
+        user: mergedAdmin,
+        worker: null,
+        firebaseUser: fbUser,
+        route: '/admin'
+      };
+    }
+
+    // 2. Existing Worker (registered via workers/{uid} or users/{uid}.role === 'worker')
+    if (workerDoc || userDoc?.role === 'worker') {
+      const workerUser: User = {
+        uid,
+        role: 'worker',
+        name: userDoc?.name || workerDoc?.name || fbUser.displayName || 'ওয়ার্কার',
+        phone: userDoc?.phone || workerDoc?.phone || this.normalizeBdPhone(fbUser.phoneNumber),
+        email: userDoc?.email || fbUser.email || undefined,
+        photoURL: userDoc?.photoURL || workerDoc?.photoURL || fbUser.photoURL || undefined,
+        authProvider: userDoc?.authProvider || 'google',
+        googleLinked: true,
+        status: userDoc?.status || 'active',
+        areaId: userDoc?.areaId || workerDoc?.areaId,
+        rating: workerDoc?.rating ?? userDoc?.rating ?? 5.0,
+        ratingCount: workerDoc?.ratingCount ?? userDoc?.ratingCount ?? 0,
+        favoriteWorkers: userDoc?.favoriteWorkers || [],
+        createdAt: userDoc?.createdAt || workerDoc?.createdAt || nowIso,
+        lastLoginAt: nowIso
+      };
+
+      if (userDoc) {
+        await this.updateLastLoginSafe(uid, workerUser);
+      }
+      this.setUser(workerUser, workerDoc);
+      return {
+        status: 'signed_in',
+        user: workerUser,
+        worker: workerDoc,
+        firebaseUser: fbUser,
+        route: '/worker'
+      };
+    }
+
+    // 3. Existing Customer upgrading to Worker via Register Worker flow
+    if (userDoc && options.intent === 'register_worker' && !options.autoCreateCustomer) {
+      this.pendingGoogleProfileSignal.set({
+        uid,
+        name: userDoc.name || fbUser.displayName || '',
+        email: userDoc.email || fbUser.email || '',
+        photoURL: userDoc.photoURL || fbUser.photoURL || '',
+        phone: userDoc.phone || this.normalizeBdPhone(fbUser.phoneNumber)
+      });
+      return {
+        status: 'needs_registration',
+        firebaseUser: fbUser
+      };
+    }
+
+    // 4. Existing Customer
+    if (userDoc) {
+      const mergedCustomer: User = {
+        ...userDoc,
+        name: userDoc.name || fbUser.displayName || 'কাস্টমার',
+        email: userDoc.email || fbUser.email || undefined,
+        photoURL: userDoc.photoURL || fbUser.photoURL || undefined,
+        authProvider: userDoc.authProvider || 'google',
+        googleLinked: true,
+        lastLoginAt: nowIso
+      };
+      await this.updateLastLoginSafe(uid, mergedCustomer);
+      this.setUser(mergedCustomer, null);
+      return {
+        status: 'signed_in',
+        user: mergedCustomer,
+        worker: null,
+        firebaseUser: fbUser,
+        route: '/customer'
+      };
+    }
+
+    // 5. Brand-new Google User
+    if (!options.autoCreateCustomer) {
+      this.pendingGoogleProfileSignal.set({
+        uid,
+        name: fbUser.displayName || '',
+        email: fbUser.email || '',
+        photoURL: fbUser.photoURL || '',
+        phone: this.normalizeBdPhone(fbUser.phoneNumber)
+      });
+      return {
+        status: 'needs_registration',
+        firebaseUser: fbUser
+      };
+    }
+
+    const fallbackName = fbUser.displayName?.trim()
+      || fbUser.email?.split('@')[0]
+      || (isEn ? 'Google User' : 'Google ব্যবহারকারী');
+
+    const newCustomer: User = {
+      uid,
+      role: 'customer',
+      name: fallbackName,
+      phone: this.normalizeBdPhone(fbUser.phoneNumber),
+      email: fbUser.email || undefined,
+      photoURL: fbUser.photoURL || undefined,
+      authProvider: 'google',
+      googleLinked: true,
+      status: 'active',
+      rating: 5.0,
+      ratingCount: 0,
+      favoriteWorkers: [],
+      createdAt: nowIso,
+      lastLoginAt: nowIso
+    };
+
+    try {
+      if (db) {
+        await setDoc(doc(db, 'users', uid), this.stripUndefined(newCustomer));
+      }
+    } catch (err) {
+      console.warn('Could not persist new Google customer to Firestore:', err);
+    }
+
+    this.setUser(newCustomer, null);
+    return {
+      status: 'signed_in',
+      user: newCustomer,
+      worker: null,
+      firebaseUser: fbUser,
+      route: '/customer',
+      isNewUser: true
+    };
+  }
+
+  private async updateLastLoginSafe(uid: string, user: User): Promise<void> {
+    try {
+      const db = this.firebaseService?.db;
+      if (!db) return;
+      const payload = this.stripUndefined({
+        lastLoginAt: user.lastLoginAt || new Date().toISOString(),
+        email: user.email,
+        photoURL: user.photoURL,
+        googleLinked: user.googleLinked
+      });
+      await updateDoc(doc(db, 'users', uid), payload);
+    } catch (err) {
+      console.warn('Firestore lastLoginAt update skipped:', err);
+    }
+  }
+
+  private findLocalWorkerByUid(uid: string): WorkerProfile | null {
+    try {
+      const saved = localStorage.getItem('kajkhoj_workers');
+      if (saved) {
+        const list: WorkerProfile[] = JSON.parse(saved);
+        const found = list.find(w => w.uid === uid);
+        if (found) return found;
+      }
+    } catch {}
+    return this.seedData.defaultWorkers.find(w => w.uid === uid) || null;
+  }
+
+  private normalizeBdPhone(rawPhone?: string | null): string {
+    if (!rawPhone) return '';
+    const digits = rawPhone.replace(/[^0-9]/g, '');
+    if (digits.startsWith('880') && digits.length === 13) {
+      return '0' + digits.slice(3);
+    }
+    if (digits.length === 11 && digits.startsWith('01')) {
+      return digits;
+    }
+    return '';
+  }
+
+  private stripUndefined<T extends Record<string, any>>(obj: T): T {
+    const clean: Record<string, any> = {};
+    for (const [k, v] of Object.entries(obj)) {
+      if (v !== undefined) {
+        clean[k] = v;
+      }
+    }
+    return clean as T;
   }
 }
