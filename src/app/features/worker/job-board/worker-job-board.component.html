@@ -2,16 +2,20 @@
   <!-- Page Header -->
   <header class="board-header">
     <div class="header-left">
-      <h1 class="page-title">খোলা কাজের বোর্ড (Job Board)</h1>
+      <h1 class="page-title">{{ 'খোলা কাজের বোর্ড (Job Board)' | t }}</h1>
       <p class="page-sub">
-        আপনার ক্যাটাগরির ({{ currentWorker()?.skills?.[0] || 'প্লাম্বার' }}) উন্মুক্ত কাজগুলো দূরত্ব অনুযায়ী সাজানো হয়েছে। পছন্দের কাজটি বেছে নিয়ে এখনই কাজ শুরু করুন।
+        @if (isEn()) {
+          Open jobs matching your category ({{ (currentWorker()?.skills?.[0] || 'কারিগর') | t }}) are sorted by distance. Pick a job and start earning.
+        } @else {
+          আপনার ক্যাটাগরির ({{ currentWorker()?.skills?.[0] || 'কারিগর' }}) উন্মুক্ত কাজগুলো দূরত্ব অনুযায়ী সাজানো হয়েছে। পছন্দের কাজটি বেছে নিয়ে এখনই কাজ শুরু করুন।
+        }
       </p>
     </div>
 
     <div class="header-right">
-      <button type="button" class="btn-seed-job" (click)="seedDemoJob()" title="নতুন টেস্ট জব তৈরি করুন">
+      <button type="button" class="btn-seed-job" (click)="seedDemoJob()" [title]="'নতুন টেস্ট জব যোগ করুন' | t">
         <i class="pi pi-plus-circle"></i>
-        <span>নতুন টেস্ট জব যোগ করুন</span>
+        <span>{{ 'নতুন টেস্ট জব যোগ করুন' | t }}</span>
       </button>
     </div>
   </header>
@@ -26,38 +30,38 @@
           class="chip-btn" 
           [class.active]="filterType() === 'all'"
           (click)="filterType.set('all')">
-          সব কাজ
+          {{ 'সব কাজ' | t }}
         </button>
         <button 
           type="button" 
           class="chip-btn" 
           [class.active]="filterType() === 'board_fixed'"
           (click)="filterType.set('board_fixed')">
-          ফিক্সড রেট কাজ
+          {{ 'ফিক্সড রেট কাজ' | t }}
         </button>
         <button 
           type="button" 
           class="chip-btn" 
           [class.active]="filterType() === 'board_bid'"
           (click)="filterType.set('board_bid')">
-          বিডিং কাজ
+          {{ 'বিডিং কাজ' | t }}
         </button>
         <button 
           type="button" 
           class="chip-btn" 
           [class.active]="filterType() === 'instant'"
           (click)="filterType.set('instant')">
-          ইনস্ট্যান্ট কল
+          {{ 'ইনস্ট্যান্ট কল' | t }}
         </button>
       </div>
 
       <!-- Sort Selection -->
       <div class="sort-wrapper">
-        <label for="sortBySelect" class="sort-label">সাজান:</label>
+        <label for="sortBySelect" class="sort-label">{{ 'সাজান:' | t }}</label>
         <select id="sortBySelect" class="sort-select" [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)">
-          <option value="distance">সবচেয়ে কাছে (দূরত্ব)</option>
-          <option value="price">সর্বোচ্চ বাজেট</option>
-          <option value="newest">সর্বশেষ পোস্ট করা</option>
+          <option value="distance">{{ 'সবচেয়ে কাছে (দূরত্ব)' | t }}</option>
+          <option value="price">{{ 'সর্বোচ্চ বাজেট' | t }}</option>
+          <option value="newest">{{ 'সর্বশেষ পোস্ট করা' | t }}</option>
         </select>
       </div>
     </div>
@@ -68,7 +72,7 @@
       <input 
         type="text" 
         class="search-input" 
-        placeholder="কাজের বিবরণ বা এলাকা দিয়ে খুঁজুন (যেমন: সাভার বাজার, সিঙ্ক পাইপ)..." 
+        [placeholder]="isEn() ? 'Search by job description or area (e.g., Savar Bazar, sink pipe)...' : 'কাজের বিবরণ বা এলাকা দিয়ে খুঁজুন (যেমন: সাভার বাজার, সিঙ্ক পাইপ)...'" 
         [ngModel]="searchQuery()" 
         (ngModelChange)="searchQuery.set($event)" />
       @if (searchQuery()) {
@@ -88,38 +92,38 @@
           <div class="job-card-header">
             <div class="badges-row">
               <span class="category-badge">
-                <i class="pi pi-wrench"></i> {{ job.categoryName }}
+                <i class="pi pi-wrench"></i> {{ getJobCategoryName(job) }}
               </span>
               <span class="job-type-pill" [class.bid-pill]="job.type === 'board_bid'">
                 @switch (job.type) {
-                  @case ('board_fixed') { ফিক্সড রেট }
-                  @case ('board_bid') { বিডিং জব }
-                  @case ('instant') { জরুরি কল }
-                  @default { উন্মুক্ত জব }
+                  @case ('board_fixed') { {{ isEn() ? 'Fixed Rate' : 'ফিক্সড রেট' }} }
+                  @case ('board_bid') { {{ isEn() ? 'Bidding Job' : 'বিডিং জব' }} }
+                  @case ('instant') { {{ isEn() ? 'Instant Call' : 'জরুরি কল' }} }
+                  @default { {{ isEn() ? 'Open Job' : 'উন্মুক্ত জব' }} }
                 }
               </span>
             </div>
 
-            <div class="distance-chip" title="আপনার লোকেশন থেকে দূরত্ব">
+            <div class="distance-chip" [title]="isEn() ? 'Distance from your location' : 'আপনার লোকেশন থেকে দূরত্ব'">
               <i class="pi pi-compass"></i>
-              <span>{{ job.distanceKm | bnNumber }} কিমি দূরে</span>
+              <span>{{ job.distanceKm | bnNumber }} {{ 'কিমি দূরে' | t }}</span>
             </div>
           </div>
 
           <!-- Description -->
           <p class="job-desc">
-            "{{ job.description }}"
+            "{{ job.description | t }}"
           </p>
 
           <!-- Customer & Address Info -->
           <div class="job-location-info">
             <div class="info-line">
               <i class="pi pi-map-marker icon-red"></i>
-              <span class="location-text">{{ job.location.address }}</span>
+              <span class="location-text">{{ job.location.address | t }}</span>
             </div>
             <div class="info-line">
               <i class="pi pi-user icon-user"></i>
-              <span class="customer-info">{{ job.customerName }} • ⭐ {{ (job.customerRating || 4.8) | bnNumber }}</span>
+              <span class="customer-info">{{ job.customerName | t }} • ⭐ {{ (job.customerRating || 4.8) | bnNumber }}</span>
               <span class="time-stamp">{{ job.timeline.createdAt | timeAgo }}</span>
             </div>
           </div>
@@ -136,17 +140,17 @@
           <!-- Price & Grab Action Footer -->
           <div class="job-card-footer">
             <div class="price-box">
-              <span class="price-label">আনুমানিক মজুরি:</span>
+              <span class="price-label">{{ isEn() ? 'Estimated Fee:' : 'আনুমানিক মজুরি:' }}</span>
               <span class="price-value">{{ job.estimatedPrice | taka }}</span>
             </div>
 
             <div class="footer-btn-group" style="display: flex; gap: 8px;">
               <button type="button" class="btn-bid-job" (click)="openBidModal(job)" style="background: none; border: 1.5px solid var(--accent-color); color: var(--accent-color); padding: 8px 12px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px;">
-                <i class="pi pi-pencil"></i> কোটেশন
+                <i class="pi pi-pencil"></i> {{ isEn() ? 'Quote' : 'কোটেশন' }}
               </button>
               <button type="button" class="btn-grab-job" (click)="promptGrab(job)">
                 <i class="pi pi-bolt"></i>
-                <span>কাজটি নিন (Grab)</span>
+                <span>{{ 'কাজটি নিন (Grab)' | t }}</span>
               </button>
             </div>
           </div>
@@ -157,12 +161,12 @@
     <!-- Empty State -->
     <div class="card empty-board-card">
       <i class="pi pi-briefcase empty-icon"></i>
-      <h3>এই মুহূর্তে কোনো উন্মুক্ত কাজ নেই</h3>
-      <p>আপনার নির্বাচিত ক্যাটাগরি বা এলাকায় নতুন কোনো কাজ এখনো আসেনি। কাস্টমার নতুন রিকোয়েস্ট পাঠালে তা এখানে স্বয়ংক্রিয়ভাবে ভেসে উঠবে।</p>
+      <h3>{{ isEn() ? 'No open jobs right now' : 'এই মুহূর্তে কোনো উন্মুক্ত কাজ নেই' }}</h3>
+      <p>{{ isEn() ? 'No new jobs in your selected categories or area yet. New customer requests will appear here automatically.' : 'আপনার নির্বাচিত ক্যাটাগরি বা এলাকায় নতুন কোনো কাজ এখনো আসেনি। কাস্টমার নতুন রিকোয়েস্ট পাঠালে তা এখানে স্বয়ংক্রিয়ভাবে ভেসে উঠবে।' }}</p>
       <div class="empty-actions">
         <button type="button" class="btn-primary" (click)="seedDemoJob()">
           <i class="pi pi-plus-circle"></i>
-          <span>একটি ডেমো টেস্ট কাজ যোগ করুন</span>
+          <span>{{ isEn() ? 'Add a Demo Test Job' : 'একটি ডেমো টেস্ট কাজ যোগ করুন' }}</span>
         </button>
       </div>
     </div>

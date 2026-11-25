@@ -6,6 +6,8 @@ import { JobService } from '../../../core/services/job.service';
 import { WorkerService } from '../../../core/services/worker.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { GeoService } from '../../../core/services/geo.service';
+import { ThemeService } from '../../../core/services/theme.service';
+import { CategoryService } from '../../../core/services/category.service';
 import { Job } from '../../../core/models/job.model';
 import { WorkerProfile } from '../../../core/models/worker.model';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
@@ -128,9 +130,25 @@ export class WorkerJobBoardComponent {
     public jobService: JobService,
     public workerService: WorkerService,
     public authService: AuthService,
+    public theme: ThemeService,
+    private categoryService: CategoryService,
     private geoService: GeoService,
     private router: Router
   ) {}
+
+  public isEn(): boolean {
+    return this.theme.currentLang() === 'en';
+  }
+
+  public getJobCategoryName(job: Job): string {
+    const cat = job.categoryId ? this.categoryService.getCategoryById(job.categoryId) : undefined;
+    if (this.isEn()) {
+      const translated = this.theme.t(job.categoryName);
+      if (translated && translated !== job.categoryName) return translated;
+      return cat?.nameEn || translated || job.categoryName;
+    }
+    return cat?.nameBn || this.theme.t(job.categoryName);
+  }
 
   public promptGrab(job: EnrichedBoardJob): void {
     this.selectedJobForGrab.set(job);

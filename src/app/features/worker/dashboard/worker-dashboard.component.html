@@ -3,21 +3,21 @@
   <header class="dashboard-header">
     <div class="header-left">
       <h1 class="welcome-title">
-        স্বাগতম, {{ currentWorker()?.name }}! 👋
+        {{ 'স্বাগতম,' | t }} {{ (currentWorker()?.name || '') | t }}! 👋
       </h1>
       <p class="welcome-sub">
-        {{ currentWorker()?.skills?.[0] || 'পেশাদার কারিগর ও টেকনিশিয়ান' }} • {{ workerAreaName() }}
+        {{ (currentWorker()?.skills?.[0] || 'পেশাদার কারিগর ও টেকনিশিয়ান') | t }} • {{ workerAreaName() | t }}
       </p>
       @if (workerCategories().length > 0) {
         <div class="worker-chosen-categories">
-          <span class="chosen-cat-label">নির্বাচিত সার্ভিস:</span>
+          <span class="chosen-cat-label">{{ 'নির্বাচিত সার্ভিস:' | t }}</span>
           @for (cat of workerCategories(); track cat.id) {
             <span class="chosen-cat-pill">
               <span>{{ cat.icon }}</span>
-              <span>{{ cat.nameBn }}</span>
+              <span>{{ isEn() ? cat.nameEn : cat.nameBn }}</span>
             </span>
           }
-          <a routerLink="/worker/edit-profile" class="edit-cat-link" title="ক্যাটাগরি পরিবর্তন করুন">
+          <a routerLink="/worker/edit-profile" class="edit-cat-link" [title]="'ক্যাটাগরি পরিবর্তন করুন' | t">
             <i class="pi pi-pencil"></i>
           </a>
         </div>
@@ -27,25 +27,25 @@
     <div class="header-right">
       <div class="job-request-simulator">
         <div class="simulator-label">
-          <span class="sim-badge">💼 পেশাদার জব রিকোয়েস্ট সিমুলেটর:</span>
+          <span class="sim-badge">{{ 'পেশাদার জব রিকোয়েস্ট সিমুলেটর:' | t }}</span>
         </div>
         <div class="simulator-input-row">
           <p-select
             [options]="availableScenarios()"
             [(ngModel)]="selectedScenario"
             optionLabel="label"
-            placeholder="কাজের রিকোয়েস্ট নির্বাচন করুন..."
+            [placeholder]="isEn() ? 'Select a job request...' : 'কাজের রিকোয়েস্ট নির্বাচন করুন...'"
             class="job-sim-pselect"
             [filter]="true"
             filterBy="label,categoryName,customerName"
-            filterPlaceholder="কাজের ধরন বা শিরোনাম লিখুন..."
+            [filterPlaceholder]="isEn() ? 'Type job type or title...' : 'কাজের ধরন বা শিরোনাম লিখুন...'"
           >
             <ng-template #selectedItem let-selected>
               @if (selected) {
                 <div class="pselect-selected-row">
                   <span class="pselect-icon">{{ selected.icon }}</span>
-                  <span class="pselect-label-text">{{ selected.label }}</span>
-                  <span class="pselect-price">৳{{ selected.estimatedPrice }}</span>
+                  <span class="pselect-label-text">{{ selected.label | t }}</span>
+                  <span class="pselect-price">{{ selected.estimatedPrice | taka }}</span>
                 </div>
               }
             </ng-template>
@@ -53,14 +53,14 @@
               <div class="pselect-dropdown-item">
                 <div class="pdi-top">
                   <span class="pdi-icon">{{ item.icon }}</span>
-                  <strong class="pdi-title">{{ item.label }}</strong>
-                  <span class="pdi-cat-badge">{{ item.categoryName }}</span>
+                  <strong class="pdi-title">{{ item.label | t }}</strong>
+                  <span class="pdi-cat-badge">{{ item.categoryName | t }}</span>
                 </div>
-                <p class="pdi-desc">{{ item.description }}</p>
+                <p class="pdi-desc">{{ item.description | t }}</p>
                 <div class="pdi-meta">
-                  <span>👤 {{ item.customerName }}</span>
-                  <span>📍 {{ item.address }}</span>
-                  <span class="pdi-budget">বাজেট: ৳{{ item.estimatedPrice }}</span>
+                  <span>👤 {{ item.customerName | t }}</span>
+                  <span>📍 {{ item.address | t }}</span>
+                  <span class="pdi-budget">{{ isEn() ? 'Budget:' : 'বাজেট:' }} {{ item.estimatedPrice | taka }}</span>
                 </div>
               </div>
             </ng-template>
@@ -70,9 +70,9 @@
             type="button" 
             class="btn-demo-trigger" 
             (click)="triggerSelectedJobOffer()"
-            title="নির্বাচিত কাজের কল পাঠান">
+            [title]="'কল পাঠান' | t">
             <i class="pi pi-phone-incoming"></i>
-            <span>কল পাঠান</span>
+            <span>{{ 'কল পাঠান' | t }}</span>
           </button>
         </div>
       </div>
@@ -107,21 +107,21 @@
         <div class="status-indicator-badge">
           <span class="status-dot"></span>
           <span class="status-text">
-            {{ currentWorker()?.isOnline ? 'আপনি বর্তমানে অনলাইন আছেন' : 'আপনি অফলাইনে আছেন' }}
+            {{ (currentWorker()?.isOnline ? 'আপনি বর্তমানে অনলাইন আছেন' : 'আপনি অফলাইনে আছেন') | t }}
           </span>
         </div>
         <h2 class="status-headline">
           @if (currentWorker()?.isOnline) {
-            নতুন কাজের কল পেতে প্রস্তুত 🟢
+            {{ 'নতুন কাজের কল পেতে প্রস্তুত 🟢' | t }}
           } @else {
-            বিশ্রাম নিচ্ছেন — কাজের নোটিফিকেশন বন্ধ ⚪
+            {{ 'বিশ্রাম নিচ্ছেন — কাজের নোটিফিকেশন বন্ধ ⚪' | t }}
           }
         </h2>
         <p class="status-description">
           @if (currentWorker()?.isOnline) {
-            আপনার এলাকার কাস্টমাররা সার্ভিস রিকোয়েস্ট পাঠালে ৩০ সেকেন্ডের মধ্যে আপনার ফোনে অ্যালার্ট আসবে।
+            {{ isEn() ? 'When customers in your area send a service request, you will receive an alert within 30 seconds.' : 'আপনার এলাকার কাস্টমাররা সার্ভিস রিকোয়েস্ট পাঠালে ৩০ সেকেন্ডের মধ্যে আপনার ফোনে অ্যালার্ট আসবে।' }}
           } @else {
-            কাজ শুরু করতে বা কাস্টমারদের ম্যাপে দৃশ্যমান হতে অনলাইন বাটনটি অন করুন।
+            {{ isEn() ? 'Turn on the online toggle to start receiving jobs and appear on the customer map.' : 'কাজ শুরু করতে বা কাস্টমারদের ম্যাপে দৃশ্যমান হতে অনলাইন বাটনটি অন করুন।' }}
           }
         </p>
       </div>
@@ -134,7 +134,7 @@
           [class.btn-go-offline]="currentWorker()?.isOnline"
           [class.btn-go-online]="!currentWorker()?.isOnline">
           <i class="pi" [class.pi-power-off]="!currentWorker()?.isOnline" [class.pi-check]="currentWorker()?.isOnline"></i>
-          <span>{{ currentWorker()?.isOnline ? 'অফলাইনে যান' : 'এখনই অনলাইন হন' }}</span>
+          <span>{{ (currentWorker()?.isOnline ? 'অফলাইনে যান' : 'এখনই অনলাইন হন') | t }}</span>
         </button>
       </div>
     </div>
@@ -224,15 +224,15 @@
     <!-- Card 1: Today's Jobs -->
     <div class="kpi-card card-jobs">
       <div class="kpi-header">
-        <span class="kpi-title">আজকের কাজ</span>
+        <span class="kpi-title">{{ 'আজকের কাজ' | t }}</span>
         <div class="kpi-icon-wrap icon-blue">
           <i class="pi pi-check-circle"></i>
         </div>
       </div>
       <div class="kpi-body">
-        <h3 class="kpi-value">{{ todayCompletedJobsCount() | bnNumber }} টি</h3>
+        <h3 class="kpi-value">{{ todayCompletedJobsCount() | bnNumber }} {{ isEn() ? 'jobs' : 'টি' }}</h3>
         <span class="kpi-trend trend-up">
-          <i class="pi pi-arrow-up"></i> সর্বমোট {{ (currentWorker()?.totalJobs || 0) | bnNumber }} টি সফল কাজ
+          <i class="pi pi-arrow-up"></i> {{ isEn() ? 'Total' : 'সর্বমোট' }} {{ (currentWorker()?.totalJobs || 0) | bnNumber }} {{ isEn() ? 'completed jobs' : 'টি সফল কাজ' }}
         </span>
       </div>
     </div>
@@ -240,7 +240,7 @@
     <!-- Card 2: Today's Earnings -->
     <div class="kpi-card card-earnings">
       <div class="kpi-header">
-        <span class="kpi-title">আজকের মোট আয়</span>
+        <span class="kpi-title">{{ 'আজকের মোট আয়' | t }}</span>
         <div class="kpi-icon-wrap icon-green">
           <i class="pi pi-money-bill"></i>
         </div>
@@ -248,7 +248,7 @@
       <div class="kpi-body">
         <h3 class="kpi-value value-green">{{ todayEarnings() | taka }}</h3>
         <span class="kpi-trend">
-          ওয়ালেট ব্যালেন্স: {{ (currentWorker()?.walletBalance || 0) | taka }}
+          {{ isEn() ? 'Wallet balance:' : 'ওয়ালেট ব্যালেন্স:' }} {{ (currentWorker()?.walletBalance || 0) | taka }}
         </span>
       </div>
     </div>
@@ -256,7 +256,7 @@
     <!-- Card 3: Acceptance Rate -->
     <div class="kpi-card card-accept">
       <div class="kpi-header">
-        <span class="kpi-title">গ্রহণযোগ্যতার হার</span>
+        <span class="kpi-title">{{ 'গ্রহণযোগ্যতার হার' | t }}</span>
         <div class="kpi-icon-wrap icon-orange">
           <i class="pi pi-chart-line"></i>
         </div>
@@ -264,7 +264,7 @@
       <div class="kpi-body">
         <h3 class="kpi-value">{{ (currentWorker()?.acceptRate || 92) | bnNumber }}%</h3>
         <span class="kpi-trend">
-          সম্পন্নতার হার: {{ (currentWorker()?.completionRate || 98) | bnNumber }}%
+          {{ isEn() ? 'Completion rate:' : 'সম্পন্নতার হার:' }} {{ (currentWorker()?.completionRate || 98) | bnNumber }}%
         </span>
       </div>
     </div>
@@ -272,7 +272,7 @@
     <!-- Card 4: Rating & Reviews -->
     <div class="kpi-card card-rating">
       <div class="kpi-header">
-        <span class="kpi-title">রেটিং ও রিভিউ</span>
+        <span class="kpi-title">{{ 'রেটিং ও রিভিউ' | t }}</span>
         <div class="kpi-icon-wrap icon-yellow">
           <i class="pi pi-star-fill"></i>
         </div>
@@ -280,7 +280,7 @@
       <div class="kpi-body">
         <h3 class="kpi-value value-star">⭐ {{ (currentWorker()?.rating || 4.8) | bnNumber }}</h3>
         <span class="kpi-trend">
-          {{ (currentWorker()?.ratingCount || 15) | bnNumber }} টি গ্রাহক রিভিউ
+          {{ (currentWorker()?.ratingCount || 15) | bnNumber }} {{ isEn() ? 'customer reviews' : 'টি গ্রাহক রিভিউ' }}
         </span>
       </div>
     </div>
@@ -290,12 +290,12 @@
   <section class="dashboard-section">
     <div class="section-header">
       <div>
-        <h2 class="section-title">সর্বশেষ সম্পন্ন কাজের তালিকা</h2>
-        <p class="section-sub">আপনার সম্পূর্ণ হওয়া পূর্ববর্তী কাজের বিবরণ</p>
+        <h2 class="section-title">{{ 'সর্বশেষ সম্পন্ন কাজের তালিকা' | t }}</h2>
+        <p class="section-sub">{{ isEn() ? 'Details of your recently completed jobs' : 'আপনার সম্পূর্ণ হওয়া পূর্ববর্তী কাজের বিবরণ' }}</p>
       </div>
       <a routerLink="/worker/job-board" class="btn-outline">
         <i class="pi pi-search"></i>
-        <span>খোলা কাজের বোর্ড দেখুন</span>
+        <span>{{ 'খোলা কাজের বোর্ড দেখুন' | t }}</span>
       </a>
     </div>
 
@@ -306,11 +306,11 @@
           <table class="worker-table">
             <thead>
               <tr>
-                <th>কাজের বিবরণ</th>
-                <th>কাস্টমার</th>
-                <th>তারিখ</th>
-                <th>মূল্য / আয়</th>
-                <th>স্ট্যাটাস</th>
+                <th>{{ isEn() ? 'Job Details' : 'কাজের বিবরণ' }}</th>
+                <th>{{ isEn() ? 'Customer' : 'কাস্টমার' }}</th>
+                <th>{{ isEn() ? 'Date' : 'তারিখ' }}</th>
+                <th>{{ isEn() ? 'Amount / Earning' : 'মূল্য / আয়' }}</th>
+                <th>{{ isEn() ? 'Status' : 'স্ট্যাটাস' }}</th>
               </tr>
             </thead>
             <tbody>
@@ -318,13 +318,13 @@
                 <tr>
                   <td>
                     <div class="job-cell-desc">
-                      <strong>{{ job.categoryName }}</strong>
-                      <span class="job-address-snippet">{{ job.location.address }}</span>
+                      <strong>{{ job.categoryName | t }}</strong>
+                      <span class="job-address-snippet">{{ job.location.address | t }}</span>
                     </div>
                   </td>
                   <td>
                     <div class="customer-cell">
-                      <span>{{ job.customerName }}</span>
+                      <span>{{ job.customerName | t }}</span>
                       <span class="rating-mini">⭐ {{ (job.customerRating || 5.0) | bnNumber }}</span>
                     </div>
                   </td>
@@ -335,13 +335,13 @@
                     <div class="price-cell">
                       <strong class="text-green">{{ (job.workerEarning || job.finalPrice || job.estimatedPrice) | taka }}</strong>
                       @if (job.commission) {
-                        <span class="commission-cut">কমিশন: {{ job.commission | taka }}</span>
+                        <span class="commission-cut">{{ isEn() ? 'Commission:' : 'কমিশন:' }} {{ job.commission | taka }}</span>
                       }
                     </div>
                   </td>
                   <td>
                     <span class="badge badge-success">
-                      <i class="pi pi-check"></i> সম্পন্ন
+                      <i class="pi pi-check"></i> {{ 'কাজ সম্পন্ন' | t }}
                     </span>
                   </td>
                 </tr>
@@ -352,8 +352,8 @@
       } @else {
         <div class="empty-jobs-state">
           <i class="pi pi-inbox empty-icon"></i>
-          <h4>কোনো পূর্ববর্তী কাজ পাওয়া যায়নি</h4>
-          <p>অনলাইন থাকুন এবং কাস্টমারদের দ্রুত সেবা দিয়ে আয় শুরু করুন।</p>
+          <h4>{{ 'কোনো পূর্ববর্তী কাজ পাওয়া যায়নি' | t }}</h4>
+          <p>{{ isEn() ? 'Stay online and serve customers quickly to start earning.' : 'অনলাইন থাকুন এবং কাস্টমারদের দ্রুত সেবা দিয়ে আয় শুরু করুন।' }}</p>
         </div>
       }
     </div>

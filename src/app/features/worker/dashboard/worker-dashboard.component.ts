@@ -9,12 +9,14 @@ import { JobService } from '../../../core/services/job.service';
 import { DispatchService } from '../../../core/services/dispatch.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { AreaService } from '../../../core/services/area.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { WorkerProfile } from '../../../core/models/worker.model';
 import { Category } from '../../../core/models/category.model';
 import { Job } from '../../../core/models/job.model';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
 import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 export interface ProfessionalJobScenario {
   id: string;
@@ -37,7 +39,7 @@ export interface ProfessionalJobScenario {
 @Component({
   selector: 'app-worker-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, Select, BnNumberPipe, TakaPipe, TimeAgoPipe],
+  imports: [CommonModule, RouterModule, FormsModule, Select, BnNumberPipe, TakaPipe, TimeAgoPipe, TranslatePipe],
   templateUrl: './worker-dashboard.component.html',
   styleUrl: './worker-dashboard.component.scss'
 })
@@ -48,6 +50,8 @@ export class WorkerDashboardComponent implements OnInit, OnDestroy {
   private dispatchService = inject(DispatchService);
   private categoryService = inject(CategoryService);
   private areaService = inject(AreaService);
+  public theme = inject(ThemeService);
+  public isEn = computed(() => this.theme.currentLang() === 'en');
   private router = inject(Router);
 
   // Professional Job Request Scenarios (realistic, technical & non-funny)

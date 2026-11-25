@@ -4,16 +4,18 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { WorkerService } from '../../../core/services/worker.service';
 import { CategoryService } from '../../../core/services/category.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { ImageUploaderComponent } from '../../../shared/components/image-uploader/image-uploader.component';
 import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loader/skeleton-loader.component';
 import { WorkerProfile, RateUnit } from '../../../core/models/worker.model';
 import { CATEGORY_DEFAULTS, getSuggestedSkillsForCategories, syncSkillsWithCategories } from '../../../core/constants/category-defaults';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-worker-edit-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImageUploaderComponent, SkeletonLoaderComponent, BnNumberPipe],
+  imports: [CommonModule, FormsModule, ImageUploaderComponent, SkeletonLoaderComponent, BnNumberPipe, TranslatePipe],
   templateUrl: './worker-edit-profile.component.html',
   styleUrls: ['./worker-edit-profile.component.scss']
 })
@@ -21,6 +23,8 @@ export class WorkerEditProfileComponent implements OnInit {
   private auth = inject(AuthService);
   private workerService = inject(WorkerService);
   private categoryService = inject(CategoryService);
+  public theme = inject(ThemeService);
+  public isEn = computed(() => this.theme.currentLang() === 'en');
 
   public worker = this.auth.currentWorker;
   public categories = computed(() =>
