@@ -13,6 +13,7 @@ import { MaskPhonePipe } from '../../../shared/pipes/mask-phone.pipe';
 import { WorkerProfile, WorkerPrivate, RateUnit, GeoPoint } from '../../../core/models/worker.model';
 import { User } from '../../../core/models/user.model';
 import { FirebaseService } from '../../../core/services/firebase.service';
+import { CATEGORY_DEFAULTS, syncSkillsWithCategories } from '../../../core/constants/category-defaults';
 import { doc, setDoc } from 'firebase/firestore';
 
 @Component({
@@ -31,7 +32,9 @@ export class RegisterWorkerComponent {
   private firebaseService = inject(FirebaseService);
   private router = inject(Router);
 
-  public categories = this.categoryService.categories;
+  public categories = computed(() =>
+    this.categoryService.categories().filter(c => c.isActive).sort((a, b) => a.order - b.order)
+  );
   public areas = this.areaService.areas;
 
   // Stepper State (1 to 5, and 6 = Completed)
@@ -45,23 +48,30 @@ export class RegisterWorkerComponent {
   public name = signal<string>('মো: সালাম হোসেন');
   public phone = signal<string>('01755667788');
   public experienceYears = signal<number>(5);
-  public bio = signal<string>('সাভার এলাকার অভিজ্ঞ টেকনিশিয়ান। বাসা-বাড়ির সব ধরনের মেরামত যত্নসহকারে সম্পন্ন করি।');
+  public bio = signal<string>(CATEGORY_DEFAULTS['electrician'].defaultBio);
   public photoURL = signal<string>('https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=150');
 
   // Step 2: Categories & Skills
   public selectedCategoryIds = signal<string[]>(['electrician']);
-  public skills = signal<string[]>(['হাউজ ওয়্যারিং', 'শর্ট সার্কিট চেক', 'সুইচ ও সকেট ফিটিং']);
+  public skills = signal<string[]>(CATEGORY_DEFAULTS['electrician'].suggestedSkills.slice(0, 3));
   public customSkillInput = signal<string>('');
 
-  public suggestedSkillsMap: Record<string, string[]> = {
-    plumber: ['পাইপ লিকেজ মেরামত', 'বেসিন ও কমোড ফিটিং', 'পাম্প মোটর স্থাপন', 'ট্যাপ ও শাওয়ার মেরামত', 'গিজার লাইন কানেকশন'],
-    electrician: ['হাউজ ওয়্যারিং', 'শর্ট সার্কিট চেক', 'সুইচ ও সকেট ফিটিং', 'সিলিং ফ্যান স্থাপন', 'সার্কিট ব্রেকার মেরামত'],
-    ac_technician: ['এসি গ্যাস চার্জ', 'মাস্টার ওয়াশ', 'ইনস্টলেশন ও রি-ইনস্টলেশন', 'কম্প্রেসার চেক', 'লিকেজ রিপেয়ার'],
-    cleaner: ['বাথরুম ডিপ ক্লিনিং', 'কিচেন ডিপ ক্লিনিং', 'ফ্লোর পলিশ', 'সোফা ও কার্পেট ওয়াশ', 'পানি ট্যাংক পরিষ্কার'],
-    painter: ['ওয়াল পুটিং ও পেইন্টিং', 'ড্যাম্প প্রটেকশন', 'রং ডিজাইন ও টেক্সচার', 'দরজা-জানালা বার্নিশ'],
-    day_laborer: ['ভারী মালামাল বহন', 'বাসা বদল সহায়তা', 'লোডিং-আনলোডিং', 'নির্মাণ সহায়তা'],
-    mason: ['দেওয়াল গাঁথুনি', 'প্লাস্টার কাজ', 'টাইলস ফিটিং', 'ঢালাই ও মেরামত']
-  };
+  // Track manual overrides so category changes keep defaults aligned without overwriting user edits
+  public bioCustomized = false;
+  public rateCustomized = false;
+  public rateUnitCustomized = false;
+
+  public getCategorySuggestedSkills(catId: string): string[] {
+    return CATEGORY_DEFAULTS[catId]?.suggestedSkills || [];
+  }
+
+  public selectedCategoryNames = computed(() => {
+    const ids = this.selectedCategoryIds();
+    return this.categories()
+      .filter(c => ids.includes(c.id))
+      .map(c => `${c.icon} ${c.nameBn}`)
+      .join(', ');
+  });
 
   // Step 3: Mandatory Home Location
   public homeAddress = signal<string>('সাভার বাজার বাসস্ট্যান্ড রোড, সাভার, ঢাকা');
@@ -70,12 +80,12 @@ export class RegisterWorkerComponent {
   public areaId = signal<string>('savar_bazar');
   public isDetectingLocation = signal<boolean>(false);
 
-  // Quick preset locations in Savar / Dhaka
+  // Quick preset locations in Savar / Dhaka (areaIds match SeedDataService.defaultAreas)
   public presetLocations = [
     { label: 'সাভার বাজার', lat: 23.8245, lng: 90.2689, address: 'সাভার বাজার বাসস্ট্যান্ড রোড, সাভার', areaId: 'savar_bazar' },
-    { label: 'সাভার থানা রোড', lat: 23.8210, lng: 90.2635, address: 'থানা রোড, সাভার, ঢাকা', areaId: 'savar_thana' },
+    { label: 'সাভার থানা রোড', lat: 23.8210, lng: 90.2635, address: 'থানা রোড, সাভার, ঢাকা', areaId: 'savar_bazar' },
     { label: 'হেমায়েতপুর', lat: 23.7932, lng: 90.2691, address: 'হেমায়েতপুর বাসস্ট্যান্ড, সাভার', areaId: 'hemayetpur' },
-    { label: 'আশুলিয়া', lat: 23.8902, lng: 90.3204, address: 'আশুলিয়া বাজার রোড, ঢাকা', areaId: 'ashulia' },
+    { label: 'আশুলিয়া', lat: 23.9318, lng: 90.2917, address: 'আশুলিয়া ও ডিইপিজেড এলাকা, সাভার', areaId: 'ashulia_epz' },
     { label: 'মিরপুর ১০', lat: 23.8071, lng: 90.3686, address: 'মিরপুর ১০ গোলচত্বর, ঢাকা', areaId: 'dhaka_mirpur' }
   ];
 
@@ -87,8 +97,8 @@ export class RegisterWorkerComponent {
   public policeClearanceURL = signal<string>('');
 
   // Step 5: Rates & Service Area
-  public rate = signal<number>(350);
-  public rateUnit = signal<RateUnit>('job');
+  public rate = signal<number>(CATEGORY_DEFAULTS['electrician'].defaultRate);
+  public rateUnit = signal<RateUnit>(CATEGORY_DEFAULTS['electrician'].rateUnit);
   public serviceRadiusKm = signal<number>(6);
   public bkashNumber = signal<string>('01755667788');
   public nagadNumber = signal<string>('');
@@ -195,7 +205,8 @@ export class RegisterWorkerComponent {
 
   // Step 2 Category Toggle
   public toggleCategory(catId: string): void {
-    const list = [...this.selectedCategoryIds()];
+    const prev = [...this.selectedCategoryIds()];
+    const list = [...prev];
     const idx = list.indexOf(catId);
     if (idx >= 0) {
       if (list.length > 1) {
@@ -204,7 +215,35 @@ export class RegisterWorkerComponent {
     } else {
       list.push(catId);
     }
+    if (list.length === prev.length && list.every((v, i) => v === prev[i])) {
+      return;
+    }
+
     this.selectedCategoryIds.set(list);
+    this.skills.set(syncSkillsWithCategories(this.skills(), prev, list));
+
+    // Align default bio, rate, and rateUnit with the primary selected category unless manually customized
+    const primaryCatId = list[0];
+    const defaults = CATEGORY_DEFAULTS[primaryCatId];
+    const catModel = this.categoryService.getCategoryById(primaryCatId);
+
+    if (!this.bioCustomized && defaults) {
+      this.bio.set(defaults.defaultBio);
+    }
+    if (!this.rateCustomized && defaults) {
+      this.rate.set(defaults.defaultRate);
+    }
+    if (!this.rateUnitCustomized) {
+      const unit = catModel?.pricingType || defaults?.rateUnit;
+      if (unit) {
+        this.rateUnit.set(unit);
+      }
+    }
+  }
+
+  public selectRateUnit(unit: RateUnit): void {
+    this.rateUnitCustomized = true;
+    this.rateUnit.set(unit);
   }
 
   public isCategorySelected(catId: string): boolean {
