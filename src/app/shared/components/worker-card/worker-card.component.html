@@ -34,6 +34,14 @@
     </div>
   </div>
 
+  @if (getWorkerCategories().length > 0) {
+    <div class="categories-row">
+      @for (cat of getWorkerCategories(); track cat.id) {
+        <span class="cat-badge">{{ cat.icon }} {{ cat.nameBn }}</span>
+      }
+    </div>
+  }
+
   <div class="skills-row">
     @for (skill of (worker.skills || []).slice(0, 3); track skill) {
       <span class="skill-tag">{{ skill }}</span>
