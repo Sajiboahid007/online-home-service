@@ -25,12 +25,19 @@ export class WorkerService {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.some(w => w.uid === 'worker_kalam_5')) {
+          let changed = false;
           const rahim = parsed.find((w: any) => w.uid === 'worker_rahim_1');
           if (rahim && !rahim.photoURL) {
             rahim.photoURL = 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=150';
-            localStorage.setItem('kajkhoj_workers', JSON.stringify(parsed));
+            changed = true;
           }
-          this.workersSignal.set(parsed);
+          const existingIds = new Set(parsed.map((w: any) => w.uid));
+          const missingDefaults = this.seedData.defaultWorkers.filter(d => !existingIds.has(d.uid));
+          const merged = [...parsed, ...missingDefaults];
+          this.workersSignal.set(merged);
+          if (changed || missingDefaults.length > 0) {
+            this.saveToStorage();
+          }
           return;
         }
       } catch (e) {}
