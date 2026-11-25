@@ -66,11 +66,14 @@ export class WorkerLayoutComponent implements OnInit, OnDestroy {
     return this.jobService.jobs().find(j => j.workerId === worker.uid && activeStatuses.includes(j.status)) || null;
   });
 
-  // Count open jobs on board in worker's category
+  // Count open jobs on board across all of worker's chosen categories
   public openJobsCount = computed(() => {
     const worker = this.currentWorker();
-    const catId = worker?.categoryIds?.[0];
-    return this.jobService.getOpenBoardJobs(catId).length;
+    const catIds = worker?.categoryIds;
+    if (!catIds || catIds.length === 0) {
+      return this.jobService.getOpenBoardJobs().length;
+    }
+    return this.jobService.getOpenBoardJobs().filter(j => catIds.includes(j.categoryId)).length;
   });
 
   // Global Incoming Job Offer for Worker
