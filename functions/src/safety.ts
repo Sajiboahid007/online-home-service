@@ -1,5 +1,6 @@
 import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
+import { requireSelfOrAdmin, requireAdmin } from './auth-helpers';
 
 const db = admin.firestore();
 
@@ -12,6 +13,8 @@ export const triggerSOS = functions.https.onCall(async (data, context) => {
   if (!uid || !location) {
     throw new functions.https.HttpsError('invalid-argument', 'Missing SOS parameters');
   }
+
+  requireSelfOrAdmin(context, uid);
 
   const sosRef = db.collection('sosAlerts').doc(`sos_${Date.now()}`);
   const sosData = {
@@ -46,15 +49,19 @@ export const triggerSOS = functions.https.onCall(async (data, context) => {
  * 92. approveWorker / rejectWorker
  */
 export const approveWorker = functions.https.onCall(async (data, context) => {
+  requireAdmin(context);
   const { workerId, approved, rejectionReason } = data;
+  if (!workerId) {
+    throw new functions.https.HttpsError('invalid-argument', 'workerId is required');
+  }
 
   const workerRef = db.collection('workers').doc(workerId);
   const userRef = db.collection('users').doc(workerId);
 
   if (approved) {
     await workerRef.update({
-      status: 'approved',
-      badges: admin.firestore.FieldValue.arrayUnion('verified'),
+      verificationStatus: 'approved',
+      verified: true,
       approvedAt: new Date().toISOString()
     });
     await userRef.update({ status: 'active' });
@@ -69,7 +76,8 @@ export const approveWorker = functions.https.onCall(async (data, context) => {
     });
   } else {
     await workerRef.update({
-      status: 'rejected',
+      verificationStatus: 'rejected',
+      verified: false,
       rejectionReason: rejectionReason || 'তথ্য বা এনআইডি অসম্পূর্ণ'
     });
 
@@ -87,11 +95,17 @@ export const approveWorker = functions.https.onCall(async (data, context) => {
 });
 
 export const rejectWorker = functions.https.onCall(async (data, context) => {
+  requireAdmin(context);
   const { workerId, rejectionReason } = data;
+  if (!workerId) {
+    throw new functions.https.HttpsError('invalid-argument', 'workerId is required');
+  }
+
   const workerRef = db.collection('workers').doc(workerId);
 
   await workerRef.update({
-    status: 'rejected',
+    verificationStatus: 'rejected',
+    verified: false,
     rejectionReason: rejectionReason || 'তথ্য বা এনআইডি অসম্পূর্ণ'
   });
 

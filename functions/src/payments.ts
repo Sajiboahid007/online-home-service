@@ -1,14 +1,21 @@
 import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
+import { requireSelfOrAdmin } from './auth-helpers';
 
 const db = admin.firestore();
 
 /**
- * 66. paymentWebhook: Secure payment callback from SSLCommerz / bKash
+ * 66. paymentWebhook: Callback endpoint (validates shared secret if configured)
  */
 export const paymentWebhook = functions.https.onRequest(async (req, res) => {
   if (req.method !== 'POST') {
     res.status(405).send('Method Not Allowed');
+    return;
+  }
+
+  const configuredSecret = process.env.PAYMENT_WEBHOOK_SECRET;
+  if (configuredSecret && req.headers['x-webhook-secret'] !== configuredSecret) {
+    res.status(401).json({ status: 'UNAUTHORIZED' });
     return;
   }
 
@@ -54,10 +61,13 @@ export const paymentWebhook = functions.https.onRequest(async (req, res) => {
 export const requestWithdraw = functions.https.onCall(async (data, context) => {
   const { workerId, amount, method, accountNumber } = data;
 
-  if (!workerId || !amount || amount < 100 || !accountNumber) {
+  if (!workerId || !amount || Number(amount) < 100 || !accountNumber) {
     throw new functions.https.HttpsError('invalid-argument', 'Invalid withdrawal parameters. Minimum ৳100.');
   }
 
+  requireSelfOrAdmin(context, workerId);
+
+  const withdrawAmount = Number(amount);
   const workerRef = db.collection('workers').doc(workerId);
 
   return db.runTransaction(async (transaction) => {
@@ -65,14 +75,14 @@ export const requestWithdraw = functions.https.onCall(async (data, context) => {
     if (!workerDoc.exists) throw new functions.https.HttpsError('not-found', 'Worker not found');
     const worker = workerDoc.data()!;
 
-    const currentBalance = worker.wallet?.balance || 0;
-    if (currentBalance < amount) {
+    const currentBalance = Number(worker.walletBalance ?? worker.wallet?.balance ?? 0);
+    if (currentBalance < withdrawAmount) {
       throw new functions.https.HttpsError('failed-precondition', 'পর্যাপ্ত ব্যালেন্স নেই।');
     }
 
     // Deduct balance from worker wallet immediately into escrow
     transaction.update(workerRef, {
-      'wallet.balance': admin.firestore.FieldValue.increment(-amount)
+      walletBalance: admin.firestore.FieldValue.increment(-withdrawAmount)
     });
 
     // Create withdrawal request in queue
@@ -80,7 +90,7 @@ export const requestWithdraw = functions.https.onCall(async (data, context) => {
     transaction.set(withdrawRef, {
       workerId,
       workerName: worker.name || 'কর্মী',
-      amount,
+      amount: withdrawAmount,
       method: method || 'bkash',
       accountNumber,
       status: 'pending',

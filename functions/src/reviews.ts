@@ -1,5 +1,6 @@
 import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
+import { requireAuth, requireAdmin } from './auth-helpers';
 
 const db = admin.firestore();
 
@@ -7,17 +8,20 @@ const db = admin.firestore();
  * 70. submitReview: Calculate worker's average rating on the server
  */
 export const submitReview = functions.https.onCall(async (data, context) => {
+  const reviewerId = requireAuth(context);
   const { jobId, workerId, rating, comment, isWorkerReview } = data;
 
-  if (!jobId || !workerId || !rating) {
-    throw new functions.https.HttpsError('invalid-argument', 'Missing review parameters');
+  const numericRating = Number(rating);
+  if (!jobId || !workerId || !numericRating || numericRating < 1 || numericRating > 5) {
+    throw new functions.https.HttpsError('invalid-argument', 'Valid jobId, workerId, and rating (1-5) are required.');
   }
 
   const reviewRef = db.collection('reviews').doc(`rev_${Date.now()}`);
   const newReview = {
     jobId,
     workerId,
-    rating: Number(rating),
+    reviewerId,
+    rating: numericRating,
     comment: comment || '',
     isWorkerReview: !!isWorkerReview,
     createdAt: new Date().toISOString()
@@ -96,6 +100,7 @@ async function checkAutoBan(workerId: string, rating: number, reviewCount: numbe
  * 72. banUser / unbanUser: Custom claims, blacklist, and audit logging
  */
 export const banUser = functions.https.onCall(async (data, context) => {
+  const actorUid = requireAdmin(context);
   const { uid, reason, durationDays } = data;
   if (!uid) throw new functions.https.HttpsError('invalid-argument', 'Missing uid');
 
@@ -114,9 +119,13 @@ export const banUser = functions.https.onCall(async (data, context) => {
     suspendedUntil
   });
 
-  // 2. Set Auth custom claim
+  // 2. Preserve existing custom claims while setting banned flag
   try {
-    await admin.auth().setCustomUserClaims(uid, { banned: true });
+    const authUser = await admin.auth().getUser(uid);
+    await admin.auth().setCustomUserClaims(uid, {
+      ...(authUser.customClaims || {}),
+      banned: true
+    });
   } catch (e) {
     console.warn(`Failed to set custom claim on ${uid}:`, e);
   }
@@ -127,7 +136,7 @@ export const banUser = functions.https.onCall(async (data, context) => {
       type: 'phone',
       value: userData.phone,
       reason: reason || 'অ্যাকাউন্ট বরখাস্ত',
-      bannedBy: 'Admin',
+      bannedBy: actorUid,
       bannedAt: new Date().toISOString()
     });
   }
@@ -135,7 +144,7 @@ export const banUser = functions.https.onCall(async (data, context) => {
   // 4. Record audit log
   await db.collection('auditLogs').add({
     action: 'BAN_USER',
-    actorId: context.auth?.uid || 'admin',
+    actorId: actorUid,
     targetId: uid,
     targetType: 'user',
     reason,
@@ -146,6 +155,7 @@ export const banUser = functions.https.onCall(async (data, context) => {
 });
 
 export const unbanUser = functions.https.onCall(async (data, context) => {
+  const actorUid = requireAdmin(context);
   const { uid } = data;
   if (!uid) throw new functions.https.HttpsError('invalid-argument', 'Missing uid');
 
@@ -156,12 +166,16 @@ export const unbanUser = functions.https.onCall(async (data, context) => {
   });
 
   try {
-    await admin.auth().setCustomUserClaims(uid, { banned: false });
+    const authUser = await admin.auth().getUser(uid);
+    await admin.auth().setCustomUserClaims(uid, {
+      ...(authUser.customClaims || {}),
+      banned: false
+    });
   } catch (e) {}
 
   await db.collection('auditLogs').add({
     action: 'UNBAN_USER',
-    actorId: context.auth?.uid || 'admin',
+    actorId: actorUid,
     targetId: uid,
     targetType: 'user',
     reason: 'ব্যান প্রত্যাহার করা হয়েছে',
