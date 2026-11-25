@@ -22,7 +22,14 @@ export class PricingService {
     const saved = localStorage.getItem('kajkhoj_pricing');
     if (saved) {
       try {
-        this.pricingListSignal.set(JSON.parse(saved));
+        const parsed: Pricing[] = JSON.parse(saved);
+        const existingIds = new Set(parsed.map(p => p.id));
+        const missingDefaults = this.seedData.defaultPricing.filter(d => !existingIds.has(d.id));
+        const merged = [...parsed, ...missingDefaults];
+        this.pricingListSignal.set(merged);
+        if (missingDefaults.length > 0) {
+          this.savePricingToStorage();
+        }
         return;
       } catch (e) {}
     }
