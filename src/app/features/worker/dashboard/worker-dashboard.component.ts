@@ -1,4 +1,4 @@
-import { Component, computed, signal, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, computed, signal, effect, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +7,10 @@ import { AuthService } from '../../../core/services/auth.service';
 import { WorkerService } from '../../../core/services/worker.service';
 import { JobService } from '../../../core/services/job.service';
 import { DispatchService } from '../../../core/services/dispatch.service';
+import { CategoryService } from '../../../core/services/category.service';
+import { AreaService } from '../../../core/services/area.service';
 import { WorkerProfile } from '../../../core/models/worker.model';
+import { Category } from '../../../core/models/category.model';
 import { Job } from '../../../core/models/job.model';
 import { BnNumberPipe } from '../../../shared/pipes/bn-number.pipe';
 import { TakaPipe } from '../../../shared/pipes/taka.pipe';
@@ -43,6 +46,8 @@ export class WorkerDashboardComponent implements OnInit, OnDestroy {
   public workerService = inject(WorkerService);
   public jobService = inject(JobService);
   private dispatchService = inject(DispatchService);
+  private categoryService = inject(CategoryService);
+  private areaService = inject(AreaService);
   private router = inject(Router);
 
   // Professional Job Request Scenarios (realistic, technical & non-funny)
@@ -199,6 +204,150 @@ export class WorkerDashboardComponent implements OnInit, OnDestroy {
       lat: 23.8235,
       lng: 90.2675,
       photoURL: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=500'
+    },
+    {
+      id: 'sc_mason_1',
+      label: 'বাথরুম টাইলস ফিটিং ও প্লাস্টার মেরামত',
+      categoryName: 'রাজমিস্ত্রি',
+      categoryId: 'mason',
+      icon: '🧱',
+      customerName: 'নুসরাত জাহান',
+      customerPhone: '01744556677',
+      customerRating: 4.9,
+      description: 'বাথরুমের ফাঁপা টাইলস খুলে নতুন টাইলস বসানো ও দেয়ালের প্লাস্টার মেরামতের জন্য দক্ষ রাজমিস্ত্রি প্রয়োজন।',
+      estimatedPrice: 850,
+      address: 'ডিইপিজেড গেট #১ সংলগ্ন, আশুলিয়া',
+      landmark: 'ডিইপিজেড ১ নং গেটের পূর্ব পাশে',
+      lat: 23.9318,
+      lng: 90.2917
+    },
+    {
+      id: 'sc_app_1',
+      label: 'ইনভার্টার ফ্রিজ কুলিং সমস্যা ও থার্মোস্ট্যাট চেক',
+      categoryName: 'অ্যাপ্লায়েন্স মেরামত (ফ্রিজ/টিভি)',
+      categoryId: 'appliance_repair',
+      icon: '📺',
+      customerName: 'তানভীর আহমেদ',
+      customerPhone: '01712345678',
+      customerRating: 4.9,
+      description: 'রেফ্রিজারেটরের নিচের চেম্বারে ঠান্ডা হচ্ছে না এবং কম্প্রেসার অস্বাভাবিক শব্দ করছে। জরুরি চেকআপ প্রয়োজন।',
+      estimatedPrice: 550,
+      address: 'বাড়ি #১২, রোড #৩, সাভার বাজার',
+      landmark: 'নিউ মার্কেট রোড সংলগ্ন',
+      lat: 23.8230,
+      lng: 90.2660
+    },
+    {
+      id: 'sc_pest_1',
+      label: '৩ রুমের ফ্ল্যাটে তেলাপোকা ও ছারপোকা দমন সার্ভিস',
+      categoryName: 'পেস্ট কন্ট্রোল (পোকামাকড় দমন)',
+      categoryId: 'pest_control',
+      icon: '🪲',
+      customerName: 'সাব্বির হোসেন',
+      customerPhone: '01819876500',
+      customerRating: 4.8,
+      description: 'রান্নাঘর ও বেডরুমে জেল ও গন্ধহীন স্প্রে ট্রিটমেন্টের মাধ্যমে নিরাপদ পেস্ট কন্ট্রোল সার্ভিস প্রয়োজন।',
+      estimatedPrice: 1100,
+      address: 'বাড়ি #৪৫, রোড #২, সাভার থানা রোড',
+      landmark: 'সাভার মডেল থানার পাশে',
+      lat: 23.8245,
+      lng: 90.2685
+    },
+    {
+      id: 'sc_shift_1',
+      label: '২ বেডরুম ফ্ল্যাটের বাসা বদল প্যাকিং ও শিফটিং',
+      categoryName: 'বাসা বদল ও মুভিং',
+      categoryId: 'shifting_moving',
+      icon: '🚚',
+      customerName: 'ফারহানা রহমান',
+      customerPhone: '01912345670',
+      customerRating: 5.0,
+      description: 'খাটের ডিসঅ্যাসেম্বল, ফ্রিজ ও আসবাবপত্র নিরাপদ প্যাকিং করে নতুন ফ্ল্যাটে সেটআপ করতে হবে।',
+      estimatedPrice: 1500,
+      address: 'স্বপ্ননীল টাওয়ার, সাভার বাসস্ট্যান্ড',
+      landmark: 'সাভার বাসস্ট্যান্ড ওভারব্রিজ সংলগ্ন',
+      lat: 23.8260,
+      lng: 90.2640
+    },
+    {
+      id: 'sc_lock_1',
+      label: 'মেইন ডোর সিলিন্ডার লক পরিবর্তন ও ডুপ্লিকেট চাবি',
+      categoryName: 'তালা-চাবি ও সিকিউরিটি',
+      categoryId: 'locksmith',
+      icon: '🔑',
+      customerName: 'ইকবাল মাহমুদ',
+      customerPhone: '01799887766',
+      customerRating: 4.7,
+      description: 'মেইন দরজার তালা জ্যাম হয়ে চাবি ভেঙে গেছে। জরুরিভাবে তালা খুলে নতুন সিকিউরিটি লক বসাতে হবে।',
+      estimatedPrice: 400,
+      address: 'হাউজ ১৭, ব্লক সি, শিমুলতলা, সাভার',
+      landmark: 'শিমুলতলা জামে মসজিদের পাশে',
+      lat: 23.8310,
+      lng: 90.2710
+    },
+    {
+      id: 'sc_garden_1',
+      label: 'ছাদ বাগান পরিষ্কার, গাছ ছাঁটাই ও মাটি সার প্রস্তুত',
+      categoryName: 'বাগান পরিচর্যা (মালী)',
+      categoryId: 'gardener',
+      icon: '🌿',
+      customerName: 'আরিফুল ইসলাম',
+      customerPhone: '01733445566',
+      customerRating: 4.8,
+      description: 'বাসার ছাদ বাগানের ফলের গাছ ছাঁটাই, আগাছা পরিষ্কার ও নতুন টবে জৈব সারসহ মাটি প্রস্তুত করতে হবে।',
+      estimatedPrice: 450,
+      address: 'হেমায়েতপুর বাসস্ট্যান্ড, সাভার',
+      landmark: 'হেমায়েতপুর বাজার মোড়',
+      lat: 23.7915,
+      lng: 90.2741
+    },
+    {
+      id: 'sc_weld_1',
+      label: 'ব্যালকনি গ্রিল ও মেইন গেটের হিঞ্জ ওয়েল্ডিং মেরামত',
+      categoryName: 'ওয়েল্ডিং ও গ্রিল মিস্ত্রি',
+      categoryId: 'welder',
+      icon: '🔥',
+      customerName: 'রোকেয়া বেগম',
+      customerPhone: '01822334455',
+      customerRating: 4.9,
+      description: 'লোহার মেইন গেটের নিচের কব্জা ভেঙে গেছে এবং ব্যালকনির গ্রিলে স্পট ওয়েল্ডিং করা প্রয়োজন।',
+      estimatedPrice: 600,
+      address: 'পল্লী বিদ্যুৎ রোড, আশুলিয়া, সাভার',
+      landmark: 'পল্লী বিদ্যুৎ সাবস্টেশনের সামনে',
+      lat: 23.9318,
+      lng: 90.2917
+    },
+    {
+      id: 'sc_wash_1',
+      label: 'সেডান কার ফুল বডি প্রেশার ওয়াশ ও ইন্টেরিয়র ক্লিন',
+      categoryName: 'গাড়ি ও বাইক ওয়াশ',
+      categoryId: 'car_wash',
+      icon: '🚗',
+      customerName: 'মেহজাবিন চৌধুরী',
+      customerPhone: '01611223344',
+      customerRating: 5.0,
+      description: 'বাসার গ্যারেজে গাড়ির এক্সটেরিয়র ফোম ওয়াশ, ড্যাশবোর্ড পলিশ ও সিট ভ্যাকুয়াম ক্লিনিং প্রয়োজন।',
+      estimatedPrice: 500,
+      address: 'রোড #৬, ব্লক #ডি, মিরপুর ১০, ঢাকা',
+      landmark: 'মিরপুর গার্লস আইডিয়াল স্কুল সংলগ্ন',
+      lat: 23.8071,
+      lng: 90.3686
+    },
+    {
+      id: 'sc_cctv_1',
+      label: '৪টি সিসিটিভি ক্যামেরা সেটআপ ও ওয়াইফাই রাউটার কনফিগ',
+      categoryName: 'সিসিটিভি ও ইন্টারনেট টেকনিশিয়ান',
+      categoryId: 'cctv_it',
+      icon: '📷',
+      customerName: 'নাজমুল হাসান',
+      customerPhone: '01555667788',
+      customerRating: 4.6,
+      description: 'বাসার প্রবেশপথ ও গ্যারেজে ৪টি আইপি ক্যামেরা, এনভিআর ও মোবাইল ভিউ কনফিগারেশন করাতে হবে।',
+      estimatedPrice: 900,
+      address: 'নামাবাজার ঘাট রোড, সাভার',
+      landmark: 'নামাবাজার ব্রিজের পশ্চিম পাশে',
+      lat: 23.8188,
+      lng: 90.2642
     }
   ];
 
@@ -209,6 +358,29 @@ export class WorkerDashboardComponent implements OnInit, OnDestroy {
     const authWorker = this.authService.currentWorker();
     const uid = authWorker?.uid || 'worker_rahim_1';
     return this.workerService.getWorkerById(uid) || authWorker || this.workerService.workers()[0] || null;
+  });
+
+  // Only the service categories this worker chose when creating/updating their account
+  public workerCategories = computed<Category[]>(() => {
+    const ids = this.currentWorker()?.categoryIds || [];
+    const allCats = this.categoryService.categories();
+    return allCats.filter(c => ids.includes(c.id));
+  });
+
+  // Scenarios filtered to the worker's chosen categories (fallback to all if none match)
+  public availableScenarios = computed<ProfessionalJobScenario[]>(() => {
+    const ids = this.currentWorker()?.categoryIds || [];
+    if (ids.length === 0) return this.professionalScenarios;
+    const filtered = this.professionalScenarios.filter(s => ids.includes(s.categoryId));
+    return filtered.length > 0 ? filtered : this.professionalScenarios;
+  });
+
+  // Resolve worker's area zone name dynamically
+  public workerAreaName = computed<string>(() => {
+    const w = this.currentWorker();
+    if (!w) return 'সাভার জোন';
+    const area = this.areaService.getAreaById(w.areaId);
+    return area?.zoneName || w.homeLocation?.address || 'সাভার জোন';
   });
 
   // Incoming offer signal from JobService
@@ -268,17 +440,17 @@ export class WorkerDashboardComponent implements OnInit, OnDestroy {
     return sum > 0 ? sum : 750; // demo figure if no jobs today
   });
 
-  constructor() {}
+  constructor() {
+    effect(() => {
+      const list = this.availableScenarios();
+      if (list.length > 0 && !list.some(s => s.id === this.selectedScenario?.id)) {
+        this.selectedScenario = list[0];
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.startCountdownWatcher();
-    const currentWorker = this.currentWorker();
-    if (currentWorker?.categoryIds?.length) {
-      const match = this.professionalScenarios.find(s => currentWorker.categoryIds.includes(s.categoryId));
-      if (match) {
-        this.selectedScenario = match;
-      }
-    }
   }
 
   ngOnDestroy(): void {
