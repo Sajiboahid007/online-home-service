@@ -33,6 +33,17 @@
       </div>
 
       <div class="dialog-body">
+        @if (getWorkerCategories().length > 0) {
+          <div class="section-block">
+            <h4>সার্ভিস ক্যাটাগরি</h4>
+            <div class="chips-wrap">
+              @for (cat of getWorkerCategories(); track cat.id) {
+                <span class="cat-chip">{{ cat.icon }} {{ cat.nameBn }}</span>
+              }
+            </div>
+          </div>
+        }
+
         @if (worker.bio) {
           <div class="section-block">
             <h4>পরিচয় ও অভিজ্ঞতা</h4>
