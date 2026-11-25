@@ -20,28 +20,12 @@
     <div class="tracking-content-grid">
       <!-- Left Column: Status Timeline & OTP Security -->
       <div class="timeline-column">
-        <!-- Interactive Simulation Control (Staff/Testing Helper) -->
-        @if (isAdmin() || isWorker()) {
-          <div class="simulation-banner">
-            <div class="sim-info">
-              <span class="sim-icon">🧪</span>
-              <div>
-                <span class="sim-title">{{ 'লাইভ ডেমো সিমুলেটর' | t }}</span>
-                <p class="sim-sub">{{ 'ওয়ার্কারের অবস্থান ও কাজের ধাপ পরিবর্তন টেস্ট করুন' | t }}</p>
-              </div>
-            </div>
-            <button type="button" class="btn-advance-step" (click)="advanceSimulationStep()" [disabled]="job.status === 'completed' || job.status.includes('cancelled')">
-              <span>{{ 'ধাপ পরিবর্তন করুন ⏩' | t }}</span>
-            </button>
-          </div>
-        }
-
         <!-- 4-Digit Start / Completion OTP Card (Visible ONLY to the customer/user, never to worker) -->
         @if (canViewJobOtp() && job.status !== 'completed' && job.status !== 'paid' && !job.status.includes('cancelled')) {
           @if (job.status === 'in_progress') {
             <div class="otp-card">
               <div class="otp-header">
-                <div class="otp-icon-wrap">🏁</div>
+                <div class="otp-icon-wrap"><i class="pi pi-flag"></i></div>
                 <div class="otp-title-text">
                   <h3 class="otp-title">{{ '৪-সংখ্যার কাজ শেষ করার ওটিপি (Completion OTP)' | t }}</h3>
                   <p class="otp-subtitle">{{ 'কাজ সঠিকভাবে শেষ হলে কর্মীকে এই OTP দিন' | t }}</p>
@@ -59,14 +43,14 @@
               </div>
 
               <div class="otp-security-note">
-                <span class="sec-icon">🛡️</span>
+                <i class="pi pi-shield sec-icon"></i>
                 <span class="sec-text">{{ 'কাজ সম্পূর্ণভাবে শেষ হওয়া যাচাই করার পরই কেবল কর্মীকে এই সমাপনী OTP দিন, যাতে কর্মী অ্যাপে কাজ সম্পন্ন করতে পারেন।' | t }}</span>
               </div>
             </div>
           } @else {
             <div class="otp-card">
               <div class="otp-header">
-                <div class="otp-icon-wrap">🔐</div>
+                <div class="otp-icon-wrap"><i class="pi pi-lock"></i></div>
                 <div class="otp-title-text">
                   <h3 class="otp-title">{{ '৪-সংখ্যার কাজ শুরুর ওটিপি (Start OTP)' | t }}</h3>
                   <p class="otp-subtitle">{{ 'এই OTP ওয়ার্কারকে বলুন কাজ শুরু করার জন্য' | t }}</p>
@@ -84,7 +68,7 @@
               </div>
 
               <div class="otp-security-note">
-                <span class="sec-icon">🛡️</span>
+                <i class="pi pi-shield sec-icon"></i>
                 <span class="sec-text">{{ 'কর্মী আপনার বাসায় পৌঁছানোর পর কাজ শুরুর অনুমতি হিসেবে এই কোডটি বলবেন। অন্য কাউকে এই কোড শেয়ার করবেন না।' | t }}</span>
               </div>
             </div>
@@ -98,14 +82,14 @@
           <div class="steps-flow">
             @for (step of timelineSteps(); track step.key; let i = $index) {
               <div class="step-item" 
-                   [class.completed]="i < currentStepIndex() || (i === currentStepIndex() && job.status === 'completed')"
-                   [class.active]="i === currentStepIndex() && job.status !== 'completed'"
+                   [class.completed]="i < currentStepIndex() || (i === currentStepIndex() && (job.status === 'completed' || job.status === 'paid' || job.status === 'reviewed'))"
+                   [class.active]="i === currentStepIndex() && job.status !== 'completed' && job.status !== 'paid' && job.status !== 'reviewed'"
                    [class.upcoming]="i > currentStepIndex()">
                 
                 <div class="step-marker">
                   <div class="marker-circle">
-                    @if (i < currentStepIndex() || (i === currentStepIndex() && job.status === 'completed')) {
-                      <span class="check-icon">✓</span>
+                    @if (i < currentStepIndex() || (i === currentStepIndex() && (job.status === 'completed' || job.status === 'paid' || job.status === 'reviewed'))) {
+                      <i class="pi pi-check check-icon"></i>
                     } @else {
                       <span class="step-num">{{ i + 1 | bnNumber }}</span>
                     }
@@ -117,9 +101,9 @@
 
                 <div class="step-body">
                   <div class="step-title-line">
-                    <span class="step-icon">{{ step.icon }}</span>
+                    <span class="step-icon"><i [class]="step.icon"></i></span>
                     <h4 class="step-title">{{ step.titleBn }}</h4>
-                    @if (i === currentStepIndex() && job.status !== 'completed') {
+                    @if (i === currentStepIndex() && job.status !== 'completed' && job.status !== 'paid' && job.status !== 'reviewed') {
                       <span class="current-badge">{{ 'বর্তমান অবস্থা' | t }}</span>
                     }
                   </div>
@@ -128,6 +112,24 @@
               </div>
             }
           </div>
+
+          <!-- Active Step Detail Callout -->
+          @if (timelineSteps()[currentStepIndex()]; as activeStep) {
+            <div class="active-step-detail-card" [class.is-done]="job.status === 'completed' || job.status === 'paid' || job.status === 'reviewed'">
+              <div class="masc-icon-badge">
+                <i [class]="activeStep.icon"></i>
+              </div>
+              <div class="masc-content">
+                <div class="masc-header">
+                  <strong class="masc-title">{{ activeStep.titleBn }}</strong>
+                  <span class="masc-badge">
+                    {{ (job.status === 'completed' || job.status === 'paid' || job.status === 'reviewed') ? ('কাজ সম্পন্ন' | t) : ('বর্তমান অবস্থা' | t) }}
+                  </span>
+                </div>
+                <p class="masc-desc">{{ activeStep.descBn }}</p>
+              </div>
+            </div>
+          }
         </div>
       </div>
 
@@ -141,17 +143,17 @@
             <div class="worker-profile-row">
               <div class="worker-avatar">
                 <img [src]="job.workerPhoto || 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=150&auto=format&fit=crop&q=80'" [alt]="job.workerName" />
-                <span class="avatar-verified-badge">✓</span>
+                <span class="avatar-verified-badge"><i class="pi pi-check" style="font-size:10px;"></i></span>
               </div>
 
               <div class="worker-details">
                 <h4 class="worker-fullname">{{ (job.workerName || categoryLabel()) | t }}</h4>
                 <div class="worker-submeta">
-                  <span class="cat-pill">{{ categoryIcon() }} {{ categoryLabel() }}</span>
-                  <span class="rating-txt">⭐ {{ (worker()?.rating || 5.0) | bnNumber }} ({{ (worker()?.totalJobs || 0) | bnNumber }} {{ 'টি কাজ' | t }})</span>
+                  <span class="cat-pill"><app-cat-icon [icon]="categoryIcon()" /> {{ categoryLabel() }}</span>
+                  <span class="rating-txt"><i class="pi pi-star-fill" style="color:#f59e0b;font-size:11px;"></i> {{ (worker()?.rating || 5.0) | bnNumber }} ({{ (worker()?.totalJobs || 0) | bnNumber }} {{ 'টি কাজ' | t }})</span>
                 </div>
                 <div class="worker-masked-phone">
-                  <span class="phone-icon">📞</span>
+                  <i class="pi pi-phone phone-icon"></i>
                   <span class="phone-number">{{ (job.status !== 'searching' && job.status !== 'pending') ? (job.workerPhone || '01712345678') : (job.workerPhone || '01712345678' | maskPhone) }}</span>
                 </div>
               </div>
@@ -235,7 +237,7 @@
             }
           } @else if (job.status.includes('cancelled')) {
             <div class="cancelled-work-request-box" style="text-align: center; padding: 24px 16px; background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 12px; margin-bottom: 1.5rem;">
-              <div style="font-size: 36px; margin-bottom: 6px;">❌</div>
+              <div style="font-size: 36px; margin-bottom: 6px; color:#dc2626;"><i class="pi pi-times-circle"></i></div>
               <h4 style="margin: 0 0 6px; color: #991b1b; font-size: 16px; font-weight: 700;">এই কাজের রিকোয়েস্টটি বাতিল করা হয়েছে</h4>
               <p style="margin: 0 0 10px; font-size: 13px; color: #b91c1c;">
                 <strong>বাতিলের কারণ:</strong> {{ job.cancelReason || 'দেরি হচ্ছে' }}
@@ -263,7 +265,7 @@
               <div class="radar-pulse-wrap">
                 <div class="pulse-ring"></div>
                 <div class="pulse-ring delay"></div>
-                <div class="center-icon">{{ categoryIcon() }}</div>
+                <div class="center-icon"><app-cat-icon [icon]="categoryIcon()" /></div>
               </div>
 
               @if (isEn()) {
@@ -339,7 +341,7 @@
 
             @if (job.locationPinned) {
               <div class="doorstep-confirm">
-                <span class="doorstep-confirm-title">📍 {{ 'আপনার দরজার পিন + ল্যান্ডমার্ক' | t }} <span class="doorstep-confirm-badge">✓ {{ 'সঠিক পিন' | t }}</span></span>
+                <span class="doorstep-confirm-title"><i class="pi pi-map-marker"></i> {{ 'আপনার দরজার পিন + ল্যান্ডমার্ক' | t }} <span class="doorstep-confirm-badge"><i class="pi pi-check" style="font-size:10px;"></i> {{ 'সঠিক পিন' | t }}</span></span>
                 @if (job.landmark) {
                   <span class="doorstep-confirm-landmark">{{ job.landmark | t }}</span>
                 }
@@ -414,7 +416,7 @@
     </div>
   } @else {
     <div class="no-job-state card">
-      <span class="no-job-icon">📋</span>
+      <i class="pi pi-list no-job-icon" style="color:#0f766e;"></i>
       <h3>{{ 'কোনো চলমান কাজের ট্র্যাকিং পাওয়া যায়নি' | t }}</h3>
       <p>{{ 'আপনি বর্তমানে কোনো চলমান সার্ভিসের সাথে যুক্ত নেই। নতুন কর্মী ডাকতে নিচের বাটনে চাপুন।' | t }}</p>
       <div class="actions">
@@ -484,20 +486,20 @@
   }
 
   <!-- Live Trip Share Modal -->
-  @if (showShareModal() && currentJob(); as job) {
+          @if (showShareModal() && currentJob(); as job) {
     <div class="modal-backdrop" (click)="closeShare()">
       <div class="modal-card share-trip-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <div class="modal-title-wrap">
-            <span class="modal-icon">🔗</span>
+            <i class="pi pi-share-alt modal-icon" style="color:#0f766e;"></i>
             <h3 class="modal-title">{{ 'লাইভ ট্রিপ শেয়ার করুন' | t }}</h3>
           </div>
-          <button class="close-btn" (click)="closeShare()">✕</button>
+          <button class="close-btn" (click)="closeShare()"><i class="pi pi-times"></i></button>
         </div>
 
         <div class="share-modal-body">
           <div class="share-safety-badge">
-            <span class="ss-icon">🛡️</span>
+            <i class="pi pi-shield ss-icon" style="color:#0f766e;"></i>
             <span>{{ isEn() ? 'Share with family or friends so they can track in real time when the worker arrives.' : 'পরিবারের সদস্য বা পরিচিত কারও সাথে শেয়ার করুন যাতে তারা রিয়েল-টাইমে দেখতে পারেন কর্মী কখন আসছেন ও কার সাথে কাজ চলছে।' }}</span>
           </div>
 
@@ -529,10 +531,10 @@
       <div class="modal-card dispute-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <div class="modal-title-wrap">
-            <span class="modal-icon">⚠️</span>
+            <i class="pi pi-exclamation-triangle modal-icon" style="color:#f59e0b;"></i>
             <h3 class="modal-title">{{ 'অভিযোগ দাখিল করুন (Dispute Report)' | t }}</h3>
           </div>
-          <button class="close-btn" (click)="closeReport()">✕</button>
+          <button class="close-btn" (click)="closeReport()"><i class="pi pi-times"></i></button>
         </div>
 
         <div class="dispute-modal-body">
@@ -571,7 +573,7 @@
             </div>
           } @else {
             <div class="report-success-state">
-              <span class="rss-icon">✅</span>
+              <i class="pi pi-check-circle rss-icon" style="color:#16a34a;"></i>
               <h4>{{ 'অভিযোগটি অ্যাডমিন সেন্টারে পাঠানো হয়েছে' | t }}</h4>
               <p>{{ isEn() ? 'Admin team will review and contact you shortly.' : 'অ্যাডমিন টিম তদন্ত শেষে দ্রুত পদক্ষেপ নেবে এবং আপনার সাথে যোগাযোগ করবে।' }}</p>
             </div>

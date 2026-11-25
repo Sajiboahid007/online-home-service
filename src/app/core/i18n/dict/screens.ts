@@ -25,9 +25,6 @@ export const SCREENS_EN: Record<string, string> = {
 
   // Customer Job Tracking
   'কাজের অগ্রগতি ট্র্যাকিং': 'Job Progress Tracking',
-  'লাইভ ডেমো সিমুলেটর': 'Live Demo Simulator',
-  'ওয়ার্কারের অবস্থান ও কাজের ধাপ পরিবর্তন টেস্ট করুন': 'Test worker location & job step transitions',
-  'ধাপ পরিবর্তন করুন ⏩': 'Advance Step ⏩',
   '৪-সংখ্যার কাজ শুরুর ওটিপি (Start OTP)': '4-Digit Start OTP',
   'এই OTP ওয়ার্কারকে বলুন কাজ শুরু করার জন্য': 'Share this OTP with the worker to start the job',
   'কর্মী আপনার বাসায় পৌঁছানোর পর কাজ শুরুর অনুমতি হিসেবে এই কোডটি বলবেন। অন্য কাউকে এই কোড শেয়ার করবেন না।':

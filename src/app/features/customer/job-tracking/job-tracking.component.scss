@@ -111,63 +111,6 @@
   gap: 18px;
 }
 
-/* Simulation Banner (Demo Helper) */
-.simulation-banner {
-  background: #fdf4ff;
-  border: 1px dashed #d946ef;
-  border-radius: 12px;
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-
-  .sim-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    .sim-icon {
-      font-size: 24px;
-    }
-
-    .sim-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: #a21caf;
-    }
-
-    .sim-sub {
-      margin: 1px 0 0;
-      font-size: 11px;
-      color: #c026d3;
-    }
-  }
-
-  .btn-advance-step {
-    background: #c026d3;
-    color: #ffffff;
-    border: none;
-    padding: 7px 14px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    white-space: nowrap;
-    transition: background 0.15s;
-
-    &:hover:not(:disabled) {
-      background: #a21caf;
-    }
-
-    &:disabled {
-      background: #cbd5e1;
-      cursor: not-allowed;
-    }
-  }
-}
-
 /* 4-digit Start OTP Card */
 .otp-card {
   background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
@@ -270,34 +213,42 @@
   }
 }
 
-/* Timeline flow */
+/* Timeline flow (Horizontal side-by-side stepper across web & mobile) */
 .timeline-card {
   .card-heading {
-    margin: 0 0 16px;
+    margin: 0 0 18px;
     font-size: 16px;
     font-weight: 800;
     color: var(--text-primary);
   }
 
   .steps-flow {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+    align-items: start;
   }
 
   .step-item {
     display: flex;
-    gap: 16px;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
     position: relative;
+    min-width: 0;
 
     .step-marker {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
-      width: 32px;
+      justify-content: center;
+      width: 100%;
+      position: relative;
 
       .marker-circle {
-        width: 32px;
-        height: 32px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
         background: #f1f5f9;
         border: 2px solid #cbd5e1;
@@ -307,83 +258,263 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
         z-index: 2;
         transition: all 0.2s;
       }
 
       .connecting-line {
-        width: 2px;
-        flex: 1;
+        position: absolute;
+        top: 50%;
+        left: calc(50% + 18px);
+        width: calc(100% - 28px);
+        height: 3px;
         background: #e2e8f0;
-        min-height: 36px;
-        margin: 4px 0;
+        transform: translateY(-50%);
+        z-index: 1;
       }
     }
 
     .step-body {
-      padding-bottom: 24px;
-      flex: 1;
+      padding-bottom: 0;
+      width: 100%;
 
       .step-title-line {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 8px;
+        gap: 4px;
 
         .step-icon {
-          font-size: 16px;
+          width: 26px;
+          height: 26px;
+          border-radius: 8px;
+          background: #f1f5f9;
+          color: #64748b;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 13px;
+          line-height: 1;
+          transition: all 0.2s;
         }
 
         .step-title {
           margin: 0;
-          font-size: 15px;
+          font-size: 12px;
           font-weight: 700;
+          line-height: 1.3;
           color: var(--text-primary);
+          word-break: break-word;
         }
 
         .current-badge {
-          background: #fef3c7;
-          color: #b45309;
-          font-size: 10px;
-          font-weight: 700;
-          padding: 2px 8px;
-          border-radius: 12px;
+          display: none;
         }
       }
 
       .step-desc {
-        margin: 4px 0 0;
-        font-size: 12px;
-        color: var(--text-secondary);
+        display: none;
       }
     }
 
     &.completed {
-      .marker-circle {
-        background: var(--primary-color);
-        border-color: var(--primary-color);
-        color: #ffffff;
+      .step-marker {
+        .marker-circle {
+          background: var(--primary-color);
+          border-color: var(--primary-color);
+          color: #ffffff;
+
+          .check-icon {
+            font-size: 13px;
+            font-weight: 700;
+          }
+        }
+
+        .connecting-line {
+          background: var(--primary-color);
+        }
       }
 
-      .connecting-line {
-        background: var(--primary-color);
+      .step-body .step-title-line .step-icon {
+        background: #ccfbf1;
+        color: #0f766e;
       }
     }
 
     &.active {
-      .marker-circle {
+      .step-marker .marker-circle {
         background: #ffffff;
         border-color: var(--accent-color);
         color: var(--accent-color);
         box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.2);
       }
 
-      .step-title {
-        color: var(--accent-color);
+      .step-body .step-title-line {
+        .step-icon {
+          background: #ffedd5;
+          color: #ea580c;
+        }
+
+        .step-title {
+          color: var(--accent-color);
+        }
       }
     }
 
     &.upcoming {
       opacity: 0.6;
+    }
+  }
+
+  .active-step-detail-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+
+    &.is-done {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+
+      .masc-icon-badge {
+        background: #dcfce7;
+        color: #15803d;
+        border-color: #bbf7d0;
+      }
+
+      .masc-badge {
+        background: #dcfce7;
+        color: #15803d;
+      }
+    }
+
+    .masc-icon-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: #ffedd5;
+      color: #c2410c;
+      border: 1px solid #fed7aa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .masc-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .masc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 3px;
+    }
+
+    .masc-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .masc-badge {
+      background: #ffedd5;
+      color: #c2410c;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 999px;
+    }
+
+    .masc-desc {
+      margin: 0;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .timeline-card {
+    padding: 16px 14px;
+
+    .card-heading {
+      margin-bottom: 14px;
+      font-size: 15px;
+    }
+
+    .steps-flow {
+      gap: 4px;
+    }
+
+    .step-item {
+      gap: 6px;
+
+      .step-marker {
+        .marker-circle {
+          width: 28px;
+          height: 28px;
+          font-size: 11px;
+        }
+
+        .connecting-line {
+          left: calc(50% + 14px);
+          width: calc(100% - 24px);
+          height: 2.5px;
+        }
+      }
+
+      .step-body .step-title-line {
+        gap: 3px;
+
+        .step-icon {
+          width: 22px;
+          height: 22px;
+          border-radius: 6px;
+          font-size: 11px;
+        }
+
+        .step-title {
+          font-size: 10px;
+          line-height: 1.25;
+        }
+      }
+    }
+
+    .active-step-detail-card {
+      margin-top: 14px;
+      padding: 10px 12px;
+      gap: 10px;
+
+      .masc-icon-badge {
+        width: 34px;
+        height: 34px;
+        font-size: 15px;
+      }
+
+      .masc-title {
+        font-size: 13px;
+      }
+
+      .masc-badge {
+        font-size: 10px;
+        padding: 2px 8px;
+      }
+
+      .masc-desc {
+        font-size: 12px;
+      }
     }
   }
 }

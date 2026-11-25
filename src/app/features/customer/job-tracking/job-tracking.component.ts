@@ -9,6 +9,7 @@ import { ReportService } from '../../../core/services/report.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { JobChatComponent } from '../../../shared/components/job-chat/job-chat.component';
+import { CategoryIconComponent } from '../../../shared/components/category-icon/category-icon.component';
 import { ChatService } from '../../../core/services/chat.service';
 import { Job, JobStatus } from '../../../core/models/job.model';
 import { WorkerProfile } from '../../../core/models/worker.model';
@@ -28,7 +29,7 @@ interface TimelineStep {
 @Component({
   selector: 'app-job-tracking',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, BnNumberPipe, TakaPipe, MaskPhonePipe, TimeAgoPipe, TranslatePipe, JobChatComponent],
+  imports: [CommonModule, RouterModule, FormsModule, BnNumberPipe, TakaPipe, MaskPhonePipe, TimeAgoPipe, TranslatePipe, JobChatComponent, CategoryIconComponent],
   templateUrl: './job-tracking.component.html',
   styleUrl: './job-tracking.component.scss'
 })
@@ -44,12 +45,10 @@ export class JobTrackingComponent implements OnInit, OnDestroy {
   public isEn = computed(() => this.theme.currentLang() === 'en');
 
   public currentUser = this.authService.currentUser;
-  public isAdmin = this.authService.isAdmin;
   public isWorker = this.authService.isWorker;
   public jobId = signal<string>('');
   public showCancelModal = signal<boolean>(false);
   public cancelReason = signal<string>('দেরি হচ্ছে');
-  public isSimulating = signal<boolean>(false);
   public copySuccess = signal<boolean>(false);
 
   // New features: Chat, Share trip, Dispute Report
@@ -97,7 +96,7 @@ export class JobTrackingComponent implements OnInit, OnDestroy {
   });
 
   public categoryIcon = computed<string>(() => {
-    return this.jobCategory()?.icon || '🔧';
+    return this.jobCategory()?.icon || 'pi pi-wrench';
   });
 
   public matchingDemoWorkers = computed<WorkerProfile[]>(() => {
@@ -111,24 +110,23 @@ export class JobTrackingComponent implements OnInit, OnDestroy {
   // Dynamic Timeline configuration matching the job's category and current language
   public timelineSteps = computed<TimelineStep[]>(() => {
     const cat = this.categoryLabel();
-    const icon = this.categoryIcon();
     if (this.isEn()) {
       return [
-        { key: 'searching', titleBn: 'Job Request Posted', descBn: `Open request — waiting for ${cat}`, icon: '📢' },
-        { key: 'accepted', titleBn: `${cat} Accepted`, descBn: `First ${cat} grabbed the job`, icon },
-        { key: 'on_the_way', titleBn: 'On the Way', descBn: `${cat} is heading to your address`, icon: '🛵' },
-        { key: 'arrived', titleBn: 'Arrived', descBn: `${cat} has arrived at your location`, icon: '📍' },
-        { key: 'in_progress', titleBn: 'Work in Progress', descBn: 'OTP verified and work has started', icon: '⚡' },
-        { key: 'completed', titleBn: 'Completed', descBn: 'Work finished and bill is ready', icon: '✅' }
+        { key: 'searching', titleBn: 'Request Posted', descBn: `Open request — waiting for ${cat}`, icon: 'pi pi-megaphone' },
+        { key: 'accepted', titleBn: `${cat} Assigned`, descBn: `First ${cat} accepted the job`, icon: 'pi pi-wrench' },
+        { key: 'on_the_way', titleBn: 'On the Way', descBn: `${cat} is heading to your address`, icon: 'pi pi-directions' },
+        { key: 'arrived', titleBn: 'Arrived', descBn: `${cat} has arrived at your location`, icon: 'pi pi-map-marker' },
+        { key: 'in_progress', titleBn: 'In Progress', descBn: 'OTP verified and work has started', icon: 'pi pi-cog' },
+        { key: 'completed', titleBn: 'Completed', descBn: 'Work finished and bill is ready', icon: 'pi pi-check-circle' }
       ];
     }
     return [
-      { key: 'searching', titleBn: 'কাজের চাহিদা পোস্ট', descBn: `উন্মুক্ত রিকোয়েস্ট — ${cat} এর অপেক্ষায়`, icon: '📢' },
-      { key: 'accepted', titleBn: `${cat} গ্রহণ করেছেন`, descBn: `প্রথম ${cat} কাজটি গ্রহণ (Grab) করেছেন`, icon },
-      { key: 'on_the_way', titleBn: 'রওনা দিয়েছেন', descBn: `${cat} আপনার ঠিকানার পথে রয়েছেন`, icon: '🛵' },
-      { key: 'arrived', titleBn: 'পৌঁছে গেছেন', descBn: `${cat} আপনার বাড়িতে উপস্থিত হয়েছেন`, icon: '📍' },
-      { key: 'in_progress', titleBn: 'কাজ চলছে', descBn: 'ওটিপি যাচাই শেষে কাজ শুরু হয়েছে', icon: '⚡' },
-      { key: 'completed', titleBn: 'সম্পন্ন', descBn: 'কাজ সফলভাবে শেষ হয়েছে ও বিল প্রস্তুত', icon: '✅' }
+      { key: 'searching', titleBn: 'চাহিদা পোস্ট', descBn: `উন্মুক্ত রিকোয়েস্ট — ${cat} এর অপেক্ষায়`, icon: 'pi pi-megaphone' },
+      { key: 'accepted', titleBn: `${cat} নিযুক্ত`, descBn: `প্রথম ${cat} কাজটি গ্রহণ করেছেন`, icon: 'pi pi-wrench' },
+      { key: 'on_the_way', titleBn: 'রওনা দিয়েছেন', descBn: `${cat} আপনার ঠিকানার পথে রয়েছেন`, icon: 'pi pi-directions' },
+      { key: 'arrived', titleBn: 'পৌঁছে গেছেন', descBn: `${cat} আপনার বাড়িতে উপস্থিত হয়েছেন`, icon: 'pi pi-map-marker' },
+      { key: 'in_progress', titleBn: 'কাজ চলছে', descBn: 'ওটিপি যাচাই শেষে কাজ শুরু হয়েছে', icon: 'pi pi-cog' },
+      { key: 'completed', titleBn: 'সম্পন্ন', descBn: 'কাজ সফলভাবে শেষ হয়েছে ও বিল প্রস্তুত', icon: 'pi pi-check-circle' }
     ];
   });
 
@@ -340,33 +338,6 @@ export class JobTrackingComponent implements OnInit, OnDestroy {
     if (!res.success) {
       alert(res.message);
     }
-  }
-
-  // Demo simulator helper to advance through stages
-  public advanceSimulationStep(): void {
-    const job = this.currentJob();
-    if (!job) return;
-
-    const currentStatus = job.status;
-    let nextStatus: JobStatus = 'accepted';
-
-    if (currentStatus === 'searching' || currentStatus === 'pending') {
-      // Auto assign Rahim if none
-      const rahim = this.workerService.workers()[0];
-      this.jobService.acceptJob(job.id, rahim.uid, rahim.name, rahim.phone, rahim.photoURL);
-      return;
-    } else if (currentStatus === 'accepted') {
-      nextStatus = 'on_the_way';
-    } else if (currentStatus === 'on_the_way') {
-      nextStatus = 'arrived';
-    } else if (currentStatus === 'arrived') {
-      nextStatus = 'in_progress';
-    } else if (currentStatus === 'in_progress') {
-      this.jobService.completeJob(job.id, job.estimatedPrice || 450, 0);
-      return;
-    }
-
-    this.jobService.updateJobStatus(job.id, nextStatus);
   }
 
   public getStatusText(status?: JobStatus): string {
