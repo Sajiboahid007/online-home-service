@@ -128,6 +128,52 @@
       <!-- ============================================== -->
       @if (currentStep() === 1) {
         <div class="step-content-pane">
+          <!-- Google SSO Sign-Up Banner -->
+          <div class="sso-signup-box">
+            @if (!googleAccount()) {
+              <button
+                type="button"
+                class="btn-google-sso"
+                (click)="signUpWithGoogle()"
+                [disabled]="isLoading() || isSsoLoading()"
+              >
+                @if (isSsoLoading()) {
+                  <span class="spinner spinner-dark"></span>
+                  <span>{{ isEn() ? 'Connecting Google Account...' : 'Google অ্যাকাউন্ট সংযুক্ত হচ্ছে...' }}</span>
+                } @else {
+                  <svg class="google-logo" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"/>
+                    <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"/>
+                  </svg>
+                  <span>{{ isEn() ? 'Sign up with Google' : 'Google অ্যাকাউন্ট দিয়ে সাইন আপ করুন' }}</span>
+                }
+              </button>
+              <p class="sso-box-hint">
+                {{ isEn() ? 'Link your Google account to auto-fill your name and profile photo.' : 'আপনার Google অ্যাকাউন্ট যুক্ত করে নাম ও প্রোফাইল ছবি সহজেই পূরণ করুন।' }}
+              </p>
+            } @else {
+              <div class="google-connected-card">
+                <div class="gc-left">
+                  @if (googleAccount()?.photoURL) {
+                    <img [src]="googleAccount()?.photoURL" alt="Google Avatar" class="gc-avatar" />
+                  } @else {
+                    <span class="gc-avatar-fallback">G</span>
+                  }
+                  <div class="gc-meta">
+                    <span class="gc-badge">✓ {{ isEn() ? 'Google Account Linked' : 'Google অ্যাকাউন্ট সংযুক্ত' }}</span>
+                    <strong class="gc-name">{{ googleAccount()?.name || name() }}</strong>
+                    <span class="gc-email">{{ googleAccount()?.email }}</span>
+                  </div>
+                </div>
+                <button type="button" class="btn-unlink-google" (click)="unlinkGoogleAccount()">
+                  {{ isEn() ? 'Switch Account' : 'পরিবর্তন করুন' }}
+                </button>
+              </div>
+            }
+          </div>
+
           <div class="pane-header">
             <h2 class="pane-title">ধাপ ১: ব্যক্তিগত ও মৌলিক তথ্য</h2>
             <p class="pane-desc">আপনার পরিচিতি তথ্য দিন যা কাস্টমাররা প্ল্যাটফর্মে দেখতে পাবেন।</p>
@@ -184,7 +230,11 @@
             <div class="form-group">
               <label class="form-label">প্রোফাইল ছবি</label>
               <div class="avatar-upload-row">
-                <img [src]="photoURL()" alt="Profile Preview" class="avatar-preview-img" />
+                @if (photoURL()) {
+                  <img [src]="photoURL()" alt="Profile Preview" class="avatar-preview-img" />
+                } @else {
+                  <div class="avatar-preview-img" style="display:flex;align-items:center;justify-content:center;background:#f1f5f9;font-size:24px;">👤</div>
+                }
                 <div class="upload-controls">
                   <label class="btn-upload-file">
                     📷 ছবি পরিবর্তন করুন
@@ -351,16 +401,20 @@
             <div class="coord-header">
               <span class="coord-icon">🧭</span>
               <span class="coord-title">চিহ্নিত স্থানাঙ্ক (GeoPoint Pin)</span>
-              <span class="coord-status">✓ পিন নিশ্চিত</span>
+              @if (lat() && lng()) {
+                <span class="coord-status">✓ পিন নিশ্চিত</span>
+              } @else {
+                <span class="coord-status" style="background:#fef3c7;color:#92400e;">অনির্ধারিত</span>
+              }
             </div>
             <div class="coords-numbers-grid">
               <div class="coord-box">
                 <span class="coord-label">Latitude (অক্ষাংশ)</span>
-                <span class="coord-value">{{ lat() | bnNumber }}° N</span>
+                <span class="coord-value">{{ lat() ? ((lat() | bnNumber) + '° N') : '--' }}</span>
               </div>
               <div class="coord-box">
                 <span class="coord-label">Longitude (দ্রাঘিমাংশ)</span>
-                <span class="coord-value">{{ lng() | bnNumber }}° E</span>
+                <span class="coord-value">{{ lng() ? ((lng() | bnNumber) + '° E') : '--' }}</span>
               </div>
             </div>
           </div>
@@ -369,7 +423,8 @@
           <div class="form-grid">
             <div class="form-group">
               <label for="w-area" class="form-label">সার্ভিস জোন / এলাকা <span class="required">*</span></label>
-              <select id="w-area" class="form-control" [(ngModel)]="areaId" name="areaId">
+              <select id="w-area" class="form-control" [(ngModel)]="areaId" name="areaId" required>
+                <option value="">{{ isEn() ? '-- Select your area --' : '-- এলাকা নির্বাচন করুন --' }}</option>
                 @for (area of areas(); track area.id) {
                   <option [value]="area.id">{{ area.zoneName }} ({{ area.upazila }}, {{ area.district }})</option>
                 }

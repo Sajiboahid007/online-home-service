@@ -90,19 +90,29 @@
           <div class="session-info">
             <span class="avatar-ring">👤</span>
             <div>
-              <p class="logged-text">বর্তমান সেশন: <strong>{{ currentUser()?.name }}</strong></p>
-              <span class="role-pill">{{ currentUser()?.role === 'superadmin' ? 'সুপার অ্যাডমিন' : currentUser()?.role === 'admin' ? 'সাভার অ্যাডমিন' : currentUser()?.role === 'worker' ? 'ওয়ার্কার' : 'কাস্টমার' }}</span>
+              <p class="logged-text">{{ isEn() ? 'Active session:' : 'বর্তমান সেশন:' }} <strong>{{ currentUser()?.name }}</strong></p>
+              <span class="role-pill">
+                {{
+                  currentUser()?.role === 'superadmin'
+                    ? (isEn() ? 'Super Admin' : 'সুপার অ্যাডমিন')
+                    : currentUser()?.role === 'admin'
+                      ? (isEn() ? 'Savar Admin' : 'সাভার অ্যাডমিন')
+                      : currentUser()?.role === 'worker'
+                        ? (isEn() ? 'Worker' : 'ওয়ার্কার')
+                        : (isEn() ? 'Customer' : 'কাস্টমার')
+                }}
+              </span>
             </div>
           </div>
           <div class="session-actions">
             @if (currentUser()?.role === 'superadmin' || currentUser()?.role === 'admin') {
-              <a routerLink="/admin" class="btn-go-dash">অ্যাডমিন প্যানেল ➔</a>
+              <a routerLink="/admin" class="btn-go-dash">{{ isEn() ? 'Admin Panel ➔' : 'অ্যাডমিন প্যানেল ➔' }}</a>
             } @else if (currentUser()?.role === 'worker') {
-              <a routerLink="/worker" class="btn-go-dash">ওয়ার্কার ড্যাশবোর্ড ➔</a>
+              <a routerLink="/worker" class="btn-go-dash">{{ isEn() ? 'Worker Dashboard ➔' : 'ওয়ার্কার ড্যাশবোর্ড ➔' }}</a>
             } @else {
-              <a routerLink="/customer" class="btn-go-dash">কাস্টমার পোর্টাল ➔</a>
+              <a routerLink="/customer" class="btn-go-dash">{{ isEn() ? 'Customer Portal ➔' : 'কাস্টমার পোর্টাল ➔' }}</a>
             }
-            <button type="button" class="btn-logout-link" (click)="authService.logout()">লগআউট</button>
+            <button type="button" class="btn-logout-link" (click)="authService.logout()">{{ isEn() ? 'Logout' : 'লগআউট' }}</button>
           </div>
         </div>
       }
@@ -122,195 +132,216 @@
         </div>
       }
 
-      <!-- STEP 1: Phone Input Screen -->
-      @if (!otpSent()) {
-        <div class="form-wrapper">
-          <h2 class="form-heading">{{ 'মোবাইল নম্বর দিয়ে প্রবেশ করুন' | t }}</h2>
-          <p class="form-subtext">{{ 'আপনার ফোন নম্বরে একটি ৬-সংখ্যার ওটিপি কোড পাঠানো হবে।' | t }}</p>
+      <!-- Side-by-Side Responsive Split Grid -->
+      <div class="login-split-grid">
+        <!-- LEFT COLUMN: Mobile OTP Login / Verification -->
+        <section class="login-col login-left-col">
+          <!-- STEP 1: Phone Input Screen -->
+          @if (!otpSent()) {
+            <div class="form-wrapper">
+              <h2 class="form-heading">{{ 'মোবাইল নম্বর দিয়ে প্রবেশ করুন' | t }}</h2>
+              <p class="form-subtext">{{ 'আপনার ফোন নম্বরে একটি ৬-সংখ্যার ওটিপি কোড পাঠানো হবে।' | t }}</p>
 
-          <!-- Quick Account Preset Selector Dropdown -->
-          <div class="form-group preset-group">
-            <label for="preset-select" class="form-label preset-label">
-              <span>⚡ ডেমো অ্যাকাউন্ট বেছে নিন (অটো-ফিল নম্বর):</span>
-              <button type="button" class="link-directory-btn" (click)="openDirectoryModal()">সবগুলো দেখুন</button>
-            </label>
-            <select id="preset-select" class="form-control preset-select-control" (change)="onPresetSelect($event)">
-              <option value="">-- ডেমো কাস্টমার বা ইউজার নির্বাচন করুন --</option>
-              <optgroup label="👤 নিবন্ধিত কাস্টমারবৃন্দ (Firebase DB)">
-                @for (acc of demoAccounts; track acc.id) {
-                  @if (acc.category === 'customer') {
-                    <option [value]="acc.phone">{{ acc.name }} — {{ acc.phone }} ({{ acc.area }})</option>
+              <form (ngSubmit)="sendOtp()" class="auth-form">
+                <div class="form-group">
+                  <label for="phone-input" class="form-label">{{ 'মোবাইল নম্বর' | t }}</label>
+                  <div class="phone-input-group">
+                    <span class="country-prefix">
+                      <span class="bd-flag">🇧🇩</span> {{ isEn() ? '+880' : '+৮৮০' }}
+                    </span>
+                    <input
+                      id="phone-input"
+                      type="tel"
+                      class="form-control phone-control"
+                      placeholder="01XXXXXXXXX"
+                      [(ngModel)]="phone"
+                      name="phone"
+                      maxlength="11"
+                      autocomplete="tel"
+                      [disabled]="isLoading()"
+                      required
+                    />
+                  </div>
+                  <span class="field-hint">
+                    {{ isEn()
+                      ? 'Enter your 11-digit Bangladeshi mobile number (e.g. 017XXXXXXXX)'
+                      : 'আপনার ১১ ডিজিটের বাংলাদেশি মোবাইল নম্বর লিখুন (যেমন: 017XXXXXXXX)' }}
+                  </span>
+                </div>
+
+                <button type="submit" class="btn-primary-action" [disabled]="isLoading()">
+                  @if (isLoading()) {
+                    <span class="spinner"></span>
+                    <span>{{ isEn() ? 'Sending OTP...' : 'ওটিপি পাঠানো হচ্ছে...' }}</span>
+                  } @else {
+                    <span>{{ 'ওটিপি কোড পাঠান' | t }}</span>
+                    <span class="btn-arrow">➔</span>
                   }
-                }
-              </optgroup>
-              <optgroup label="🔧 নিবন্ধিত কারিগরবৃন্দ (Firebase DB)">
-                @for (acc of demoAccounts; track acc.id) {
-                  @if (acc.category === 'worker') {
-                    <option [value]="acc.phone">{{ acc.name }} — {{ acc.phone }} ({{ acc.area }})</option>
-                  }
-                }
-              </optgroup>
-              <optgroup label="👑 অ্যাডমিনবৃন্দ (Firebase DB)">
-                @for (acc of demoAccounts; track acc.id) {
-                  @if (acc.category === 'admin') {
-                    <option [value]="acc.phone">{{ acc.name }} — {{ acc.phone }}</option>
-                  }
-                }
-              </optgroup>
-            </select>
-          </div>
-
-          <form (ngSubmit)="sendOtp()" class="auth-form">
-            <div class="form-group">
-              <label for="phone-input" class="form-label">মোবাইল নম্বর</label>
-              <div class="phone-input-group">
-                <span class="country-prefix">
-                  <span class="bd-flag">🇧🇩</span> +৮৮০
-                </span>
-                <input
-                  id="phone-input"
-                  type="tel"
-                  class="form-control phone-control"
-                  placeholder="01XXXXXXXXX"
-                  [(ngModel)]="phone"
-                  name="phone"
-                  maxlength="11"
-                  autocomplete="tel"
-                  [disabled]="isLoading()"
-                  required
-                />
-              </div>
-              <span class="field-hint">যেকোনো নিবন্ধিত নম্বর লিখুন (যেমন: তানভীর 01712345678, ফারহানা 01912345670, সাব্বির 01819876500)</span>
-            </div>
-
-            <button type="submit" class="btn-primary-action" [disabled]="isLoading()">
-              @if (isLoading()) {
-                <span class="spinner"></span>
-                <span>ওটিপি পাঠানো হচ্ছে...</span>
-              } @else {
-                <span>ওটিপি কোড পাঠান</span>
-                <span class="btn-arrow">➔</span>
-              }
-            </button>
-          </form>
-        </div>
-      }
-
-      <!-- STEP 2: OTP Verification Screen -->
-      @if (otpSent()) {
-        <div class="form-wrapper otp-wrapper">
-          <div class="otp-header">
-            <h2 class="form-heading">ওটিপি যাচাই করুন</h2>
-            <p class="form-subtext">
-              <strong>+৮৮০ {{ phone() }}</strong> নম্বরে প্রেরিত কোডটি লিখুন।
-            </p>
-            <button type="button" class="btn-change-phone" (click)="changePhone()">
-              ✏️ নম্বর পরিবর্তন করুন
-            </button>
-          </div>
-
-          <!-- In-App OTP Display (Only visible to current user, no SMS API required) -->
-          <div class="simulation-banner">
-            <div class="sim-content">
-              <span class="sim-icon">🔐</span>
-              <div class="sim-text">
-                <strong>আপনার ওটিপি কোড:</strong> {{ generatedOtp() }} (শুধুমাত্র আপনার জন্য দৃশ্যমান)
-              </div>
-            </div>
-            <button type="button" class="btn-autofill" (click)="autoFillOtp()">
-              ⚡ অটো-ফিল ওটিপি
-            </button>
-          </div>
-
-          <form (ngSubmit)="verifyOtp()" class="auth-form">
-            <div class="form-group">
-              <label class="form-label">৬-ডিজিটের কোড লিখুন</label>
-              <div class="otp-inputs-grid" (paste)="onOtpPaste($event)">
-                @for (d of otpDigits(); track $index) {
-                  <input
-                    [id]="'otp-box-' + $index"
-                    type="text"
-                    inputmode="numeric"
-                    maxlength="1"
-                    class="otp-digit-box"
-                    [value]="d"
-                    (input)="onOtpInput($event, $index)"
-                    (keydown)="onOtpKeyDown($event, $index)"
-                    [disabled]="isLoading()"
-                  />
-                }
-              </div>
-            </div>
-
-            <!-- Resend Timer -->
-            <div class="resend-row">
-              @if (countdown() > 0) {
-                <span class="countdown-text">
-                  পুনরায় কোড পাঠানোর সময় বাকি: <strong>{{ countdown() | bnNumber }}</strong> সেকেন্ড
-                </span>
-              } @else {
-                <button type="button" class="btn-resend" (click)="resendOtp()" [disabled]="isLoading()">
-                  🔄 কোড পুনরায় পাঠান
                 </button>
-              }
+              </form>
             </div>
+          }
 
-            <button type="submit" class="btn-primary-action" [disabled]="isLoading() || otpString().length < 6">
-              @if (isLoading()) {
-                <span class="spinner"></span>
-                <span>যাচাই করা হচ্ছে...</span>
+          <!-- STEP 2: OTP Verification Screen -->
+          @if (otpSent()) {
+            <div class="form-wrapper otp-wrapper">
+              <div class="otp-header">
+                <h2 class="form-heading">{{ 'ওটিপি যাচাই করুন' | t }}</h2>
+                <p class="form-subtext">
+                  <strong>{{ isEn() ? '+880' : '+৮৮০' }} {{ phone() }}</strong>
+                  {{ isEn() ? '— enter the 6-digit code generated below.' : 'নম্বরে প্রেরিত কোডটি লিখুন।' }}
+                </p>
+                <button type="button" class="btn-change-phone" (click)="changePhone()">
+                  ✏️ {{ isEn() ? 'Change phone number' : 'নম্বর পরিবর্তন করুন' }}
+                </button>
+              </div>
+
+              <!-- In-App OTP Display (Only visible to current user, no SMS API required) -->
+              <div class="simulation-banner">
+                <div class="sim-content">
+                  <span class="sim-icon">🔐</span>
+                  <div class="sim-text">
+                    <strong>{{ isEn() ? 'Your OTP Code:' : 'আপনার ওটিপি কোড:' }}</strong> {{ generatedOtp() }}
+                    ({{ isEn() ? 'Visible only to you' : 'শুধুমাত্র আপনার জন্য দৃশ্যমান' }})
+                  </div>
+                </div>
+                <button type="button" class="btn-autofill" (click)="autoFillOtp()">
+                  ⚡ {{ isEn() ? 'Auto-fill OTP' : 'অটো-ফিল ওটিপি' }}
+                </button>
+              </div>
+
+              <form (ngSubmit)="verifyOtp()" class="auth-form">
+                <div class="form-group">
+                  <label class="form-label">{{ isEn() ? 'Enter 6-digit code' : '৬-ডিজিটের কোড লিখুন' }}</label>
+                  <div class="otp-inputs-grid" (paste)="onOtpPaste($event)">
+                    @for (d of otpDigits(); track $index) {
+                      <input
+                        [id]="'otp-box-' + $index"
+                        type="text"
+                        inputmode="numeric"
+                        maxlength="1"
+                        class="otp-digit-box"
+                        [value]="d"
+                        (input)="onOtpInput($event, $index)"
+                        (keydown)="onOtpKeyDown($event, $index)"
+                        [disabled]="isLoading()"
+                      />
+                    }
+                  </div>
+                </div>
+
+                <!-- Resend Timer -->
+                <div class="resend-row">
+                  @if (countdown() > 0) {
+                    <span class="countdown-text">
+                      {{ isEn() ? 'Resend available in' : 'পুনরায় কোড পাঠানোর সময় বাকি:' }}
+                      <strong>{{ countdown() | bnNumber }}</strong>
+                      {{ isEn() ? 'seconds' : 'সেকেন্ড' }}
+                    </span>
+                  } @else {
+                    <button type="button" class="btn-resend" (click)="resendOtp()" [disabled]="isLoading()">
+                      🔄 {{ isEn() ? 'Resend Code' : 'কোড পুনরায় পাঠান' }}
+                    </button>
+                  }
+                </div>
+
+                <button type="submit" class="btn-primary-action" [disabled]="isLoading() || otpString().length < 6">
+                  @if (isLoading()) {
+                    <span class="spinner"></span>
+                    <span>{{ isEn() ? 'Verifying...' : 'যাচাই করা হচ্ছে...' }}</span>
+                  } @else {
+                    <span>{{ 'যাচাই করুন ও প্রবেশ করুন' | t }}</span>
+                    <span class="btn-arrow">✓</span>
+                  }
+                </button>
+              </form>
+            </div>
+          }
+        </section>
+
+        <!-- CENTER SPLIT DIVIDER -->
+        <div class="split-divider" aria-hidden="true">
+          <span class="split-line"></span>
+          <span class="split-or-pill">{{ isEn() ? 'OR' : 'অথবা' }}</span>
+          <span class="split-line"></span>
+        </div>
+
+        <!-- RIGHT COLUMN: Google SSO & New Account Registration -->
+        <section class="login-col login-right-col">
+          <!-- Google Sign-In Section -->
+          <div class="sso-section">
+            <div class="sso-header-row">
+              <span class="sso-title">{{ isEn() ? 'Quick Sign-In' : 'দ্রুত সাইন-ইন' }}</span>
+            </div>
+            <button
+              type="button"
+              class="btn-google-sso"
+              (click)="signInWithGoogle()"
+              [disabled]="isLoading() || isSsoLoading()"
+            >
+              @if (isSsoLoading()) {
+                <span class="spinner spinner-dark"></span>
+                <span>{{ isEn() ? 'Connecting with Google...' : 'Google-এর সাথে সংযুক্ত হচ্ছে...' }}</span>
               } @else {
-                <span>যাচাই করুন ও প্রবেশ করুন</span>
-                <span class="btn-arrow">✓</span>
+                <svg class="google-logo" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"/>
+                  <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"/>
+                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"/>
+                </svg>
+                <span>{{ isEn() ? 'Continue with Google' : 'Google দিয়ে প্রবেশ করুন' }}</span>
               }
             </button>
-          </form>
-        </div>
-      }
-
-      <!-- Divider -->
-      <div class="or-divider">
-        <span class="divider-line"></span>
-        <span class="divider-text">{{ 'নতুন অ্যাকাউন্ট খুলুন' | t }}</span>
-        <span class="divider-line"></span>
-      </div>
-
-      <!-- Registration Options Cards -->
-      <div class="registration-cards-grid">
-        <a routerLink="/auth/register-customer" class="reg-card customer-card">
-          <div class="reg-icon-box">🏠</div>
-          <div class="reg-card-content">
-            <h3 class="reg-card-title">{{ 'কাস্টমার রেজিস্ট্রেশন' | t }}</h3>
-            <p class="reg-card-desc">{{ isEn() ? 'Book trusted home service professionals' : 'বাসাবাড়ির কাজের জন্য বিশ্বস্ত কারিগর বুকিং করুন' }}</p>
+            <p class="sso-hint">
+              {{ isEn() ? 'Sign in or create a new customer account instantly with Google.' : 'Google অ্যাকাউন্ট দিয়ে ১-ক্লিকে লগইন বা নতুন অ্যাকাউন্ট তৈরি করুন।' }}
+            </p>
           </div>
-          <span class="card-chevron">›</span>
-        </a>
 
-        <a routerLink="/auth/register-worker" class="reg-card worker-card">
-          <div class="reg-icon-box worker-icon-box">🔧</div>
-          <div class="reg-card-content">
-            <h3 class="reg-card-title">{{ 'ওয়ার্কার হিসেবে যুক্ত হন' | t }}</h3>
-            <p class="reg-card-desc">{{ isEn() ? 'Work flexibility, fair earnings & live job alerts' : 'কাজের স্বাধীনতা, সম্মানজনক আয় ও লাইভ জব রিকোয়েস্ট' }}</p>
+          <!-- Divider -->
+          <div class="or-divider compact-divider">
+            <span class="divider-line"></span>
+            <span class="divider-text">{{ 'নতুন অ্যাকাউন্ট খুলুন' | t }}</span>
+            <span class="divider-line"></span>
           </div>
-          <span class="card-chevron">›</span>
-        </a>
+
+          <!-- Registration Options Cards -->
+          <div class="registration-cards-grid">
+            <a routerLink="/auth/register-customer" class="reg-card customer-card">
+              <div class="reg-icon-box">🏠</div>
+              <div class="reg-card-content">
+                <h3 class="reg-card-title">{{ 'কাস্টমার রেজিস্ট্রেশন' | t }}</h3>
+                <p class="reg-card-desc">{{ isEn() ? 'Book trusted home service professionals' : 'বাসাবাড়ির কাজের জন্য বিশ্বস্ত কারিগর বুকিং করুন' }}</p>
+              </div>
+              <span class="card-chevron">›</span>
+            </a>
+
+            <a routerLink="/auth/register-worker" class="reg-card worker-card">
+              <div class="reg-icon-box worker-icon-box">🔧</div>
+              <div class="reg-card-content">
+                <h3 class="reg-card-title">{{ 'ওয়ার্কার হিসেবে যুক্ত হন' | t }}</h3>
+                <p class="reg-card-desc">{{ isEn() ? 'Work flexibility, fair earnings & live job alerts' : 'কাজের স্বাধীনতা, সম্মানজনক আয় ও লাইভ জব রিকোয়েস্ট' }}</p>
+              </div>
+              <span class="card-chevron">›</span>
+            </a>
+          </div>
+        </section>
       </div>
 
       <!-- Trust Badges Footer -->
       <div class="trust-footer">
         <div class="trust-item">
           <span class="trust-icon">🛡️</span>
-          <span>NID ভেরিফাইড কারিগর</span>
+          <span>{{ isEn() ? 'NID Verified Workers' : 'NID ভেরিফাইড কারিগর' }}</span>
         </div>
         <div class="trust-dot">•</div>
         <div class="trust-item">
           <span class="trust-icon">📍</span>
-          <span>লাইভ ট্র্যাকিং</span>
+          <span>{{ isEn() ? 'Live Tracking' : 'লাইভ ট্র্যাকিং' }}</span>
         </div>
         <div class="trust-dot">•</div>
         <div class="trust-item">
           <span class="trust-icon">⚡</span>
-          <span>জরুরি সার্ভিস</span>
+          <span>{{ isEn() ? 'Emergency Service' : 'জরুরি সার্ভিস' }}</span>
         </div>
       </div>
     </div>

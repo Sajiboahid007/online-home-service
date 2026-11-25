@@ -3,20 +3,80 @@
     <div class="register-card">
       <!-- Card Header -->
       <div class="card-header">
-        <a routerLink="/login" class="back-link">
-          <span class="back-arrow">←</span>
-          <span>লগইনে ফিরে যান</span>
-        </a>
+        <div class="header-top-bar">
+          <a routerLink="/login" class="back-link">
+            <span class="back-arrow">←</span>
+            <span>{{ isEn() ? 'Back to Login' : 'লগইনে ফিরে যান' }}</span>
+          </a>
+          <app-lang-toggle></app-lang-toggle>
+        </div>
         <div class="header-content">
           <div class="brand-badge">🏠</div>
-          <h1 class="page-title">কাস্টমার রেজিস্ট্রেশন</h1>
-          <p class="page-subtitle">দ্রুত ও সহজে বাসাবাড়ির বিশ্বস্ত সেবা গ্রহণ করুন</p>
+          <h1 class="page-title">{{ isEn() ? 'Customer Registration' : 'কাস্টমার রেজিস্ট্রেশন' }}</h1>
+          <p class="page-subtitle">{{ isEn() ? 'Book trusted home service professionals quickly & easily' : 'দ্রুত ও সহজে বাসাবাড়ির বিশ্বস্ত সেবা গ্রহণ করুন' }}</p>
         </div>
 
         <!-- 1-Click Demo Fill -->
         <button type="button" class="btn-demo-fill" (click)="fillDemoData()">
-          ⚡ ডেমো তথ্য পূরণ করুন
+          ⚡ {{ isEn() ? 'Fill Demo Data' : 'ডেমো তথ্য পূরণ করুন' }}
         </button>
+      </div>
+
+      <!-- Google SSO Sign-Up Card -->
+      <div class="sso-signup-box">
+        @if (!googleAccount()) {
+          <button
+            type="button"
+            class="btn-google-sso"
+            (click)="signUpWithGoogle()"
+            [disabled]="isLoading() || isSsoLoading()"
+          >
+            @if (isSsoLoading()) {
+              <span class="spinner spinner-dark"></span>
+              <span>{{ isEn() ? 'Connecting Google Account...' : 'Google অ্যাকাউন্ট সংযুক্ত হচ্ছে...' }}</span>
+            } @else {
+              <svg class="google-logo" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"/>
+                <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"/>
+              </svg>
+              <span>{{ isEn() ? 'Sign up with Google' : 'Google অ্যাকাউন্ট দিয়ে সাইন আপ করুন' }}</span>
+            }
+          </button>
+          <p class="sso-box-hint">
+            {{ isEn() ? 'Quickly fill in your name and email using your Google account.' : 'Google অ্যাকাউন্ট দিয়ে সহজেই আপনার নাম ও ইমেইল পূরণ করুন।' }}
+          </p>
+        } @else {
+          <div class="google-connected-card">
+            <div class="gc-left">
+              @if (googleAccount()?.photoURL) {
+                <img [src]="googleAccount()?.photoURL" alt="Google Avatar" class="gc-avatar" />
+              } @else {
+                <span class="gc-avatar-fallback">G</span>
+              }
+              <div class="gc-meta">
+                <span class="gc-badge">✓ {{ isEn() ? 'Google Account Linked' : 'Google অ্যাকাউন্ট সংযুক্ত' }}</span>
+                <strong class="gc-name">{{ googleAccount()?.name || name() }}</strong>
+                <span class="gc-email">{{ googleAccount()?.email }}</span>
+              </div>
+            </div>
+            <div class="gc-actions">
+              <button type="button" class="btn-quick-google" (click)="quickCompleteGoogleCustomer()" [disabled]="isLoading()">
+                ⚡ {{ isEn() ? 'Instant Continue' : '১-ক্লিকে প্রবেশ' }}
+              </button>
+              <button type="button" class="btn-unlink-google" (click)="unlinkGoogleAccount()">
+                {{ isEn() ? 'Switch' : 'পরিবর্তন' }}
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="form-or-divider">
+        <span class="line"></span>
+        <span class="text">{{ isEn() ? 'OR COMPLETE PROFILE DETAILS' : 'অথবা বিস্তারিত তথ্য পূরণ করুন' }}</span>
+        <span class="line"></span>
       </div>
 
       <!-- Alerts -->
@@ -98,7 +158,8 @@
           <div class="form-grid">
             <div class="form-group">
               <label for="cust-area" class="form-label">সার্ভিস জোন / এলাকা <span class="required">*</span></label>
-              <select id="cust-area" class="form-control" [(ngModel)]="areaId" name="areaId">
+              <select id="cust-area" class="form-control" [(ngModel)]="areaId" name="areaId" required>
+                <option value="">{{ isEn() ? '-- Select your area --' : '-- এলাকা নির্বাচন করুন --' }}</option>
                 @for (area of areas(); track area.id) {
                   <option [value]="area.id">{{ area.zoneName }} ({{ area.upazila }})</option>
                 }

@@ -1,8 +1,8 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService, PendingGoogleProfile } from '../../../core/services/auth.service';
 import { WorkerService } from '../../../core/services/worker.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { AreaService } from '../../../core/services/area.service';
@@ -26,7 +26,7 @@ import { doc, setDoc } from 'firebase/firestore';
   templateUrl: './register-worker.component.html',
   styleUrl: './register-worker.component.scss'
 })
-export class RegisterWorkerComponent {
+export class RegisterWorkerComponent implements OnInit {
   private authService = inject(AuthService);
   private workerService = inject(WorkerService);
   private categoryService = inject(CategoryService);
@@ -36,6 +36,8 @@ export class RegisterWorkerComponent {
   private router = inject(Router);
   public theme = inject(ThemeService);
   public isEn = computed(() => this.theme.currentLang() === 'en');
+  public isSsoLoading = this.authService.isSsoLoading;
+  public googleAccount = signal<PendingGoogleProfile | null>(null);
 
   public categories = computed(() =>
     this.categoryService.categories().filter(c => c.isActive).sort((a, b) => a.order - b.order)
@@ -49,16 +51,16 @@ export class RegisterWorkerComponent {
   public errorMessage = signal<string>('');
   public successMessage = signal<string>('');
 
-  // Step 1: Basic Info
-  public name = signal<string>('মো: সালাম হোসেন');
-  public phone = signal<string>('01755667788');
-  public experienceYears = signal<number>(5);
-  public bio = signal<string>(CATEGORY_DEFAULTS['electrician'].defaultBio);
-  public photoURL = signal<string>('https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=150');
+  // Step 1: Basic Info (empty by default so no fake/demo data is saved)
+  public name = signal<string>('');
+  public phone = signal<string>('');
+  public experienceYears = signal<number>(0);
+  public bio = signal<string>('');
+  public photoURL = signal<string>('');
 
   // Step 2: Categories & Skills
-  public selectedCategoryIds = signal<string[]>(['electrician']);
-  public skills = signal<string[]>(CATEGORY_DEFAULTS['electrician'].suggestedSkills.slice(0, 3));
+  public selectedCategoryIds = signal<string[]>([]);
+  public skills = signal<string[]>([]);
   public customSkillInput = signal<string>('');
 
   // Track manual overrides so category changes keep defaults aligned without overwriting user edits
@@ -80,10 +82,10 @@ export class RegisterWorkerComponent {
   });
 
   // Step 3: Mandatory Home Location
-  public homeAddress = signal<string>('সাভার বাজার বাসস্ট্যান্ড রোড, সাভার, ঢাকা');
-  public lat = signal<number>(23.8245);
-  public lng = signal<number>(90.2689);
-  public areaId = signal<string>('savar_bazar');
+  public homeAddress = signal<string>('');
+  public lat = signal<number>(0);
+  public lng = signal<number>(0);
+  public areaId = signal<string>('');
   public isDetectingLocation = signal<boolean>(false);
 
   // Quick preset locations in Savar / Dhaka (areaIds match SeedDataService.defaultAreas)
@@ -96,17 +98,17 @@ export class RegisterWorkerComponent {
   ];
 
   // Step 4: KYC Documents
-  public nidNumber = signal<string>('19902691234567890');
-  public nidFrontURL = signal<string>('https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=400');
-  public nidBackURL = signal<string>('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=400');
-  public selfieURL = signal<string>('https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=400');
+  public nidNumber = signal<string>('');
+  public nidFrontURL = signal<string>('');
+  public nidBackURL = signal<string>('');
+  public selfieURL = signal<string>('');
   public policeClearanceURL = signal<string>('');
 
   // Step 5: Rates & Service Area
-  public rate = signal<number>(CATEGORY_DEFAULTS['electrician'].defaultRate);
-  public rateUnit = signal<RateUnit>(CATEGORY_DEFAULTS['electrician'].rateUnit);
+  public rate = signal<number>(0);
+  public rateUnit = signal<RateUnit>('job');
   public serviceRadiusKm = signal<number>(6);
-  public bkashNumber = signal<string>('01755667788');
+  public bkashNumber = signal<string>('');
   public nagadNumber = signal<string>('');
 
   // Rate Unit Options
@@ -124,6 +126,88 @@ export class RegisterWorkerComponent {
     if (step >= 6) return 100;
     return Math.round(((step - 1) / 5) * 100);
   });
+
+  ngOnInit(): void {
+    const pending = this.authService.pendingGoogleProfile();
+    if (pending) {
+      this.applyGoogleProfile(pending);
+      this.authService.clearPendingGoogleProfile();
+    }
+  }
+
+  private applyGoogleProfile(profile: PendingGoogleProfile): void {
+    this.googleAccount.set(profile);
+    if (profile.name) {
+      this.name.set(profile.name);
+    }
+    if (profile.photoURL) {
+      this.photoURL.set(profile.photoURL);
+    }
+    if (profile.phone) {
+      this.phone.set(profile.phone);
+    }
+  }
+
+  public async signUpWithGoogle(): Promise<void> {
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    const result = await this.authService.signInWithGoogleSSO({
+      intent: 'register_worker',
+      autoCreateCustomer: false
+    });
+
+    if (result.status === 'redirecting') {
+      this.successMessage.set(
+        this.isEn()
+          ? 'Redirecting to Google Sign-In...'
+          : 'Google সাইন-ইনে রিডাইরেক্ট করা হচ্ছে...'
+      );
+      return;
+    }
+
+    if (result.status === 'cancelled' || result.status === 'error') {
+      if (result.error) this.errorMessage.set(result.error);
+      return;
+    }
+
+    if (result.status === 'signed_in') {
+      this.successMessage.set(
+        this.isEn()
+          ? 'Existing worker profile found! Signing you in...'
+          : 'আপনার Google অ্যাকাউন্টে ইতিমধ্যে ওয়ার্কার প্রোফাইল রয়েছে! ড্যাশবোর্ডে নেওয়া হচ্ছে...'
+      );
+      setTimeout(() => {
+        this.router.navigateByUrl(result.route || '/worker');
+      }, 500);
+      return;
+    }
+
+    if (result.status === 'needs_registration' && result.firebaseUser) {
+      const fb = result.firebaseUser;
+      const pending = this.authService.pendingGoogleProfile() || {
+        uid: fb.uid,
+        name: fb.displayName || '',
+        email: fb.email || '',
+        photoURL: fb.photoURL || '',
+        phone: ''
+      };
+      this.applyGoogleProfile(pending);
+      this.authService.clearPendingGoogleProfile();
+      this.successMessage.set(
+        this.isEn()
+          ? 'Google account connected! Complete the 5 steps to submit your worker application.'
+          : 'Google অ্যাকাউন্ট সংযুক্ত হয়েছে! ৫টি ধাপ সম্পন্ন করে আবেদন জমা দিন।'
+      );
+    }
+  }
+
+  public async unlinkGoogleAccount(): Promise<void> {
+    this.googleAccount.set(null);
+    this.authService.clearPendingGoogleProfile();
+    await this.firebaseService.signOutFirebase();
+    this.successMessage.set('');
+  }
 
   // Step Navigation
   public goToStep(step: number): void {
@@ -169,6 +253,10 @@ export class RegisterWorkerComponent {
 
     // Validation for Step 3: MANDATORY HOME LOCATION
     if (step === 3) {
+      if (!this.areaId()) {
+        this.errorMessage.set('সার্ভিস জোন / এলাকা নির্বাচন করা বাধ্যতামূলক।');
+        return;
+      }
       if (!this.homeAddress().trim()) {
         this.errorMessage.set('বাসার সঠিক ও পূর্ণ ঠিকানা নির্ধারণ করা বাধ্যতামূলক।');
         return;
@@ -348,9 +436,11 @@ export class RegisterWorkerComponent {
     this.isLoading.set(true);
 
     setTimeout(async () => {
-      const authUid = this.firebaseService?.auth?.currentUser?.uid;
+      const google = this.googleAccount();
+      const authUid = google?.uid || this.firebaseService?.auth?.currentUser?.uid;
       const uid = authUid || ('worker_onboard_' + Date.now());
       const cleanPhone = this.phone().replace(/[^0-9]/g, '');
+      const nowIso = new Date().toISOString();
 
       // Create Public Worker Profile
       const workerProfile: WorkerProfile = {
@@ -386,7 +476,7 @@ export class RegisterWorkerComponent {
         cancelRate: 0.0,
         walletBalance: 0,
         commissionDue: 0,
-        portfolio: [this.photoURL()],
+        portfolio: this.photoURL() ? [this.photoURL()] : [],
         createdAt: new Date().toISOString()
       };
 
@@ -415,19 +505,30 @@ export class RegisterWorkerComponent {
         role: 'worker',
         name: workerProfile.name,
         phone: workerProfile.phone,
+        email: google?.email || undefined,
         photoURL: workerProfile.photoURL,
+        authProvider: google ? 'google' : 'phone',
+        googleLinked: !!google,
         status: 'active',
         areaId: workerProfile.areaId,
         rating: 5.0,
         ratingCount: 0,
-        createdAt: workerProfile.createdAt
+        createdAt: workerProfile.createdAt,
+        lastLoginAt: nowIso
       };
 
-      // Persist to Firebase Firestore only when an authenticated Firebase session owns `uid`
+      // Persist to Firebase Firestore when an authenticated Firebase session owns `uid`
       try {
         if (this.firebaseService?.db && this.firebaseService?.auth?.currentUser?.uid === uid) {
-          await setDoc(doc(this.firebaseService.db, 'workers', uid), workerProfile);
-          await setDoc(doc(this.firebaseService.db, 'workerPrivate', uid), workerPrivate);
+          const cleanWorker = Object.fromEntries(
+            Object.entries(workerProfile).filter(([, value]) => value !== undefined)
+          );
+          const cleanPrivate = Object.fromEntries(
+            Object.entries(workerPrivate).filter(([, value]) => value !== undefined)
+          );
+          await setDoc(doc(this.firebaseService.db, 'workers', uid), cleanWorker);
+          await setDoc(doc(this.firebaseService.db, 'workerPrivate', uid), cleanPrivate);
+          await this.authService.syncGoogleUserToFirestore(workerUser);
         }
       } catch (err) {
         console.warn('Failed to persist registered worker to Firestore:', err);

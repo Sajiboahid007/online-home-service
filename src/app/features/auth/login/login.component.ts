@@ -1,7 +1,7 @@
 import { Component, signal, computed, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { WorkerService } from '../../../core/services/worker.service';
 import { SeedDataService } from '../../../core/services/seed-data.service';
@@ -42,15 +42,17 @@ export class LoginComponent implements OnDestroy {
   private seedData = inject(SeedDataService);
   private firebaseService = inject(FirebaseService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   // Form states
-  public phone = signal<string>('01712345678');
+  public phone = signal<string>('');
   public otpDigits = signal<string[]>(['', '', '', '', '', '']);
   public otpString = signal<string>('');
   public generatedOtp = signal<string>('');
   private otpExpiresAt = 0;
   public otpSent = signal<boolean>(false);
   public isLoading = signal<boolean>(false);
+  public isSsoLoading = this.authService.isSsoLoading;
   public errorMessage = signal<string>('');
   public successMessage = signal<string>('');
   public countdown = signal<number>(60);
@@ -636,6 +638,47 @@ export class LoginComponent implements OnDestroy {
     this.closeDirectoryModal();
   }
 
+  public async signInWithGoogle(): Promise<void> {
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || undefined;
+    const result = await this.authService.signInWithGoogleSSO({
+      intent: 'login',
+      autoCreateCustomer: true,
+      returnUrl
+    });
+
+    if (result.status === 'redirecting') {
+      this.successMessage.set(
+        this.isEn()
+          ? 'Redirecting to Google Sign-In...'
+          : 'Google সাইন-ইনে রিডাইরেক্ট করা হচ্ছে...'
+      );
+      return;
+    }
+
+    if (result.status === 'cancelled' || result.status === 'error') {
+      if (result.error) {
+        this.errorMessage.set(result.error);
+      }
+      return;
+    }
+
+    if (result.status === 'signed_in') {
+      this.successMessage.set(
+        this.isEn()
+          ? (result.isNewUser ? 'Google account registered and signed in!' : 'Signed in with Google!')
+          : (result.isNewUser ? 'Google অ্যাকাউন্ট দিয়ে সফলভাবে সাইন-আপ ও লগইন হয়েছে!' : 'Google অ্যাকাউন্ট দিয়ে সফলভাবে লগইন হয়েছে!')
+      );
+      const safeReturnUrl = returnUrl && returnUrl.startsWith('/') && !returnUrl.startsWith('/auth') && !returnUrl.startsWith('/login')
+        ? returnUrl
+        : null;
+      const target = safeReturnUrl || result.route || '/customer';
+      await this.router.navigateByUrl(target);
+    }
+  }
+
   public onPresetSelect(event: Event): void {
     const target = event.target as HTMLSelectElement;
     if (target && target.value) {
@@ -817,7 +860,6 @@ export class LoginComponent implements OnDestroy {
         name: 'কাস্টমার (' + cleanPhone.slice(-4) + ')',
         phone: cleanPhone,
         status: 'active',
-        areaId: 'savar_bazar',
         rating: 5.0,
         ratingCount: 0,
         createdAt: new Date().toISOString()
