@@ -33,7 +33,7 @@
 
       <div class="form-group">
         <label>রেটের একক (Unit)</label>
-        <select [(ngModel)]="rateUnit" class="input-field">
+        <select [ngModel]="rateUnit()" (ngModelChange)="onRateUnitChange($event)" class="input-field">
           <option value="job">প্রতি কাজের জন্য (Per Job)</option>
           <option value="hour">প্রতি ঘণ্টা (Hourly)</option>
           <option value="day">প্রতি দিন (Daily)</option>
@@ -48,7 +48,28 @@
 
       <div class="form-group">
         <label>নিজের সম্পর্কে বিবরণ (Bio)</label>
-        <textarea [(ngModel)]="bio" class="input-field" rows="3" placeholder="আপনার অভিজ্ঞতা ও কাজের ধরন সংক্ষেপে লিখুন..."></textarea>
+        <textarea [ngModel]="bio()" (ngModelChange)="onBioChange($event)" class="input-field" rows="3" placeholder="আপনার অভিজ্ঞতা ও কাজের ধরন সংক্ষেপে লিখুন..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>নির্বাচিত সার্ভিস ক্যাটাগরি (কমপক্ষে ১টি)</label>
+        <div class="category-chips-grid">
+          @for (cat of categories(); track cat.id) {
+            <button
+              type="button"
+              class="cat-toggle-chip"
+              [class.selected]="isCategorySelected(cat.id)"
+              (click)="toggleCategory(cat.id)"
+            >
+              <span>{{ cat.icon }}</span>
+              <span>{{ cat.nameBn }}</span>
+              @if (isCategorySelected(cat.id)) {
+                <i class="pi pi-check-circle"></i>
+              }
+            </button>
+          }
+        </div>
+        <span class="hint-text">অ্যাকাউন্ট তৈরির সময় বা প্রোফাইল থেকে নির্বাচিত ক্যাটাগরি অনুযায়ী আপনি কাজের রিকোয়েস্ট পাবেন</span>
       </div>
 
       <div class="form-group">
@@ -65,6 +86,24 @@
             </span>
           }
         </div>
+        @if (suggestedSkills().length > 0) {
+          <div class="suggested-skills-wrap">
+            <span class="hint-text">নির্বাচিত ক্যাটাগরির প্রস্তাবিত স্কিল (ক্লিক করে যোগ/বাতিল করুন):</span>
+            <div class="suggested-chips-row">
+              @for (s of suggestedSkills(); track s) {
+                <button
+                  type="button"
+                  class="suggested-skill-btn"
+                  [class.active]="hasSkill(s)"
+                  (click)="toggleSuggestedSkill(s)"
+                >
+                  <span>{{ hasSkill(s) ? '✓' : '+' }}</span>
+                  <span>{{ s }}</span>
+                </button>
+              }
+            </div>
+          </div>
+        }
       </div>
     </div>
 
