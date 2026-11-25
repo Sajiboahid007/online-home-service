@@ -132,7 +132,7 @@
           <div class="card doorstep-card" [class.nav-mode-active]="isNavigating()">
             <div class="doorstep-header">
               <div class="dh-title-wrap">
-                <h3 class="doorstep-title">📍 {{ 'কাস্টমারের দরজা' | t }}</h3>
+                <h3 class="doorstep-title"><i class="pi pi-map-marker" style="color:#dc2626;"></i> {{ 'কাস্টমারের দরজা' | t }}</h3>
                 @if (isNavigating()) {
                   <span class="live-nav-indicator">
                     <span class="pulse-dot"></span>
@@ -143,7 +143,7 @@
 
               <div class="dh-right-controls">
                 @if (currentJob.locationPinned) {
-                  <span class="pin-badge exact">✓ {{ 'সঠিক পিন' | t }}</span>
+                  <span class="pin-badge exact"><i class="pi pi-check" style="font-size:10px;"></i> {{ 'সঠিক পিন' | t }}</span>
                 } @else {
                   <span class="pin-badge approx">{{ 'আনুমানিক লোকেশন' | t }}</span>
                 }
@@ -165,12 +165,51 @@
               [class.nav-active]="isNavigating()"
             ></div>
 
+            <!-- Route Legend & Quick Fit Bar -->
+            <div class="map-route-legend">
+              <div class="legend-items">
+                <span class="legend-pill user-pill">
+                  <span class="dot dot-user"></span>
+                  {{ isEn() ? 'Your Location' : 'আপনার অবস্থান' }}
+                </span>
+                <span class="legend-pill customer-pill">
+                  <span class="dot dot-customer"></span>
+                  {{ isEn() ? 'Customer' : 'কাস্টমার' }}
+                </span>
+                <span class="legend-pill route-pill">
+                  <span class="route-swatch"></span>
+                  {{ navDistance() }} • {{ navDuration() }}
+                </span>
+              </div>
+              <div class="legend-actions">
+                <button
+                  type="button"
+                  class="btn-legend-tool"
+                  (click)="refreshMyLocation()"
+                  [disabled]="isRefreshingLocation()"
+                  [title]="isEn() ? 'Refresh my location' : 'আমার অবস্থান রিফ্রেশ করুন'"
+                >
+                  <i class="pi pi-refresh" [class.pi-spin]="isRefreshingLocation()"></i>
+                  <span>{{ isEn() ? 'My Location' : 'আমার লোকেশন' }}</span>
+                </button>
+                <button
+                  type="button"
+                  class="btn-legend-tool"
+                  (click)="zoomToRoute()"
+                  [title]="isEn() ? 'Fit route' : 'পুরো রুট দেখুন'"
+                >
+                  <i class="pi pi-arrows-alt"></i>
+                  <span>{{ isEn() ? 'Fit Route' : 'পুরো রুট' }}</span>
+                </button>
+              </div>
+            </div>
+
             <!-- In-App Turn-by-Turn Navigation HUD (On this map) -->
             @if (isNavigating()) {
               <div class="in-app-nav-hud">
                 <div class="hud-metrics-bar">
                   <div class="hud-metric-pill">
-                    <span class="hud-m-icon">⏱️</span>
+                    <i class="pi pi-clock hud-m-icon" style="color:#0f766e;"></i>
                     <div>
                       <span class="hud-m-lbl">সময় বাকি</span>
                       <strong class="hud-m-val">{{ navDuration() }}</strong>
@@ -178,7 +217,7 @@
                   </div>
 
                   <div class="hud-metric-pill">
-                    <span class="hud-m-icon">📏</span>
+                    <i class="pi pi-directions hud-m-icon" style="color:#0f766e;"></i>
                     <div>
                       <span class="hud-m-lbl">দূরত্ব</span>
                       <strong class="hud-m-val">{{ navDistance() }}</strong>
@@ -186,7 +225,7 @@
                   </div>
 
                   <div class="hud-metric-pill">
-                    <span class="hud-m-icon">🗺️</span>
+                    <i class="pi pi-map hud-m-icon" style="color:#0f766e;"></i>
                     <div>
                       <span class="hud-m-lbl">নেভিগেশন</span>
                       <strong class="hud-m-val text-teal">সরাসরি ম্যাপ</strong>
@@ -240,7 +279,7 @@
 
             @if (currentJob.landmark) {
               <div class="landmark-callout">
-                <span class="doorstep-label">🏷️ {{ 'ল্যান্ডমার্ক / চেনার উপায়' | t }}</span>
+                <span class="doorstep-label"><i class="pi pi-map-marker"></i> {{ 'ল্যান্ডমার্ক / চেনার উপায়' | t }}</span>
                 <strong>{{ currentJob.landmark }}</strong>
               </div>
             }
@@ -488,7 +527,7 @@
               <!-- Completion OTP Verification (Ask customer when work finishes) -->
               <div class="completion-otp-box" style="padding: 14px; border: 1px solid #f59e0b; background: #fffbeb; border-radius: 10px;">
                 <label class="picker-label" style="display: block; font-weight: 700; color: #92400e; margin-bottom: 4px;">
-                  🔐 {{ 'কাজ শেষ করার ৪-সংখ্যার সমাপনী OTP দিন' | t }} <span style="color:#dc2626">*</span>
+                  <i class="pi pi-lock"></i> {{ 'কাজ শেষ করার ৪-সংখ্যার সমাপনী OTP দিন' | t }} <span style="color:#dc2626">*</span>
                 </label>
                 <p style="margin: 0 0 10px 0; font-size: 12px; color: #78350f;">
                   {{ 'কাজ সম্পূর্ণ শেষ করে কাস্টমারের স্ক্রিন থেকে ৪ সংখ্যার সমাপনী OTP কোডটি জেনে এখানে বসান।' | t }}

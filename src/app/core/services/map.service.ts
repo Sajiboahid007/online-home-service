@@ -50,32 +50,33 @@ export class MapService {
     const statusClass = worker.isOnline ? (worker.isBusy ? 'busy' : 'online') : 'offline';
     el.className = `worker-marker ${statusClass}`;
 
-    const catIcon = worker.categoryIds.includes('plumber') ? '🔧' :
-                    worker.categoryIds.includes('electrician') ? '⚡' :
-                    worker.categoryIds.includes('ac_technician') ? '❄️' :
-                    worker.categoryIds.includes('cleaner') ? '🧹' : '👷';
+    const catIconClass = worker.categoryIds.includes('plumber') ? 'pi-wrench' :
+                         worker.categoryIds.includes('electrician') ? 'pi-bolt' :
+                         worker.categoryIds.includes('ac_technician') ? 'pi-asterisk' :
+                         worker.categoryIds.includes('cleaner') ? 'pi-sparkles' : 'pi-user';
 
     el.innerHTML = `
       <img src="${worker.photoURL}" alt="${worker.name}" class="avatar" />
-      <span class="cat-icon-badge">${catIcon}</span>
-      ${worker.verified ? '<span class="verified-badge">✓</span>' : ''}
+      <span class="cat-icon-badge"><i class="pi ${catIconClass}" style="font-size: 10px;"></i></span>
+      ${worker.verified ? '<span class="verified-badge"><i class="pi pi-check" style="font-size: 9px;"></i></span>' : ''}
     `;
 
     // Map Popup
+    const statusDotColor = worker.isOnline ? '#22c55e' : worker.isBusy ? '#f97316' : '#94a3b8';
     const popupContent = document.createElement('div');
     popupContent.className = 'worker-popup';
     popupContent.innerHTML = `
       <div class="popup-header">
         <img src="${worker.photoURL}" alt="${worker.name}" />
         <div>
-          <h4>${worker.name} ${worker.verified ? '✔️' : ''}</h4>
-          <span style="font-size: 12px; color: #6b7280;">⭐ ${worker.rating.toFixed(1)} (${worker.totalJobs} কাজ)</span>
+          <h4>${worker.name} ${worker.verified ? '<i class="pi pi-check-circle" style="color: #16a34a; font-size: 12px;"></i>' : ''}</h4>
+          <span style="font-size: 12px; color: #6b7280;"><i class="pi pi-star-fill" style="color: #f59e0b; font-size: 11px;"></i> ${worker.rating.toFixed(1)} (${worker.totalJobs} কাজ)</span>
         </div>
       </div>
       <div class="popup-meta">
         <span class="popup-rate">৳${worker.rate} / ${worker.rateUnit === 'job' ? 'কাজ' : worker.rateUnit === 'hour' ? 'ঘণ্টা' : 'দিন'}</span>
-        <span>${worker.isOnline ? '🟢 অনলাইন ও প্রস্তুত' : worker.isBusy ? '🟠 কাজে ব্যস্ত' : '⚪ অফলাইন'}</span>
-        ${worker.distanceKm !== undefined ? `<span>📍 প্রায় ${worker.distanceKm} কিমি দূরে</span>` : ''}
+        <span><i class="pi pi-circle-fill" style="color: ${statusDotColor}; font-size: 8px;"></i> ${worker.isOnline ? 'অনলাইন ও প্রস্তুত' : worker.isBusy ? 'কাজে ব্যস্ত' : 'অফলাইন'}</span>
+        ${worker.distanceKm !== undefined ? `<span><i class="pi pi-map-marker" style="color: #ef4444; font-size: 11px;"></i> প্রায় ${worker.distanceKm} কিমি দূরে</span>` : ''}
       </div>
       <button class="view-profile-btn" id="btn-profile-${worker.uid}">প্রোফাইল দেখুন</button>
     `;
@@ -170,6 +171,22 @@ export class MapService {
     end: { lat: number; lng: number },
     sourceId: string = 'route-line'
   ): Promise<{ distanceKm: number; durationMin: number }> {
+    const waitForStyle = (): Promise<void> => {
+      if (map.isStyleLoaded()) return Promise.resolve();
+      return new Promise<void>((resolve) => {
+        const onLoad = () => resolve();
+        map.once('load', onLoad);
+      });
+    };
+
+    const approxDistKm = this.computeHaversineKm(start, end);
+    const approxDurationMin = Math.max(1, Math.round((approxDistKm / 25) * 60));
+
+    let coordinates: [number, number][] = [[start.lng, start.lat], [end.lng, end.lat]];
+    let distanceKm = approxDistKm;
+    let durationMin = approxDurationMin;
+    let isFallback = true;
+
     try {
       const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`;
       const response = await fetch(url);
@@ -177,80 +194,79 @@ export class MapService {
 
       if (data.routes && data.routes.length > 0) {
         const route = data.routes[0];
-        const coordinates = route.geometry.coordinates;
-        const distanceKm = Math.round((route.distance / 1000) * 10) / 10;
-        const durationMin = Math.round(route.duration / 60);
-
-        const geojsonData: any = {
-          type: 'Feature',
-          geometry: {
-            type: 'LineString',
-            coordinates
-          }
-        };
-
-        if (map.getSource(sourceId)) {
-          (map.getSource(sourceId) as any).setData(geojsonData);
-        } else {
-          map.addSource(sourceId, {
-            type: 'geojson',
-            data: geojsonData
-          });
-
-          map.addLayer({
-            id: `${sourceId}-casing`,
-            type: 'line',
-            source: sourceId,
-            layout: {
-              'line-join': 'round',
-              'line-cap': 'round'
-            },
-            paint: {
-              'line-color': '#ffffff',
-              'line-width': 6
-            }
-          });
-
-          map.addLayer({
-            id: `${sourceId}-core`,
-            type: 'line',
-            source: sourceId,
-            layout: {
-              'line-join': 'round',
-              'line-cap': 'round'
-            },
-            paint: {
-              'line-color': '#0f766e',
-              'line-width': 4
-            }
-          });
-        }
-
-        return { distanceKm, durationMin };
+        coordinates = route.geometry.coordinates;
+        distanceKm = Math.round((route.distance / 1000) * 10) / 10;
+        durationMin = Math.max(1, Math.round(route.duration / 60));
+        isFallback = false;
       }
     } catch (err) {
       console.warn('OSRM routing fallback to straight line:', err);
     }
 
-    // Fallback straight line
-    const fallbackCoords = [[start.lng, start.lat], [end.lng, end.lat]];
+    await waitForStyle();
+    if (!(map as any).style) {
+      return { distanceKm, durationMin };
+    }
+
     const geojsonData: any = {
       type: 'Feature',
-      geometry: { type: 'LineString', coordinates: fallbackCoords }
+      geometry: {
+        type: 'LineString',
+        coordinates
+      }
     };
+
     if (map.getSource(sourceId)) {
       (map.getSource(sourceId) as any).setData(geojsonData);
     } else {
-      map.addSource(sourceId, { type: 'geojson', data: geojsonData });
+      map.addSource(sourceId, {
+        type: 'geojson',
+        data: geojsonData
+      });
+
+      map.addLayer({
+        id: `${sourceId}-casing`,
+        type: 'line',
+        source: sourceId,
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': '#ffffff',
+          'line-width': 6
+        }
+      });
+
       map.addLayer({
         id: `${sourceId}-core`,
         type: 'line',
         source: sourceId,
-        paint: { 'line-color': '#0f766e', 'line-width': 3, 'line-dasharray': [2, 1] }
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': '#0f766e',
+          'line-width': isFallback ? 3.5 : 4,
+          ...(isFallback ? { 'line-dasharray': [2, 1.5] } : {})
+        }
       });
     }
 
-    return { distanceKm: 2.5, durationMin: 12 };
+    return { distanceKm, durationMin };
+  }
+
+  private computeHaversineKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
+    const R = 6371;
+    const dLat = toRad(b.lat - a.lat);
+    const dLng = toRad(b.lng - a.lng);
+    const sinLat = Math.sin(dLat / 2);
+    const sinLng = Math.sin(dLng / 2);
+    const h = sinLat * sinLat + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * sinLng * sinLng;
+    const dist = 2 * R * Math.asin(Math.sqrt(h));
+    return Math.round(dist * 10) / 10;
   }
 
   // Draw Heatmap for Admin Live Operations
