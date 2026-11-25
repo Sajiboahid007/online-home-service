@@ -71,11 +71,17 @@ export class FirebaseService {
   }
 
   // Realtime Database Job Tracking Writer
-  public updateJobTracking(jobId: string, workerLocation: { lat: number; lng: number }, etaMinutes: number): void {
+  public updateJobTracking(
+    jobId: string,
+    workerLocation: { lat: number; lng: number },
+    etaMinutes: number,
+    workerId?: string | null
+  ): void {
     try {
       const trackingRef = ref(this.rtdb, `jobTracking/${jobId}`);
       set(trackingRef, {
         jobId,
+        workerId: workerId || null,
         workerLocation,
         etaMinutes,
         updatedAt: Date.now()
