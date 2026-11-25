@@ -25,6 +25,51 @@
     margin: 4px 0 0 0;
   }
 
+  .worker-chosen-categories {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+
+    .chosen-cat-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .chosen-cat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .edit-cat-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 11px;
+      text-decoration: none;
+
+      &:hover {
+        background: #e2e8f0;
+        color: #0f766e;
+      }
+    }
+  }
+
   .job-request-simulator {
     display: flex;
     flex-direction: column;
