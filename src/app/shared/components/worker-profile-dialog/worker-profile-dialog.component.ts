@@ -1,6 +1,8 @@
 import { Component, Input, Output, EventEmitter, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WorkerProfile } from '../../../core/models/worker.model';
+import { Category } from '../../../core/models/category.model';
+import { CategoryService } from '../../../core/services/category.service';
 import { RatingStarsComponent } from '../rating-stars/rating-stars.component';
 import { BnNumberPipe } from '../../pipes/bn-number.pipe';
 import { TakaPipe } from '../../pipes/taka.pipe';
@@ -17,12 +19,18 @@ import { NotificationService } from '../../../core/services/notification.service
 export class WorkerProfileDialogComponent {
   private auth = inject(AuthService);
   private notification = inject(NotificationService);
+  private categoryService = inject(CategoryService);
 
   @Input() worker: WorkerProfile | null = null;
   public visible = signal<boolean>(false);
   public isFav = signal<boolean>(false);
 
   @Output() bookDirect = new EventEmitter<WorkerProfile>();
+
+  public getWorkerCategories(): Category[] {
+    const ids = this.worker?.categoryIds || [];
+    return this.categoryService.categories().filter(c => ids.includes(c.id));
+  }
 
   public show(worker: WorkerProfile): void {
     this.worker = worker;
