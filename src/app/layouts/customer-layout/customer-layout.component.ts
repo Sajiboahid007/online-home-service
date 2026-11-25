@@ -73,12 +73,21 @@ export class CustomerLayoutComponent {
     ).length;
   });
 
-  // Modal signals
+  // Modal & mobile sidebar signals
+  public mobileSidebarOpen = signal<boolean>(false);
   public showSOSModal = signal<boolean>(false);
   public sosSent = signal<boolean>(false);
   public showProfileModal = signal<boolean>(false);
   public isRefreshingLocation = signal<boolean>(false);
   public avatarImgError = signal<boolean>(false);
+
+  public toggleMobileSidebar(): void {
+    this.mobileSidebarOpen.update(open => !open);
+  }
+
+  public closeMobileSidebar(): void {
+    this.mobileSidebarOpen.set(false);
+  }
 
   public onAvatarError(): void {
     this.avatarImgError.set(true);

@@ -151,12 +151,12 @@
               </div>
             }
 
-            <div class="bcard-info-item">
+            <div class="bcard-info-item bcard-date-item">
               <span class="bii-label">{{ theme.currentLang() === 'bn' ? 'অর্ডারের তারিখ' : 'Order Date' }}</span>
               <span class="bii-val">{{ job.timeline.createdAt | timeAgo }}</span>
             </div>
 
-            <div class="bcard-info-item">
+            <div class="bcard-info-item bcard-loc-item">
               <span class="bii-label">{{ theme.currentLang() === 'bn' ? 'স্থান' : 'Location' }}</span>
               <span class="bii-val address-truncate">{{
                 (job.location.address || 'সাভার, ঢাকা') | t
@@ -193,19 +193,6 @@
                 type="button"
                 class="btn-action-reopen"
                 (click)="reactivateJob(job)"
-                style="
-                  background: #0f766e;
-                  color: #fff;
-                  border: none;
-                  padding: 7px 14px;
-                  border-radius: 8px;
-                  font-size: 13px;
-                  font-weight: 700;
-                  cursor: pointer;
-                  display: inline-flex;
-                  align-items: center;
-                  gap: 6px;
-                "
               >
                 <span class="pi pi-refresh"></span>
                 <span>{{ theme.currentLang() === 'bn' ? 'পুনরায় চালু করুন' : 'Reopen Job' }}</span>
@@ -228,20 +215,6 @@
               class="btn-action-delete"
               (click)="deleteJob(job, $event)"
               [title]="theme.currentLang() === 'bn' ? 'অর্ডার ডিলিট করুন' : 'Delete booking'"
-              style="
-                background: transparent;
-                color: #dc2626;
-                border: 1.5px solid #fecaca;
-                padding: 7px 12px;
-                border-radius: 8px;
-                font-size: 13px;
-                font-weight: 600;
-                cursor: pointer;
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                margin-left: auto;
-              "
             >
               <span class="pi pi-trash"></span>
               <span>{{ theme.currentLang() === 'bn' ? 'মুছে ফেলুন' : 'Delete booking' }}</span>

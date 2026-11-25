@@ -2,6 +2,16 @@
   <!-- Topbar -->
   <header class="customer-header">
     <div class="header-left">
+      <button
+        type="button"
+        class="mobile-menu-btn"
+        (click)="toggleMobileSidebar()"
+        [attr.aria-expanded]="mobileSidebarOpen()"
+        [attr.aria-label]="'মেনু খুলুন' | t"
+      >
+        <i class="pi" [class.pi-bars]="!mobileSidebarOpen()" [class.pi-times]="mobileSidebarOpen()"></i>
+      </button>
+
       <a routerLink="/customer/home" class="brand-link">
         <div class="brand-badge">{{ 'ক' | t }}</div>
         <div class="brand-text">
@@ -103,82 +113,118 @@
   </header>
 
   <div class="customer-body">
-    <!-- Desktop Sidebar Navigation (replaces the bottom nav on wide screens) -->
-    <aside class="customer-sidebar" [attr.aria-label]="'মেনু' | t">
-      <nav class="sidebar-nav">
-        <span class="sidebar-section-label">{{ 'মেনু' | t }}</span>
+    @if (mobileSidebarOpen()) {
+      <div class="mobile-sidebar-backdrop" (click)="closeMobileSidebar()"></div>
+    }
 
-        <a routerLink="/customer/home" routerLinkActive="active" class="sidebar-link">
-          <i class="pi pi-map"></i>
-          <span>{{ 'সার্ভিস ম্যাপ' | t }}</span>
-        </a>
-
-        <a routerLink="/customer/create-request" routerLinkActive="active" class="sidebar-link">
-          <i class="pi pi-plus-circle"></i>
-          <span>{{ 'কাজের রিকোয়েস্ট' | t }}</span>
-        </a>
-
-        <a routerLink="/customer/bookings" routerLinkActive="active" class="sidebar-link">
-          <i class="pi pi-calendar"></i>
-          <span>{{ 'আমার বুকিং' | t }}</span>
-        </a>
-
-        <button
-          type="button"
-          class="sidebar-link"
-          [class.active]="isOnTrackingPage()"
-          [class.disabled]="activeJobsCount() === 0"
-          [disabled]="activeJobsCount() === 0"
-          (click)="navigateToTracking()"
-          [title]="activeJobsCount() > 0 ? ('সক্রিয় কাজের লাইভ ট্র্যাকিং' | t) : ('কোনো সক্রিয় কাজ নেই (ট্র্যাকিং নিষ্ক্রিয়)' | t)"
-        >
-          <i class="pi pi-send"></i>
-          <span>{{ 'লাইভ ট্র্যাকিং' | t }}</span>
-          @if (activeJobsCount() > 0) {
-            <span class="sidebar-badge accent">{{ activeJobsCount() | bnNumber }}</span>
-          }
-        </button>
-
-        <button type="button" class="sidebar-link" (click)="openFavorites()">
-          <i class="pi pi-heart"></i>
-          <span>{{ 'প্রিয় কারিগর' | t }}</span>
-          @if (favoriteWorkers().length > 0) {
-            <span class="sidebar-badge">{{ favoriteWorkers().length | bnNumber }}</span>
-          }
-        </button>
-
-        <span class="sidebar-section-label">{{ 'অ্যাকাউন্ট' | t }}</span>
-
-        @if (isWorker()) {
-          <a routerLink="/worker/dashboard" class="sidebar-link portal-link">
-            <i class="pi pi-wrench"></i>
-            <span>{{ 'কারিগর ড্যাশবোর্ড' | t }}</span>
+    <!-- Responsive Sidebar Navigation (drawer on mobile, sticky rail on desktop) -->
+    <aside class="customer-sidebar" [class.mobile-open]="mobileSidebarOpen()" [attr.aria-label]="'মেনু' | t">
+      <div>
+        <div class="mobile-sidebar-header">
+          <a routerLink="/customer/home" class="brand-link" (click)="closeMobileSidebar()">
+            <div class="brand-badge">{{ 'ক' | t }}</div>
+            <div class="brand-text">
+              <span class="brand-name">{{ 'কাজখোঁজ' | t }}</span>
+              <span class="brand-sub">{{ 'হোম সার্ভিস' | t }}</span>
+            </div>
           </a>
-        }
-        @if (isAdmin()) {
-          <a routerLink="/admin/dashboard" class="sidebar-link portal-link">
-            <i class="pi pi-shield"></i>
-            <span>{{ 'অ্যাডমিন ড্যাশবোর্ড' | t }}</span>
-          </a>
-        }
-
-        <a routerLink="/customer/profile" routerLinkActive="active" class="sidebar-link">
-          <i class="pi pi-user"></i>
-          <span>{{ 'আমার প্রোফাইল' | t }}</span>
-        </a>
-
-        @if (isAuthenticated()) {
-          <button type="button" class="sidebar-link logout" (click)="logout()">
-            <i class="pi pi-sign-out"></i>
-            <span>{{ 'লগআউট' | t }}</span>
+          <button type="button" class="mobile-sidebar-close" (click)="closeMobileSidebar()" [attr.aria-label]="'বন্ধ করুন' | t">
+            ✕
           </button>
-        } @else {
-          <a routerLink="/auth/login" class="sidebar-link">
-            <i class="pi pi-sign-in"></i>
-            <span>{{ 'লগইন' | t }}</span>
+        </div>
+
+        <nav class="sidebar-nav">
+          <span class="sidebar-section-label">{{ 'মেনু' | t }}</span>
+
+          <a routerLink="/customer/home" routerLinkActive="active" class="sidebar-link" (click)="closeMobileSidebar()">
+            <i class="pi pi-map"></i>
+            <span>{{ 'সার্ভিস ম্যাপ' | t }}</span>
           </a>
-        }
-      </nav>
+
+          <a routerLink="/customer/create-request" routerLinkActive="active" class="sidebar-link" (click)="closeMobileSidebar()">
+            <i class="pi pi-plus-circle"></i>
+            <span>{{ 'কাজের রিকোয়েস্ট' | t }}</span>
+          </a>
+
+          <a routerLink="/customer/bookings" routerLinkActive="active" class="sidebar-link" (click)="closeMobileSidebar()">
+            <i class="pi pi-calendar"></i>
+            <span>{{ 'আমার বুকিং' | t }}</span>
+          </a>
+
+          <button
+            type="button"
+            class="sidebar-link"
+            [class.active]="isOnTrackingPage()"
+            [class.disabled]="activeJobsCount() === 0"
+            [disabled]="activeJobsCount() === 0"
+            (click)="closeMobileSidebar(); navigateToTracking()"
+            [title]="activeJobsCount() > 0 ? ('সক্রিয় কাজের লাইভ ট্র্যাকিং' | t) : ('কোনো সক্রিয় কাজ নেই (ট্র্যাকিং নিষ্ক্রিয়)' | t)"
+          >
+            <i class="pi pi-send"></i>
+            <span>{{ 'লাইভ ট্র্যাকিং' | t }}</span>
+            @if (activeJobsCount() > 0) {
+              <span class="sidebar-badge accent">{{ activeJobsCount() | bnNumber }}</span>
+            }
+          </button>
+
+          <button type="button" class="sidebar-link" (click)="closeMobileSidebar(); openFavorites()">
+            <i class="pi pi-heart"></i>
+            <span>{{ 'প্রিয় কারিগর' | t }}</span>
+            @if (favoriteWorkers().length > 0) {
+              <span class="sidebar-badge">{{ favoriteWorkers().length | bnNumber }}</span>
+            }
+          </button>
+
+          <span class="sidebar-section-label">{{ 'অ্যাকাউন্ট' | t }}</span>
+
+          @if (isWorker()) {
+            <a routerLink="/worker/dashboard" class="sidebar-link portal-link" (click)="closeMobileSidebar()">
+              <i class="pi pi-wrench"></i>
+              <span>{{ 'কারিগর ড্যাশবোর্ড' | t }}</span>
+            </a>
+          }
+          @if (isAdmin()) {
+            <a routerLink="/admin/dashboard" class="sidebar-link portal-link" (click)="closeMobileSidebar()">
+              <i class="pi pi-shield"></i>
+              <span>{{ 'অ্যাডমিন ড্যাশবোর্ড' | t }}</span>
+            </a>
+          }
+
+          <a routerLink="/customer/profile" routerLinkActive="active" class="sidebar-link" (click)="closeMobileSidebar()">
+            <i class="pi pi-user"></i>
+            <span>{{ 'আমার প্রোফাইল' | t }}</span>
+          </a>
+
+          @if (isAuthenticated()) {
+            <button type="button" class="sidebar-link logout" (click)="closeMobileSidebar(); logout()">
+              <i class="pi pi-sign-out"></i>
+              <span>{{ 'লগআউট' | t }}</span>
+            </button>
+          } @else {
+            <a routerLink="/auth/login" class="sidebar-link" (click)="closeMobileSidebar()">
+              <i class="pi pi-sign-in"></i>
+              <span>{{ 'লগইন' | t }}</span>
+            </a>
+          }
+        </nav>
+
+        <!-- Mobile Quick Tools inside Drawer -->
+        <div class="mobile-sidebar-tools">
+          <span class="sidebar-section-label">{{ themeService.currentLang() === 'en' ? 'Preferences' : 'সেটিংস' }}</span>
+          <div class="tools-row">
+            <app-lang-toggle></app-lang-toggle>
+            <button
+              type="button"
+              class="drawer-theme-btn"
+              (click)="themeService.toggleDarkMode()"
+              [title]="(themeService.isDarkMode() ? 'লাইট মোড' : 'ডার্ক মোড') | t"
+            >
+              <i class="pi" [ngClass]="themeService.isDarkMode() ? 'pi-sun' : 'pi-moon'"></i>
+              <span>{{ (themeService.isDarkMode() ? 'লাইট মোড' : 'ডার্ক মোড') | t }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div class="sidebar-help">
         <span class="help-title">{{ 'সাহায্য দরকার?' | t }}</span>
@@ -333,7 +379,11 @@
           }
           <div class="hero-details">
             <h3 class="user-fullname">{{ currentUser()?.name || ('কাস্টমার' | t) }}</h3>
-            <span class="phone-tag">{{ (currentUser()?.phone || '০১৭১২-৩৪৫৬৭৮') | bnNumber }}</span>
+            @if (currentUser()?.phone) {
+              <span class="phone-tag">{{ currentUser()?.phone | bnNumber }}</span>
+            } @else if (currentUser()?.email) {
+              <span class="phone-tag">{{ currentUser()?.email }}</span>
+            }
             <span class="badge badge-success">{{ 'সক্রিয় কাস্টমার অ্যাকাউন্ট' | t }}</span>
           </div>
         </div>
@@ -343,7 +393,7 @@
             <span class="it-icon">📍</span>
             <div class="it-content">
               <label>{{ 'বর্তমান ঠিকানা / এলাকা' | t }}</label>
-              <strong>{{ 'সাভার বাজার রোড, সাভার, ঢাকা' | t }}</strong>
+              <strong>{{ currentUser()?.savedAddresses?.[0]?.address || (themeService.currentLang() === 'en' ? 'Not added yet' : 'এখনো যোগ করা হয়নি') }}</strong>
             </div>
           </div>
 
@@ -351,7 +401,13 @@
             <span class="it-icon">🚨</span>
             <div class="it-content">
               <label>{{ 'জরুরি যোগাযোগ (Emergency Contact)' | t }}</label>
-              <strong>{{ 'রফিক আহমেদ (পিতা) — ০১৭১১-৯৮৭৬৫৪' | t }}</strong>
+              <strong>
+                @if (currentUser()?.emergencyContact?.name) {
+                  {{ currentUser()?.emergencyContact?.name }} ({{ currentUser()?.emergencyContact?.relation }}) — {{ currentUser()?.emergencyContact?.phone }}
+                } @else {
+                  {{ themeService.currentLang() === 'en' ? 'Not set yet' : 'এখনো সেট করা হয়নি' }}
+                }
+              </strong>
             </div>
           </div>
 
