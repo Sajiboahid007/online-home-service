@@ -18,11 +18,24 @@ export class CategoryService {
     if (saved) {
       try {
         const parsed: Category[] = JSON.parse(saved);
-        const existingIds = new Set(parsed.map(c => c.id));
+        const defaultMap = new Map(this.seedData.defaultCategories.map(d => [d.id, d]));
+        let migrated = false;
+        const upgraded = parsed.map(c => {
+          const def = defaultMap.get(c.id);
+          const trimmedIcon = (c.icon || '').trim();
+          // Upgrade legacy emoji seed icons in localStorage to PrimeIcons automatically
+          if (def && !trimmedIcon.startsWith('pi ') && !trimmedIcon.startsWith('pi-')) {
+            migrated = true;
+            return { ...c, icon: def.icon };
+          }
+          return c;
+        });
+
+        const existingIds = new Set(upgraded.map(c => c.id));
         const missingDefaults = this.seedData.defaultCategories.filter(d => !existingIds.has(d.id));
-        const merged = [...parsed, ...missingDefaults].sort((a, b) => a.order - b.order);
+        const merged = [...upgraded, ...missingDefaults].sort((a, b) => a.order - b.order);
         this.categoriesSignal.set(merged);
-        if (missingDefaults.length > 0) {
+        if (missingDefaults.length > 0 || migrated) {
           this.saveToStorage();
         }
         return;

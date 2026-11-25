@@ -8,11 +8,12 @@ import { ToastService } from '../../../core/services/toast.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { Category } from '../../../core/models/category.model';
 import { RateUnit } from '../../../core/models/worker.model';
+import { CategoryIconComponent } from '../../../shared/components/category-icon/category-icon.component';
 
 @Component({
   selector: 'app-superadmin-categories',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CategoryIconComponent],
   templateUrl: './superadmin-categories.component.html',
   styleUrls: ['./superadmin-categories.component.scss']
 })
@@ -28,8 +29,15 @@ export class SuperadminCategoriesComponent {
   public isEditing = signal(false);
   public editingCategoryId = signal<string | null>(null);
 
+  public readonly presetIcons: string[] = [
+    'pi pi-wrench', 'pi pi-bolt', 'pi pi-asterisk', 'pi pi-sparkles',
+    'pi pi-palette', 'pi pi-users', 'pi pi-building', 'pi pi-hammer',
+    'pi pi-desktop', 'pi pi-shield', 'pi pi-truck', 'pi pi-key',
+    'pi pi-sun', 'pi pi-cog', 'pi pi-car', 'pi pi-video'
+  ];
+
   // Form fields
-  public formIcon = '🛠️';
+  public formIcon = 'pi pi-wrench';
   public formNameBn = '';
   public formNameEn = '';
   public formPricingType: RateUnit = 'job';
@@ -47,7 +55,7 @@ export class SuperadminCategoriesComponent {
   public openEditModal(cat: Category): void {
     this.isEditing.set(true);
     this.editingCategoryId.set(cat.id);
-    this.formIcon = cat.icon || '🛠️';
+    this.formIcon = cat.icon || 'pi pi-wrench';
     this.formNameBn = cat.nameBn || '';
     this.formNameEn = cat.nameEn || '';
     this.formPricingType = cat.pricingType || 'job';
@@ -77,7 +85,7 @@ export class SuperadminCategoriesComponent {
         id,
         nameBn: this.formNameBn.trim(),
         nameEn: this.formNameEn.trim(),
-        icon: this.formIcon.trim() || '🛠️',
+        icon: this.formIcon.trim() || 'pi pi-wrench',
         pricingType: this.formPricingType,
         order: Number(this.formOrder) || 1,
         isActive: this.formIsActive
@@ -95,7 +103,7 @@ export class SuperadminCategoriesComponent {
         id: generatedId,
         nameBn: this.formNameBn.trim(),
         nameEn: this.formNameEn.trim(),
-        icon: this.formIcon.trim() || '🛠️',
+        icon: this.formIcon.trim() || 'pi pi-wrench',
         pricingType: this.formPricingType,
         isActive: this.formIsActive,
         order: Number(this.formOrder) || 1
@@ -146,7 +154,7 @@ export class SuperadminCategoriesComponent {
   }
 
   private resetForm(): void {
-    this.formIcon = '🛠️';
+    this.formIcon = 'pi pi-wrench';
     this.formNameBn = '';
     this.formNameEn = '';
     this.formPricingType = 'job';

@@ -10,11 +10,12 @@ import { TakaPipe } from '../../pipes/taka.pipe';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { CategoryIconComponent } from '../category-icon/category-icon.component';
 
 @Component({
   selector: 'app-worker-profile-dialog',
   standalone: true,
-  imports: [CommonModule, RatingStarsComponent, BnNumberPipe, TakaPipe, TranslatePipe],
+  imports: [CommonModule, RatingStarsComponent, BnNumberPipe, TakaPipe, TranslatePipe, CategoryIconComponent],
   templateUrl: './worker-profile-dialog.component.html',
   styleUrls: ['./worker-profile-dialog.component.scss']
 })

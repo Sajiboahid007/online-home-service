@@ -37,7 +37,7 @@
   @if (getWorkerCategories().length > 0) {
     <div class="categories-row">
       @for (cat of getWorkerCategories(); track cat.id) {
-        <span class="cat-badge">{{ cat.icon }} {{ isEn() ? cat.nameEn : cat.nameBn }}</span>
+        <span class="cat-badge"><app-cat-icon [icon]="cat.icon" /> {{ isEn() ? cat.nameEn : cat.nameBn }}</span>
       }
     </div>
   }

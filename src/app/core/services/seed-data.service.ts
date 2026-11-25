@@ -44,7 +44,7 @@ export class SeedDataService {
       id: 'plumber',
       nameBn: 'প্লাম্বার (পাইপ ফিটিং)',
       nameEn: 'Plumber',
-      icon: '🔧',
+      icon: 'pi pi-wrench',
       pricingType: 'job',
       isActive: true,
       order: 1
@@ -53,7 +53,7 @@ export class SeedDataService {
       id: 'electrician',
       nameBn: 'ইলেকট্রিশিয়ান',
       nameEn: 'Electrician',
-      icon: '⚡',
+      icon: 'pi pi-bolt',
       pricingType: 'job',
       isActive: true,
       order: 2
@@ -62,7 +62,7 @@ export class SeedDataService {
       id: 'ac_technician',
       nameBn: 'এসি টেকনিশিয়ান',
       nameEn: 'AC Technician',
-      icon: '❄️',
+      icon: 'pi pi-asterisk',
       pricingType: 'job',
       isActive: true,
       order: 3
@@ -71,7 +71,7 @@ export class SeedDataService {
       id: 'cleaner',
       nameBn: 'ক্লিনার (বাসাবাড়ি পরিষ্কার)',
       nameEn: 'Cleaner',
-      icon: '🧹',
+      icon: 'pi pi-sparkles',
       pricingType: 'hour',
       isActive: true,
       order: 4
@@ -80,7 +80,7 @@ export class SeedDataService {
       id: 'painter',
       nameBn: 'পেইন্টার (রং মিস্ত্রি)',
       nameEn: 'Painter',
-      icon: '🎨',
+      icon: 'pi pi-palette',
       pricingType: 'day',
       isActive: true,
       order: 5
@@ -89,7 +89,7 @@ export class SeedDataService {
       id: 'day_laborer',
       nameBn: 'দিনমজুর / শ্রমিক',
       nameEn: 'Day Laborer',
-      icon: '👷',
+      icon: 'pi pi-users',
       pricingType: 'day',
       isActive: true,
       order: 6
@@ -98,7 +98,7 @@ export class SeedDataService {
       id: 'mason',
       nameBn: 'রাজমিস্ত্রি',
       nameEn: 'Mason',
-      icon: '🧱',
+      icon: 'pi pi-building',
       pricingType: 'day',
       isActive: true,
       order: 7
@@ -107,7 +107,7 @@ export class SeedDataService {
       id: 'carpenter',
       nameBn: 'কার্পেন্টার (কাঠমিস্ত্রি)',
       nameEn: 'Carpenter',
-      icon: '🪚',
+      icon: 'pi pi-hammer',
       pricingType: 'job',
       isActive: true,
       order: 8
@@ -116,7 +116,7 @@ export class SeedDataService {
       id: 'appliance_repair',
       nameBn: 'অ্যাপ্লায়েন্স মেরামত (ফ্রিজ/টিভি)',
       nameEn: 'Appliance Repair',
-      icon: '📺',
+      icon: 'pi pi-desktop',
       pricingType: 'job',
       isActive: true,
       order: 9
@@ -125,7 +125,7 @@ export class SeedDataService {
       id: 'pest_control',
       nameBn: 'পেস্ট কন্ট্রোল (পোকামাকড় দমন)',
       nameEn: 'Pest Control',
-      icon: '🪲',
+      icon: 'pi pi-shield',
       pricingType: 'job',
       isActive: true,
       order: 10
@@ -134,7 +134,7 @@ export class SeedDataService {
       id: 'shifting_moving',
       nameBn: 'বাসা বদল ও মুভিং',
       nameEn: 'Home Shifting & Moving',
-      icon: '🚚',
+      icon: 'pi pi-truck',
       pricingType: 'job',
       isActive: true,
       order: 11
@@ -143,7 +143,7 @@ export class SeedDataService {
       id: 'locksmith',
       nameBn: 'তালা-চাবি ও সিকিউরিটি',
       nameEn: 'Locksmith & Security',
-      icon: '🔑',
+      icon: 'pi pi-key',
       pricingType: 'job',
       isActive: true,
       order: 12
@@ -152,7 +152,7 @@ export class SeedDataService {
       id: 'gardener',
       nameBn: 'বাগান পরিচর্যা (মালী)',
       nameEn: 'Gardener',
-      icon: '🌿',
+      icon: 'pi pi-sun',
       pricingType: 'hour',
       isActive: true,
       order: 13
@@ -161,7 +161,7 @@ export class SeedDataService {
       id: 'welder',
       nameBn: 'ওয়েল্ডিং ও গ্রিল মিস্ত্রি',
       nameEn: 'Welder & Fabrication',
-      icon: '🔥',
+      icon: 'pi pi-cog',
       pricingType: 'job',
       isActive: true,
       order: 14
@@ -170,7 +170,7 @@ export class SeedDataService {
       id: 'car_wash',
       nameBn: 'গাড়ি ও বাইক ওয়াশ',
       nameEn: 'Car & Bike Wash',
-      icon: '🚗',
+      icon: 'pi pi-car',
       pricingType: 'job',
       isActive: true,
       order: 15
@@ -179,7 +179,7 @@ export class SeedDataService {
       id: 'cctv_it',
       nameBn: 'সিসিটিভি ও ইন্টারনেট টেকনিশিয়ান',
       nameEn: 'CCTV & IT Support',
-      icon: '📷',
+      icon: 'pi pi-video',
       pricingType: 'job',
       isActive: true,
       order: 16

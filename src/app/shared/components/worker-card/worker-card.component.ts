@@ -8,11 +8,12 @@ import { RatingStarsComponent } from '../rating-stars/rating-stars.component';
 import { BnNumberPipe } from '../../pipes/bn-number.pipe';
 import { TakaPipe } from '../../pipes/taka.pipe';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { CategoryIconComponent } from '../category-icon/category-icon.component';
 
 @Component({
   selector: 'app-worker-card',
   standalone: true,
-  imports: [CommonModule, RatingStarsComponent, BnNumberPipe, TakaPipe, TranslatePipe],
+  imports: [CommonModule, RatingStarsComponent, BnNumberPipe, TakaPipe, TranslatePipe, CategoryIconComponent],
   templateUrl: './worker-card.component.html',
   styleUrls: ['./worker-card.component.scss']
 })

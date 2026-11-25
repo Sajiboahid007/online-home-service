@@ -38,7 +38,7 @@
             <h4>{{ 'সার্ভিস ক্যাটাগরি' | t }}</h4>
             <div class="chips-wrap">
               @for (cat of getWorkerCategories(); track cat.id) {
-                <span class="cat-chip">{{ cat.icon }} {{ isEn() ? cat.nameEn : cat.nameBn }}</span>
+                <span class="cat-chip"><app-cat-icon [icon]="cat.icon" /> {{ isEn() ? cat.nameEn : cat.nameBn }}</span>
               }
             </div>
           </div>
