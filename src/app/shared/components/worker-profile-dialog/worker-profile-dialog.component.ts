@@ -1,18 +1,20 @@
-import { Component, Input, Output, EventEmitter, signal, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WorkerProfile } from '../../../core/models/worker.model';
 import { Category } from '../../../core/models/category.model';
 import { CategoryService } from '../../../core/services/category.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { RatingStarsComponent } from '../rating-stars/rating-stars.component';
 import { BnNumberPipe } from '../../pipes/bn-number.pipe';
 import { TakaPipe } from '../../pipes/taka.pipe';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-worker-profile-dialog',
   standalone: true,
-  imports: [CommonModule, RatingStarsComponent, BnNumberPipe, TakaPipe],
+  imports: [CommonModule, RatingStarsComponent, BnNumberPipe, TakaPipe, TranslatePipe],
   templateUrl: './worker-profile-dialog.component.html',
   styleUrls: ['./worker-profile-dialog.component.scss']
 })
@@ -20,6 +22,8 @@ export class WorkerProfileDialogComponent {
   private auth = inject(AuthService);
   private notification = inject(NotificationService);
   private categoryService = inject(CategoryService);
+  public theme = inject(ThemeService);
+  public isEn = computed(() => this.theme.currentLang() === 'en');
 
   @Input() worker: WorkerProfile | null = null;
   public visible = signal<boolean>(false);

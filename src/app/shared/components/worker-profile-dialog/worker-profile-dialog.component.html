@@ -13,21 +13,21 @@
         </div>
         <div class="header-details">
           <div class="name-line">
-            <h3>{{ worker.name }}</h3>
+            <h3>{{ worker.name | t }}</h3>
             @if (worker.verified) {
-              <span class="badge badge-success"><i class="pi pi-check-circle"></i> ভেরিফাইড</span>
+              <span class="badge badge-success"><i class="pi pi-check-circle"></i> {{ 'ভেরিফায়েড' | t }}</span>
             }
             @if (worker.trustedBadge) {
-              <span class="badge badge-info"><i class="pi pi-shield"></i> বিশ্বস্ত</span>
+              <span class="badge badge-info"><i class="pi pi-shield"></i> {{ 'বিশ্বস্ত' | t }}</span>
             }
           </div>
           <p class="phone-masked"><i class="pi pi-phone"></i> {{ worker.phoneMasked }}</p>
           <div class="stats-row">
             <app-rating-stars [rating]="worker.rating" [count]="worker.ratingCount"></app-rating-stars>
             <span class="divider">|</span>
-            <span>{{ worker.totalJobs | bnNumber }} কাজ সম্পন্ন</span>
+            <span>{{ worker.totalJobs | bnNumber }} {{ 'কাজ সম্পন্ন' | t }}</span>
             <span class="divider">|</span>
-            <span>{{ ((worker.completionRate || 1) * 100).toFixed(0) | bnNumber }}% সফল</span>
+            <span>{{ ((worker.completionRate || 1) * 100).toFixed(0) | bnNumber }}% {{ 'সফল' | t }}</span>
           </div>
         </div>
       </div>
@@ -35,10 +35,10 @@
       <div class="dialog-body">
         @if (getWorkerCategories().length > 0) {
           <div class="section-block">
-            <h4>সার্ভিস ক্যাটাগরি</h4>
+            <h4>{{ 'সার্ভিস ক্যাটাগরি' | t }}</h4>
             <div class="chips-wrap">
               @for (cat of getWorkerCategories(); track cat.id) {
-                <span class="cat-chip">{{ cat.icon }} {{ cat.nameBn }}</span>
+                <span class="cat-chip">{{ cat.icon }} {{ isEn() ? cat.nameEn : cat.nameBn }}</span>
               }
             </div>
           </div>
@@ -46,42 +46,42 @@
 
         @if (worker.bio) {
           <div class="section-block">
-            <h4>পরিচয় ও অভিজ্ঞতা</h4>
-            <p class="bio-text">{{ worker.bio }}</p>
+            <h4>{{ 'পরিচয় ও অভিজ্ঞতা' | t }}</h4>
+            <p class="bio-text">{{ worker.bio | t }}</p>
           </div>
         }
 
         <div class="section-block">
-          <h4>দক্ষতাসমূহ</h4>
+          <h4>{{ 'দক্ষতাসমূহ' | t }}</h4>
           <div class="chips-wrap">
             @for (skill of worker.skills || []; track skill) {
-              <span class="skill-chip"><i class="pi pi-wrench"></i> {{ skill }}</span>
+              <span class="skill-chip"><i class="pi pi-wrench"></i> {{ skill | t }}</span>
             }
           </div>
         </div>
 
         <div class="info-grid">
           <div class="info-box">
-            <span class="info-label">সার্ভিস ফি</span>
-            <span class="info-val text-accent">{{ worker.rate | taka }} / {{ worker.rateUnit === 'hour' ? 'ঘণ্টা' : worker.rateUnit === 'day' ? 'দিন' : 'কাজ' }}</span>
+            <span class="info-label">{{ 'সার্ভিস ফি' | t }}</span>
+            <span class="info-val text-accent">{{ worker.rate | taka }} / {{ (worker.rateUnit === 'hour' ? 'ঘণ্টা' : worker.rateUnit === 'day' ? 'দিন' : 'কাজ') | t }}</span>
           </div>
           <div class="info-box">
-            <span class="info-label">সার্ভিস রেডিয়াস</span>
-            <span class="info-val">{{ worker.serviceRadiusKm | bnNumber }} কিমি এলাকা</span>
+            <span class="info-label">{{ 'সার্ভিস রেডিয়াস' | t }}</span>
+            <span class="info-val">{{ worker.serviceRadiusKm | bnNumber }} {{ 'কিমি এলাকা' | t }}</span>
           </div>
           <div class="info-box">
-            <span class="info-label">কাজের অভিজ্ঞতা</span>
-            <span class="info-val">{{ worker.experienceYears | bnNumber }} বছর</span>
+            <span class="info-label">{{ 'কাজের অভিজ্ঞতা' | t }}</span>
+            <span class="info-val">{{ worker.experienceYears | bnNumber }} {{ 'বছর' | t }}</span>
           </div>
           <div class="info-box">
-            <span class="info-label">বর্তমান অবস্থান</span>
-            <span class="info-val">{{ worker.homeLocation.address || 'সাভার বাজার' }}</span>
+            <span class="info-label">{{ 'বর্তমান অবস্থান' | t }}</span>
+            <span class="info-val">{{ (worker.homeLocation.address || 'সাভার বাজার') | t }}</span>
           </div>
         </div>
 
         @if (worker.portfolio && worker.portfolio.length > 0) {
           <div class="section-block">
-            <h4>পোর্টফোলিও ও কাজের ছবি</h4>
+            <h4>{{ 'পোর্টফোলিও ও কাজের ছবি' | t }}</h4>
             <div class="portfolio-grid">
               @for (img of worker.portfolio; track img) {
                 <img [src]="img" alt="Portfolio work" />
@@ -94,11 +94,11 @@
       <div class="dialog-footer">
         <button type="button" class="btn-favorite" (click)="toggleFav()">
           <i class="pi" [ngClass]="isFav() ? 'pi-heart-fill text-danger' : 'pi-heart'"></i>
-          {{ isFav() ? 'প্রিয় তালিকাভুক্ত' : 'প্রিয়তে রাখুন' }}
+          {{ (isFav() ? 'প্রিয় তালিকাভুক্ত' : 'প্রিয়তে রাখুন') | t }}
         </button>
 
         <button type="button" class="btn-book-direct" (click)="onBook()">
-          <i class="pi pi-bolt"></i> সরাসরি বুক করুন ({{ worker.rate | taka }})
+          <i class="pi pi-bolt"></i> {{ 'সরাসরি বুক করুন' | t }} ({{ worker.rate | taka }})
         </button>
       </div>
     }

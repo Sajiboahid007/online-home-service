@@ -11,24 +11,24 @@
 
     <div class="worker-info">
       <div class="name-row">
-        <h4>{{ worker.name }}</h4>
+        <h4>{{ worker.name | t }}</h4>
         @if (worker.verified) {
-          <span class="verified-icon" title="ভেরিফাইড কারিগর"><i class="pi pi-check-circle"></i></span>
+          <span class="verified-icon" [title]="'ভেরিফাইড কারিগর' | t"><i class="pi pi-check-circle"></i></span>
         }
         @if (worker.trustedBadge) {
-          <span class="trusted-icon" title="বিশ্বস্ত কারিগর"><i class="pi pi-shield"></i></span>
+          <span class="trusted-icon" [title]="'বিশেষভাবে বিশ্বস্ত কারিগর' | t"><i class="pi pi-shield"></i></span>
         }
       </div>
 
       <div class="rating-row">
         <app-rating-stars [rating]="worker.rating" [count]="worker.ratingCount"></app-rating-stars>
-        <span class="job-count">({{ worker.totalJobs | bnNumber }} কাজ)</span>
+        <span class="job-count">({{ worker.totalJobs | bnNumber }} {{ 'কাজ' | t }})</span>
       </div>
 
       @if (worker.distanceKm !== undefined) {
         <div class="distance-text">
           <i class="pi pi-map-marker"></i>
-          <span>{{ worker.distanceKm.toFixed(1) | bnNumber }} কিমি দূরে</span>
+          <span>{{ worker.distanceKm.toFixed(1) | bnNumber }} {{ 'কিমি দূরে' | t }}</span>
         </div>
       }
     </div>
@@ -37,29 +37,29 @@
   @if (getWorkerCategories().length > 0) {
     <div class="categories-row">
       @for (cat of getWorkerCategories(); track cat.id) {
-        <span class="cat-badge">{{ cat.icon }} {{ cat.nameBn }}</span>
+        <span class="cat-badge">{{ cat.icon }} {{ isEn() ? cat.nameEn : cat.nameBn }}</span>
       }
     </div>
   }
 
   <div class="skills-row">
     @for (skill of (worker.skills || []).slice(0, 3); track skill) {
-      <span class="skill-tag">{{ skill }}</span>
+      <span class="skill-tag">{{ skill | t }}</span>
     }
   </div>
 
   <div class="worker-card-footer">
     <div class="price-box">
       <span class="rate-amount">{{ worker.rate | taka }}</span>
-      <span class="rate-unit">/ {{ worker.rateUnit === 'hour' ? 'ঘণ্টা' : worker.rateUnit === 'day' ? 'দিন' : 'কাজ' }}</span>
+      <span class="rate-unit">/ {{ (worker.rateUnit === 'hour' ? 'ঘণ্টা' : worker.rateUnit === 'day' ? 'দিন' : 'কাজ') | t }}</span>
     </div>
 
     <div class="btn-group">
       <button type="button" class="btn-outline-sm" (click)="viewProfile.emit(worker)">
-        বিস্তারিত
+        {{ 'বিস্তারিত' | t }}
       </button>
       <button type="button" class="btn-primary-sm" (click)="directBook.emit(worker)">
-        সরাসরি বুক
+        {{ 'সরাসরি বুক' | t }}
       </button>
     </div>
   </div>
